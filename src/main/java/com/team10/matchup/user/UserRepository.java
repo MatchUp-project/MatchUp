@@ -1,7 +1,9 @@
 package com.team10.matchup.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    // 기본 CRUD (findAll, findById, save, delete…) 전부 자동 제공
+    Optional<User> findByUsername(String username);
 }
+
