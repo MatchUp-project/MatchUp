@@ -15,13 +15,10 @@ public class UserSecurityService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("사용자를 찾을 수 없습니다.")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("등록되지 않은 사용자입니다."));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
