@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BaroMatch 스타일 랜딩 시안</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons (선택) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom -->
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- 상단 유틸 바 -->
+<div class="bg-dark text-white small py-1">
+    <div class="container d-flex justify-content-end gap-3">
+        <a href="#" class="link-light text-decoration-none">홈</a>
+        <a href="#" class="link-light text-decoration-none">로그인</a>
+        <a href="#" class="link-light text-decoration-none">회원가입</a>
+    </div>
+</div>
+
+<!-- 헤더 + 검색 -->
+<header class="border-bottom">
+    <div class="container py-3 d-flex align-items-center justify-content-between">
+        <a class="navbar-brand fw-bold fs-3 text-primary" href="#">Match-up</a>
+
+        <form class="searchbar d-flex w-50" role="search">
+            <input class="form-control form-control-lg rounded-start-pill" type="search" placeholder="팀명, 구장, 지역 등 검색" aria-label="Search">
+            <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+
+        <button class="btn btn-outline-secondary d-none d-md-inline-flex">
+            <i class="bi bi-list me-1"></i> 메뉴
+        </button>
+    </div>
+</header>
+
+<!-- 카테고리 탭 -->
+<nav class="border-bottom">
+    <div class="container overflow-auto">
+        <ul class="nav nav-pills cat-tabs py-2 flex-nowrap">
+            <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-dribbble me-1"></i> 축구/풋살</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">족구</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">농구</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">배구</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">탁구</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">배드민턴</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">테니스</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">볼링</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">맞춤유니폼</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- 히어로 + 로그인 카드 -->
+<section class="hero">
+    <!-- 배경 이미지 -->
+    <img class="hero-img"
+         src="https://images.unsplash.com/photo-1629217855633-79a6925d6c47?fm=jpg&q=80&w=3000"
+         alt="soccer" />
+
+    <!-- 로그인 카드 -->
+    <div class="login-card card shadow-lg">
+        <div class="card-body">
+            <h5 class="card-title mb-3">로그인</h5>
+            <form>
+                <div class="mb-2">
+                    <label class="form-label">아이디</label>
+                    <input type="text" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-control" />
+                </div>
+                <button class="btn btn-primary w-100">로그인</button>
+                <div class="d-flex justify-content-between small mt-2">
+                    <a href="#" class="text-decoration-none">아이디 찾기</a>
+                    <a href="#" class="text-decoration-none">비밀번호 찾기</a>
+                    <a href="#" class="text-decoration-none">회원가입</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- 최근 성사된 매치 / 신청 가능한 매치 -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- 최근 성사된 매치 (매치 상세) -->
+            <div class="col-lg-8">
+                <div class="card h-100 match-card" data-id="101">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">최근 성사된 매치일정</span>
+                        <button class="btn btn-sm btn-outline-secondary">전체일정</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div class="team-badge text-center">
+                                <img src="https://placehold.co/72x72?text=logo" class="rounded-circle mb-2" alt="팀A">
+                                <div class="fw-semibold">풋또라이</div>
+                                <div class="text-muted small">0전 0승 0무 0패</div>
+                            </div>
+                            <div class="display-6 fw-bold">VS</div>
+                            <div class="team-badge text-center">
+                                <img src="https://placehold.co/72x72?text=logo" class="rounded-circle mb-2" alt="팀B">
+                                <div class="fw-semibold">문돌이</div>
+                                <div class="text-muted small">0전 0승 0무 0패</div>
+                            </div>
+                            <div class="text-muted small">
+                                <div>장소 : 충북대학교 대운동장</div>
+                                <div>날짜 : 2025-03-28</div>
+                                <div>시간 : 09:40</div>
+                            </div>
+                            <button class="btn btn-outline-primary">팀정보</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- col -->
+
+            <!-- 신청가능한 매치 (매치 상세) -->
+            <div class="col-lg-4">
+                <div class="card h-100 match-card" data-id="102">
+                    <div class="card-header fw-bold">신청가능한 매치</div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <div class="fw-semibold"></div>
+                                <div class="text-muted small">장소 : 남제주군 종합운동장</div>
+                                <div class="text-muted small">날짜 : 2033-03-08</div>
+                                <div class="text-muted small">시간 : 10:00</div>
+                            </div>
+                            <button class="btn btn-sm btn-secondary">풋살</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- col -->
+
+        </div><!-- row -->
+    </div><!-- container -->
+</section>
+
+<!-- 커뮤니티 2열: 팀구함 / 선수모집 -->
+<section class="py-2">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- 팀구함 (게시글 상세) -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between">
+                        <span class="fw-bold">팀구함</span>
+                        <button class="btn btn-sm btn-outline-secondary">바로가기</button>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item post-item" data-id="201">
+                            <a href="#" class="text-decoration-none text-primary">9월 27일 성남수진축구장→ 상대팀 구합니다…</a>
+                            <span class="text-muted float-end small">25-09-26</span>
+                        </li>
+                        <li class="list-group-item post-item" data-id="202">
+                            경기도 고양시 팀 가입 희망합니다
+                            <span class="text-muted float-end small">25-08-23</span>
+                        </li>
+                        <li class="list-group-item post-item" data-id="203">
+                            청주에서 주말 팀 구합니다!(금요일)
+                            <span class="text-muted float-end small">25-05-21</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 선수모집 (게시글 상세) -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between">
+                        <span class="fw-bold">선수모집</span>
+                        <button class="btn btn-sm btn-outline-secondary">바로가기</button>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item post-item" data-id="301">
+                            Sunday FC 같이 즐겁게 운동하실 분 모집합니다.
+                            <span class="text-muted float-end small">25-09-02</span>
+                        </li>
+                        <li class="list-group-item post-item" data-id="302">
+                            대구 신생 풋살 팀원 모집(일요일 오전)
+                            <span class="text-muted float-end small">25-06-30</span>
+                        </li>
+                        <li class="list-group-item post-item" data-id="303">
+                            경기 참관 팀원 또는 상대팀 모집합니다.
+                            <span class="text-muted float-end small">25-06-23</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- 최근 가입팀 / 그라운드 -->
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- 최근 가입팀 (팀 상세) -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">최근 가입팀</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- 팀 카드 4개 -->
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100 team-card" data-id="401">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="https://placehold.co/56x56?text=logo" class="rounded-circle" alt="">
+                                        <div>
+                                            <div class="fw-semibold">호매실</div>
+                                            <div class="text-muted small">인원 : 11명 · 연령 : 20대</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100 team-card" data-id="402">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="https://placehold.co/56x56?text=logo" class="rounded-circle" alt="">
+                                        <div>
+                                            <div class="fw-semibold">소림축구fc</div>
+                                            <div class="text-muted small">인원 : 10명 · 연령 : 10대</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100 team-card" data-id="403">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="https://placehold.co/56x56?text=logo" class="rounded-circle" alt="">
+                                        <div>
+                                            <div class="fw-semibold">LSH FC</div>
+                                            <div class="text-muted small">인원 : 15명 · 연령 : 20대</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100 team-card" data-id="404">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="https://placehold.co/56x56?text=logo" class="rounded-circle" alt="">
+                                        <div>
+                                            <div class="fw-semibold">병꼬지fc</div>
+                                            <div class="text-muted small">인원 : 11명 · 연령 : 10대</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- row -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우리의 그라운드 (경기장 상세) -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">우리의 그라운드</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- 구장 리스트 -->
+                            <div class="col-12">
+                                <div class="border rounded p-3 ground-card" data-id="501">
+                                    <div class="fw-semibold">청주종합경기장</div>
+                                    <div class="text-muted small">충북 청주시 흥덕구 사직1동 808 · 043-279-4605</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="border rounded p-3 ground-card" data-id="502">
+                                    <div class="fw-semibold">용인축구센터 미니축구장</div>
+                                    <div class="text-muted small">용인시 처인구 원삼면 독성리 · 031-322-9600</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="border rounded p-3 ground-card" data-id="503">
+                                    <div class="fw-semibold">창녕공설운동장</div>
+                                    <div class="text-muted small">창녕읍 휘진리 · 055-533-5857</div>
+                                </div>
+                            </div>
+                        </div><!-- row -->
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- row -->
+    </div><!-- container -->
+</section>
+
+<!-- 푸터 -->
+<footer class="bg-dark text-white py-4">
+    <div class="container small d-flex flex-wrap gap-3 justify-content-between">
+        <div>© 2025 Match-up Clone UI</div>
+        <div class="text-white-50">
+            문의: support@example.com · 이용약관 · 개인정보처리방침
+        </div>
+    </div>
+</footer>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 상세페이지 네비게이션 스크립트 (방법 2) -->
+<script>
+    // 공통 함수: selector로 찾아서 클릭 시 url로 이동
+    function addClickNav(selector, makeUrl) {
+      document.querySelectorAll(selector).forEach(el => {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', (e) => {
+          e.preventDefault(); // 안쪽에 a 태그 있어도 기본 동작 막기
+          const id = el.dataset.id;
+          if (!id) return;
+          window.location.href = makeUrl(id);
+        });
+      });
+    }
+
+    // 매치 상세
+    addClickNav('.match-card', id => `match_detail.html?id=${id}`);
+    // 팀 상세
+    addClickNav('.team-card', id => `team_detail.html?id=${id}`);
+    // 게시글 상세 (팀구함, 선수모집)
+    addClickNav('.post-item', id => `post_detail.html?id=${id}`);
+    // 경기장 상세
+    addClickNav('.ground-card', id => `ground_detail.html?id=${id}`);
+</script>
+</body>
+</html>
