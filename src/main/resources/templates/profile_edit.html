@@ -7,19 +7,24 @@
 
 <h2>프로필 수정</h2>
 
-<form action="/profile/edit" method="post">
+<form th:object="${user}" th:action="@{/profile/edit}" method="post">
 
-    <label>이름</label><br>
-    <input type="text" name="name" th:value="${user.name}" required><br><br>
+    <input type="text"
+           th:field="*{name}"
+           placeholder="이름을 입력하세요"
+           required>
 
-    <label>이메일</label><br>
-    <input type="email" name="email" th:value="${user.email}" required><br><br>
+    <input type="email"
+           th:field="*{email}"
+           placeholder="이메일을 입력하세요"
+           required>
 
-    <label>포지션</label><br>
-    <input type="text" name="position" th:value="${user.position}"><br><br>
+    <input type="text"
+           th:field="*{position}"
+           placeholder="포지션 (예: 공격수, 골키퍼)">
 
-    <label>생년월일</label><br>
-    <input type="date" name="birth" th:value="${user.birth}" /><br><br>
+    <input type="date"
+           th:field="*{birth}">
 
     <button type="submit">저장</button>
 </form>

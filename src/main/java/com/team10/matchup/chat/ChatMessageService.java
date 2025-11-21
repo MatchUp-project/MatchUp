@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.team10.matchup.user.UserRepository;
 
 @Service
 @Transactional
@@ -11,21 +12,21 @@ public class ChatMessageService {
 
     private final ChatMessageRepository repo;
     private final ChatRoomRepository roomRepository;
-    private final UsersRepository usersRepository;
+    private final UserRepository userRepository; // ← 이름 수정
 
     public ChatMessageService(ChatMessageRepository repo,
                               ChatRoomRepository roomRepository,
-                              UsersRepository usersRepository) {
+                              UserRepository userRepository) { // ← 이름 수정
         this.repo = repo;
         this.roomRepository = roomRepository;
-        this.usersRepository = usersRepository;
+        this.userRepository = userRepository;
     }
 
     public ChatMessage create(ChatMessageRequest req) {
         if (!roomRepository.existsById(req.getRoomId())) {
             throw new IllegalArgumentException("채팅방이 존재하지 않습니다.");
         }
-        if (!usersRepository.existsById(req.getSenderId())) {
+        if (!userRepository.existsById(req.getSenderId())) { // ← 이름 수정
             throw new IllegalArgumentException("사용자가 존재하지 않습니다.");
         }
         if (req.getMessage() == null || req.getMessage().isBlank()) {

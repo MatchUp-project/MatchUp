@@ -1,4 +1,4 @@
-package com.team10.matchup;
+package com.team10.matchup.mainpage;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
