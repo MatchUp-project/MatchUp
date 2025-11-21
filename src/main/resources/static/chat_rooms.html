@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방 목록</title>
+    <style>
+        body { font-family: Arial; background:#f5f5f5; padding:20px; }
+        .container { max-width:900px; margin:auto; }
+        .room-card {
+            background:white; padding:12px; margin-bottom:10px; border-radius:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer;
+        }
+        .room-card:hover { background:#eef6ff; }
+        .form-box {
+            background:white; padding:15px; border-radius:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/">← 팀 목록으로</a>
+    <h1 id="title">채팅방</h1>
+
+    <div class="form-box">
+        <h2>새 채팅방 만들기</h2>
+        <label>채팅방 이름</label>
+        <input type="text" id="roomName" style="width:100%; padding:6px;">
+        <button onclick="createRoom()" style="margin-top:10px;">만들기</button>
+        <div id="error" style="color:red; margin-top:5px;"></div>
+    </div>
+
+    <h2>채팅방 목록</h2>
+    <div id="roomContainer">불러오는 중...</div>
+</div>
+
+<script>
+    const params = new URLSearchParams(location.search);
+    const teamId = Number(params.get("teamId"));
+    const teamName = params.get("teamName");
+
+    document.getElementById("title").textContent = teamName + " 채팅방";
+
+    async function loadRooms() {
+        const container = document.getElementById("roomContainer");
+        const res = await fetch(`/api/chat/rooms?teamId=${teamId}`);
+        const data = await res.json();
+
+        if (data.length === 0) {
+            container.innerHTML = "채팅방이 없습니다.";
+            return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(room => {
+            const div = document.createElement("div");
+            div.className = "room-card";
+            div.innerHTML = `
+                <div><b>${room.name}</b></div>
+                <div style="font-size:12px; color:#777;">ID: ${room.id}</div>
+            `;
+            div.onclick = () => {
+                location.href = `/chat_room.html?roomId=${room.id}&teamName=${encodeURIComponent(teamName)}`;
+            };
+            container.appendChild(div);
+        });
+    }
+
+    async function createRoom() {
+        const name = document.getElementById("roomName").value.trim();
+        if (!name) {
+            document.getElementById("error").textContent = "방 이름을 입력하세요.";
+            return;
+        }
+
+        const res = await fetch("/api/chat/rooms", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ teamId, name })
+        });
+
+        if (!res.ok) {
+            alert("오류: " + await res.text());
+            return;
+        }
+
+        document.getElementById("roomName").value = "";
+        loadRooms();
+    }
+
+    loadRooms();
+</script>
+</body>
+</html>
