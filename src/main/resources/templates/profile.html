@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>내 프로필</title>
+</head>
+<body>
+
+<h2>내 프로필</h2>
+
+<p><strong>아이디:</strong> <span th:text="${user.username}"></span></p>
+<p><strong>이름:</strong> <span th:text="${user.name}"></span></p>
+<p><strong>이메일:</strong> <span th:text="${user.email}"></span></p>
+<p><strong>포지션:</strong> <span th:text="${user.position}"></span></p>
+<p><strong>생년월일:</strong> <span th:text="${user.birth}"></span></p>
+<p><strong>가입일:</strong> <span th:text="${user.createdAt}"></span></p>
+
+<br>
+
+<a href="/profile/edit">프로필 수정</a>
+
+</body>
+</html>

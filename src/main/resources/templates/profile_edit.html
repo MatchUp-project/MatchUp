@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>프로필 수정</title>
+</head>
+<body>
+
+<h2>프로필 수정</h2>
+
+<form action="/profile/edit" method="post">
+
+    <label>이름</label><br>
+    <input type="text" name="name" th:value="${user.name}" required><br><br>
+
+    <label>이메일</label><br>
+    <input type="email" name="email" th:value="${user.email}" required><br><br>
+
+    <label>포지션</label><br>
+    <input type="text" name="position" th:value="${user.position}"><br><br>
+
+    <label>생년월일</label><br>
+    <input type="date" name="birth" th:value="${user.birth}" /><br><br>
+
+    <button type="submit">저장</button>
+</form>
+
+<a href="/profile">취소</a>
+
+</body>
+</html>

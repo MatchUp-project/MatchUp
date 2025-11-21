@@ -1,9 +1,11 @@
 package com.team10.matchup.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -33,4 +35,23 @@ public class UserService {
         user.setEmail(email);
         userRepository.save(user);
     }
+
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("로그인 정보가 존재하지 않습니다."));
+    }
+
+    public void updateProfile(String username, String name, String email, String position, LocalDate birth) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        user.setName(name);
+        user.setEmail(email);
+        user.setPosition(position);
+        user.setBirth(birth);
+
+        userRepository.save(user);
+    }
+
 }
