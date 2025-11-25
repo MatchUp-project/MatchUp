@@ -83,7 +83,7 @@
         })
         .then(data => {
             alert("팀이 자동으로 생성되었습니다!");
-            window.location.href = "/team/board";
+            window.location.href = "/team/" + data.id;
         })
         .catch(err => {
             errorMsg.innerText = "팀 생성 중 오류가 발생했습니다.";
