@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>전체 팀 목록</title>
@@ -23,7 +24,8 @@
             <div class="card p-3 h-100">
                 <h5 th:text="${team.name}">팀 이름</h5>
                 <p class="text-muted" th:text="${team.region}">지역</p>
-                <a th:href="@{/team/{id}(id=${team.id})}"
+                <a th:href="@{/team/detail/{id}(id=${team.id})}"
+
                    class="btn btn-outline-secondary btn-sm">
                     상세보기
                 </a>

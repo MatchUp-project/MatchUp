@@ -12,7 +12,7 @@ public class TeamPageController {
     private final TeamService teamService;
 
     // 팀 메인 페이지
-    @GetMapping("/team/{id}")
+    @GetMapping("/team/detail/{id}")
     public String teamHome(@PathVariable Long id, Model model) {
 
         TeamResponse team = teamService.getTeam(id);
