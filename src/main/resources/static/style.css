@@ -1,5 +1,10 @@
 /* 전역 */
-body { background-color: #f8f9fa; }
+/* 전역 */
+body {
+    margin: 0;                  /* 🔥 이 줄 추가 – 위/좌우 기본 여백 제거 */
+    background-color: #f8f9fa;
+}
+
 
 /* 카테고리 탭 가로 스크롤 */
 .cat-tabs .nav-link { white-space: nowrap; }
@@ -58,3 +63,83 @@ body { background-color: #f8f9fa; }
     align-items: center;
     gap: .5rem;
 }
+
+/* 상단 메인 메뉴 스타일 */
+.main-nav {
+    gap: 0.5rem;
+}
+
+/* 메뉴 텍스트 모양 */
+.main-nav-link {
+    color: #343a40;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+}
+
+.main-nav-link:hover,
+.main-nav-link:focus,
+.main-nav-link.active {
+    color: #0d6efd;
+    background-color: #f1f3f5;
+}
+
+/* 드롭다운 hover로 열리게 */
+.main-nav .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* 딜레이 없이 바로 붙어서 나오도록 */
+}
+
+/* 드롭다운 모양 조금 정리 */
+.main-nav .dropdown-menu {
+    border-radius: 0.5rem;
+    border-color: #dee2e6;
+    min-width: 180px;
+}
+
+
+/* 상단 메뉴 스타일 */
+.main-nav {
+    gap: 0.5rem;
+}
+
+.main-nav-link {
+    color: #343a40;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+}
+
+.main-nav-link:hover,
+.main-nav-link:focus,
+.main-nav-link.active {
+    color: #0d6efd;
+    background-color: #f1f3f5;
+}
+
+/* Hover 시 드롭다운 자동 열림 */
+.main-nav .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
+
+.main-nav .dropdown-menu {
+    border-radius: 0.5rem;
+    border-color: #dee2e6;
+    min-width: 180px;
+}
+
+/* 팀 게시판 오른쪽 아래 연필 버튼 */
+.write-btn {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+
