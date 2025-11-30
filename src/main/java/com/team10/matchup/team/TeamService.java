@@ -79,4 +79,12 @@ public class TeamService {
 
         teamRepository.deleteById(id);
     }
+
+    public List<TeamResponse> getMyTeams(Long userId) {
+        return teamRepository.findTeamsByUserId(userId)
+                .stream()
+                .map(TeamResponse::new)
+                .toList();
+    }
+
 }
