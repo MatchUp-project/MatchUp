@@ -35,8 +35,8 @@ public class MatchRequest {
     @JoinColumn(name = "requester_user_id", nullable = false)
     private User requesterUser;
 
-    @Column(name = "status", nullable = false, length = 20)
-    private String status = "PENDING";   // PENDING, ACCEPTED, REJECTED
+    @Column(nullable = false, length = 20)
+    private String status = "PENDING";  // PENDING, ACCEPTED, REJECTED
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -46,22 +46,17 @@ public class MatchRequest {
 
     @PrePersist
     public void prePersist() {
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-        if (this.status == null) {
-            this.status = "PENDING";
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (status == null) status = "PENDING";
     }
 
-    // 상태 변경 편의 메서드
     public void accept() {
-        this.status = "ACCEPTED";
-        this.respondedAt = LocalDateTime.now();
+        status = "ACCEPTED";
+        respondedAt = LocalDateTime.now();
     }
 
     public void reject() {
-        this.status = "REJECTED";
-        this.respondedAt = LocalDateTime.now();
+        status = "REJECTED";
+        respondedAt = LocalDateTime.now();
     }
 }

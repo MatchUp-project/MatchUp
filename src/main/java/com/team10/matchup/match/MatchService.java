@@ -1,6 +1,7 @@
 package com.team10.matchup.match;
 
 import com.team10.matchup.common.CurrentUserService;
+import com.team10.matchup.notification.NotificationService;
 import com.team10.matchup.team.Team;
 import com.team10.matchup.user.User;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class MatchService {
     private final MatchPostRepository matchPostRepository;
     private final MatchRequestRepository matchRequestRepository;
     private final CurrentUserService currentUserService;
+    private final NotificationService notificationService;
 
     // 매치 글 등록
     public MatchPost createMatchPost(int playerCount,
@@ -45,10 +48,20 @@ public class MatchService {
         return matchPostRepository.save(post);
     }
 
-    // 전체 매치 목록 (최신순)
+    // 전체 매치 목록
     @Transactional(readOnly = true)
     public List<MatchPost> getAllMatchPosts() {
         return matchPostRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    // 현재 사용자가 이미 신청한 매치 id 목록
+    @Transactional(readOnly = true)
+    public List<Long> getRequestedMatchIdsForCurrentUser() {
+        User currentUser = currentUserService.getCurrentUser();
+        return matchRequestRepository.findByRequesterUser_Id(currentUser.getId())
+                .stream()
+                .map(req -> req.getMatchPost().getId())
+                .collect(Collectors.toList());
     }
 
     // 매치 신청
@@ -79,27 +92,53 @@ public class MatchService {
         request.setMatchPost(post);
         request.setRequesterTeam(requesterTeam);
         request.setRequesterUser(currentUser);
+        request = matchRequestRepository.save(request);
 
-        // 여기서는 알림은 나중에 붙이고, 일단 신청만 저장
-        return matchRequestRepository.save(request);
+        // 🔔 글 작성자에게 알림 보내기
+        User receiver = post.getCreatedBy();
+        notificationService.send(
+                receiver,
+                "MATCH_REQUEST",
+                requesterTeam.getName() + " 팀에서 매치 신청이 왔습니다.",
+                request
+        );
+
+        return request;
     }
 
-    // (참고) 나중에 수락/거절 기능 붙일 때 사용할 수 있는 메서드 뼈대
+    // 수락
     public void acceptRequest(Long requestId) {
         MatchRequest request = matchRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
 
-        // 매치 상태 변경
         request.accept();
         MatchPost post = request.getMatchPost();
         post.setStatus("MATCHED");
-        // 저장은 @Transactional 덕분에 자동 flush
+
+        // 🔔 신청자에게 알림
+        notificationService.send(
+                request.getRequesterUser(),
+                "MATCH_ACCEPTED",
+                "매치 신청이 수락되었습니다.",
+                request
+        );
+
+        // TODO: 여기서 팀 일정표에 경기 등록 (나중에 구현)
     }
 
+    // 거절
     public void rejectRequest(Long requestId) {
         MatchRequest request = matchRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
 
         request.reject();
+
+        // 🔔 신청자에게 알림
+        notificationService.send(
+                request.getRequesterUser(),
+                "MATCH_REJECTED",
+                "매치 신청이 거절되었습니다.",
+                request
+        );
     }
 }

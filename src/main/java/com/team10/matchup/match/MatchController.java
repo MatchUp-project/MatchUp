@@ -3,15 +3,10 @@ package com.team10.matchup.match;
 import com.team10.matchup.common.CurrentUserService;
 import com.team10.matchup.team.Team;
 import com.team10.matchup.user.User;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -37,6 +32,7 @@ public class MatchController {
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("matchCreateForm", new MatchCreateForm());
         model.addAttribute("matchPosts", matchService.getAllMatchPosts());
+        model.addAttribute("requestedMatchIds", matchService.getRequestedMatchIdsForCurrentUser());
 
         return "match_apply";
     }
@@ -56,15 +52,5 @@ public class MatchController {
     public String requestMatch(@PathVariable Long matchId) {
         matchService.requestMatch(matchId);
         return "redirect:/match/apply";
-    }
-
-    // ---- DTO ----
-    @Getter
-    @Setter
-    public static class MatchCreateForm {
-        private int playerCount;
-        private String location;
-        private LocalDate date;
-        private LocalTime time;
     }
 }

@@ -1,8 +1,6 @@
 package com.team10.matchup.notification;
 
-import com.team10.matchup.common.CurrentUserService;
 import com.team10.matchup.match.MatchService;
-import com.team10.matchup.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,41 +13,34 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final MatchService matchService;
-    private final CurrentUserService currentUserService;
 
-    // 전체 알림 목록 + 수락/거절 버튼 있는 페이지
+    // 알림 전체 목록 보기
     @GetMapping
-    public String notificationList(Model model) {
-        User user = currentUserService.getCurrentUser();
-
-        model.addAttribute("notifications",
-                notificationService.getAllNotifications(user));
-
-        return "notification/notification_list";
+    public String listNotifications(Model model) {
+        model.addAttribute("notifications", notificationService.getAllForCurrentUser());
+        notificationService.markAllReadForCurrentUser();
+        return "notifications";
     }
 
-    // 수락
+    // 매치 신청 수락
     @PostMapping("/{notificationId}/accept")
-    public String accept(@PathVariable Long notificationId,
-                         @RequestParam Long requestId) {
-
-        User user = currentUserService.getCurrentUser();
-        notificationService.markAsRead(notificationId, user);
-        matchService.acceptRequest(requestId);
-
+    public String accept(@PathVariable Long notificationId) {
+        Notification n = notificationService.getById(notificationId);
+        if (n.getRelatedMatchRequest() != null) {
+            matchService.acceptRequest(n.getRelatedMatchRequest().getId());
+        }
+        notificationService.markRead(n);
         return "redirect:/notifications";
     }
 
-    // 거절
+    // 매치 신청 거절
     @PostMapping("/{notificationId}/reject")
-    public String reject(@PathVariable Long notificationId,
-                         @RequestParam Long requestId) {
-
-        User user = currentUserService.getCurrentUser();
-        notificationService.markAsRead(notificationId, user);
-        matchService.rejectRequest(requestId);
-
+    public String reject(@PathVariable Long notificationId) {
+        Notification n = notificationService.getById(notificationId);
+        if (n.getRelatedMatchRequest() != null) {
+            matchService.rejectRequest(n.getRelatedMatchRequest().getId());
+        }
+        notificationService.markRead(n);
         return "redirect:/notifications";
     }
 }
-

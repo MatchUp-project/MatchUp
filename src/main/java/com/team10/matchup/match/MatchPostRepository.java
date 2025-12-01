@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
 
-    // 최신순 전체 목록
     List<MatchPost> findAllByOrderByCreatedAtDesc();
 }

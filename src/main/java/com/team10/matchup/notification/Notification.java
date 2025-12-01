@@ -3,11 +3,17 @@ package com.team10.matchup.notification;
 import com.team10.matchup.match.MatchRequest;
 import com.team10.matchup.user.User;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notification")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Notification {
 
     @Id
@@ -19,16 +25,17 @@ public class Notification {
     @JoinColumn(name = "receiver_user_id", nullable = false)
     private User receiver;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 50)
-    private NotificationType type;
+    // MATCH_REQUEST, MATCH_ACCEPTED, MATCH_REJECTED 등
+    @Column(nullable = false, length = 50)
+    private String type;
 
-    @Column(name = "content", nullable = false, length = 255)
+    @Column(nullable = false, length = 255)
     private String content;
 
     @Column(name = "is_read", nullable = false)
     private boolean read = false;
 
+    // 어떤 매치 신청과 관련 있는지 (옵션)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "related_match_request_id")
     private MatchRequest relatedMatchRequest;
@@ -38,57 +45,6 @@ public class Notification {
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    // --- 비즈니스 메서드 ---
-    public void markAsRead() {
-        this.read = true;
-    }
-
-    // --- getter/setter ---
-
-    public Long getId() {
-        return id;
-    }
-
-    public User getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
-    }
-
-    public NotificationType getType() {
-        return type;
-    }
-
-    public void setType(NotificationType type) {
-        this.type = type;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public boolean isRead() {
-        return read;
-    }
-
-    public MatchRequest getRelatedMatchRequest() {
-        return relatedMatchRequest;
-    }
-
-    public void setRelatedMatchRequest(MatchRequest relatedMatchRequest) {
-        this.relatedMatchRequest = relatedMatchRequest;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }

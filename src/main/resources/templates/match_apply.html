@@ -101,19 +101,31 @@
 
                         <!-- 오른쪽: 상태 / 버튼 -->
                         <div class="text-end">
+
                             <!-- 매치가 이미 완료된 경우 -->
                             <div th:if="${post.status == 'MATCHED'}"
                                  class="text-danger fw-semibold mb-2">
                                 이미 매치가 완료됐습니다
                             </div>
 
-                            <!-- 내가 개설한 매치면 신청 버튼 X -->
+                            <!-- 내가 개설한 매치 -->
                             <div th:if="${post.createdBy != null and post.createdBy.id == currentUser.id}">
                                 <span class="badge bg-secondary">내가 등록한 매치</span>
                             </div>
 
-                            <!-- 신청 가능 & 내가 개설한게 아닐 때 -->
-                            <div th:if="${post.status == 'OPEN' and (post.createdBy == null or post.createdBy.id != currentUser.id)}">
+                            <!-- 내가 신청한 매치 -->
+                            <div th:if="${post.status == 'OPEN'
+                 and post.createdBy != null
+                 and post.createdBy.id != currentUser.id
+                 and #lists.contains(requestedMatchIds, post.id)}"
+                                 class="text-primary fw-semibold">
+                                매치 신청 완료됐습니다
+                            </div>
+
+                            <!-- 신청 가능 (아직 신청 안 했고, 내가 만든 글도 아님) -->
+                            <div th:if="${post.status == 'OPEN'
+                 and (post.createdBy == null or post.createdBy.id != currentUser.id)
+                 and !#lists.contains(requestedMatchIds, post.id)}">
                                 <form th:action="@{'/match/' + ${post.id} + '/request'}"
                                       method="post">
                                     <button type="submit" class="btn btn-outline-primary">
@@ -122,6 +134,7 @@
                                 </form>
                             </div>
                         </div>
+
                     </div> <!-- card-body -->
                 </div>
             </div>
