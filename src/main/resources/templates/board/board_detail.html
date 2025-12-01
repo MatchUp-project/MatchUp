@@ -4,40 +4,162 @@
     <meta charset="UTF-8">
     <title>게시글 상세</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* 대댓글 들여쓰기 */
+        .comment-child {
+            margin-left: 30px;
+            border-left: 2px solid #ddd;
+            padding-left: 15px;
+        }
+    </style>
 </head>
+
 <body>
+
+<!-- 상단바 -->
+<div class="bg-dark text-white small py-1">
+    <div class="container d-flex justify-content-end gap-3">
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
 
 <div class="container py-5">
 
-    <h2 th:text="${board.title}"></h2>
+    <!-- 제목 -->
+    <h2 class="fw-bold mb-3" th:text="${board.title}"></h2>
 
-    <div class="text-muted mb-3">
-        작성자: <span th:text="${board.userId}"></span>
-        · 조회수: <span th:text="${board.viewCount}"></span>
-        · 작성일: <span th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+    <!-- 작성자 정보 -->
+    <div class="text-muted mb-4">
+        <span th:text="${board.username}"></span> ·
+        <span th:text="${#temporals.format(board.createdAt,'yyyy-MM-dd HH:mm')}"></span> ·
+        <span th:text="|조회 ${board.viewCount}|"></span> ·
+        <span class="badge bg-primary" th:text="${board.category}"></span>
     </div>
 
-    <hr>
+    <!-- ⭐ PLAYER 추가 정보 -->
+    <div th:if="${board.category.name() == 'PLAYER'}"
+         class="p-3 mb-4 border rounded bg-light">
+        <h6 class="fw-bold mb-2">추가 정보</h6>
+        <div>포지션: <span th:text="${board.positionNeeded}"></span></div>
+        <div>나이대: <span th:text="${board.ageRange}"></span></div>
+        <div>실력: <span th:text="${board.skillLevel}"></span></div>
+    </div>
 
-    <p th:text="${board.content}" style="white-space: pre-line"></p>
+    <!-- ⭐ TEAM 추가 정보 -->
+    <div th:if="${board.category.name() == 'TEAM'}"
+         class="p-3 mb-4 border rounded bg-light">
+        <h6 class="fw-bold mb-2">추가 정보</h6>
+        <div>지역: <span th:text="${board.region}"></span></div>
+        <div>포지션: <span th:text="${board.preferredPosition}"></span></div>
+        <div>실력: <span th:text="${board.skillLevel}"></span></div>
+    </div>
 
-    <div class="mt-4">
-        <a href="/board" class="btn btn-secondary">목록</a>
+    <!-- 본문 -->
+    <div class="mb-5" th:utext="${board.content}"></div>
 
-        <button class="btn btn-outline-danger"
-                onclick="likeBoard()">
-            👍 좋아요
+    <!-- 추천 버튼 -->
+    <div class="mb-5">
+        <button class="btn btn-outline-danger">
+            ❤️ 추천하기
         </button>
     </div>
+
+    <!-- 댓글 목록 -->
+    <h5 class="fw-bold mb-3">댓글</h5>
+
+    <!-- ================= 댓글 렌더링 시작 ================= -->
+    <div th:each="reply : ${board.comments}">
+        <div class="py-3 border-bottom">
+
+            <!-- 작성자 + 내용 -->
+            <div class="fw-semibold" th:text="${reply.username}"></div>
+            <div th:text="${reply.content}"></div>
+            <small class="text-muted"
+                   th:text="${#temporals.format(reply.createdAt,'yy-MM-dd HH:mm')}"></small>
+
+            <!-- 답글 버튼 -->
+            <button class="btn btn-sm btn-outline-secondary mt-2 reply-btn"
+                    th:attr="data-id=${reply.id}">
+                답글
+            </button>
+
+            <!-- ===== 대댓글 폼 (숨김) ===== -->
+            <form method="post"
+                  th:action="@{/board/{id}/comment(id=${board.id})}"
+                  class="reply-form mt-2 d-none">
+
+                <input type="hidden" name="parentId" th:value="${reply.id}"/>
+
+                <textarea name="content" class="form-control mb-2" rows="2"
+                          placeholder="답글을 입력하세요"></textarea>
+                <button class="btn btn-primary btn-sm">등록</button>
+            </form>
+
+            <!-- ===== 자식 댓글 출력 (재귀) ===== -->
+            <div th:replace="this ::commentChildren(${reply.children})"></div>
+
+        </div>
+    </div>
+
+    <!-- 재귀 렌더링 (대댓글) -->
+    <th:block th:fragment="commentChildren(children)">
+        <div th:each="child : ${children}" class="comment-child mt-3">
+
+            <div class="fw-semibold" th:text="${child.username}"></div>
+            <div th:text="${child.content}"></div>
+            <small class="text-muted"
+                   th:text="${#temporals.format(child.createdAt,'yy-MM-dd HH:mm')}"></small>
+
+            <!-- 답글 버튼 -->
+            <button class="btn btn-sm btn-outline-secondary mt-2 reply-btn"
+                    th:attr="data-id=${child.id}">
+                답글
+            </button>
+
+            <!-- 대댓글 입력 폼 -->
+            <form method="post"
+                  th:action="@{/board/{id}/comment(id=${board.id})}"
+                  class="reply-form mt-2 d-none">
+
+                <input type="hidden" name="parentId" th:value="${child.id}"/>
+
+                <textarea name="content" class="form-control mb-2" rows="2"
+                          placeholder="답글을 입력하세요"></textarea>
+                <button class="btn btn-primary btn-sm">등록</button>
+            </form>
+
+            <!-- 재귀 출력 -->
+            <div th:if="${child.hasChildren()}"
+                 th:replace="this ::commentChildren(${child.children})"></div>
+
+        </div>
+    </th:block>
+    <!-- ================= 댓글 렌더링 끝 ================= -->
+
+
+    <!-- 댓글 작성 -->
+    <form method="post" th:action="@{/board/{id}/comment(id=${board.id})}" class="mt-4">
+        <textarea name="content" class="form-control mb-2" rows="3"
+                  placeholder="댓글을 입력하세요"></textarea>
+        <button class="btn btn-primary">댓글 등록</button>
+    </form>
 
 </div>
 
 <script>
-    function likeBoard(){
-        fetch("/api/board/like/" + "[[${board.id}]]", {
-            method: "POST"
-        }).then(() => location.reload());
-    }
+    // "답글" 버튼 클릭 시 대댓글 입력 폼 표시
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let form = btn.nextElementSibling;
+            form.classList.toggle('d-none');
+        });
+    });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
