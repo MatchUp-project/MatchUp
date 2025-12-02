@@ -14,9 +14,10 @@ public class BoardCommentController {
     @PostMapping("/{id}/comment")
     public String writeComment(
             @PathVariable Long id,
-            @RequestParam String content
+            @RequestParam String content,
+            @RequestParam(required = false) Long parentId     // ⭐ 추가
     ) {
-        boardCommentService.addComment(id, content, null);
+        boardCommentService.addComment(id, content, parentId);  // ⭐ parentId 넘겨줌
         return "redirect:/board/" + id;
     }
 }

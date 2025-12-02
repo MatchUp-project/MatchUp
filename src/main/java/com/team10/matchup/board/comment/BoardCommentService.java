@@ -31,15 +31,14 @@ public class BoardCommentService {
     @Transactional(readOnly = true)
     public List<BoardCommentResponse> getCommentTree(Long boardId) {
 
-        // 1) 댓글 전체 조회
+        // 1) 해당 게시글 댓글 전부 시간순으로
         List<BoardComment> comments =
                 boardCommentRepository.findByBoardIdOrderByCreatedAtAsc(boardId);
 
-        // 2) 엔티티 → DTO + username 채우기
+        // 2) ID -> DTO 맵
         Map<Long, BoardCommentResponse> map = new LinkedHashMap<>();
 
         for (BoardComment c : comments) {
-
             User u = userService.getUserById(c.getUserId());
             String username = (u != null) ? u.getUsername() : "탈퇴한 사용자";
 
@@ -47,28 +46,26 @@ public class BoardCommentService {
             map.put(dto.getId(), dto);
         }
 
-        // 3) 트리 구성
+        // 3) 루트 목록
         List<BoardCommentResponse> roots = new ArrayList<>();
 
         for (BoardCommentResponse dto : map.values()) {
-
             Long parentId = dto.getParentId();
 
-            // ⭐ 최상위 댓글
-            if (parentId == null) {
+            if (parentId == null) {      // 최상위
                 roots.add(dto);
-                continue;
+            } else {
+                BoardCommentResponse parent = map.get(parentId);
+                if (parent != null) {
+                    parent.addChild(dto);   // 부모 밑에 자식 추가
+                } else {
+                    // 혹시 모를 깨진 데이터는 그냥 루트로
+                    roots.add(dto);
+                }
             }
-
-            // ⭐ 부모 찾기
-            BoardCommentResponse parent = map.get(parentId);
-
-            if (parent != null) {
-                parent.addChild(dto);
-            }
-            // ⭐ 부모가 없으면? → 고아 데이터 → root에 넣지 않고 무시
         }
 
         return roots;
     }
+
 }

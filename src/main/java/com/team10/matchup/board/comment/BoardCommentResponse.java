@@ -44,4 +44,13 @@ public class BoardCommentResponse {
     public boolean hasChildren() {
         return children != null && !children.isEmpty();
     }
+
+    public int getTotalChildrenCount() {
+        int count = children.size();
+        for (BoardCommentResponse child : children) {
+            count += child.getTotalChildrenCount();
+        }
+        return count;
+    }
+
 }

@@ -23,7 +23,7 @@ public class Board {
     private String title;
 
     @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "view_count", nullable = false)

@@ -39,9 +39,13 @@ public class BoardService {
 
         User currentUser = userService.getCurrentUser();
 
+        // String → ENUM 변환
+        BoardCategory category = BoardCategory.valueOf(request.getCategory());
+
+        // 저장
         Board board = new Board(
                 currentUser.getId(),
-                request.getCategory(),
+                category,
                 request.getTitle(),
                 request.getContent()
         );
@@ -49,7 +53,7 @@ public class BoardService {
         Board saved = boardRepository.save(board);
 
         // PLAYER
-        if (request.getCategory() == BoardCategory.PLAYER) {
+        if (category == BoardCategory.PLAYER) {
             playerRecruitRepository.save(new BoardPlayerRecruit(
                     saved.getId(),
                     request.getPositionNeeded(),
@@ -59,7 +63,7 @@ public class BoardService {
         }
 
         // TEAM
-        if (request.getCategory() == BoardCategory.TEAM) {
+        if (category == BoardCategory.TEAM) {
             teamSearchRepository.save(new BoardTeamSearch(
                     saved.getId(),
                     request.getRegion(),
@@ -70,6 +74,7 @@ public class BoardService {
 
         return saved.getId();
     }
+
 
 
     // ============================================================
