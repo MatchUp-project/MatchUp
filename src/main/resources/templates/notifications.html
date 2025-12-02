@@ -24,17 +24,37 @@
                 </small>
             </div>
 
-            <!-- 매치 신청(MATCH_REQUEST) 이고 아직 PENDING인 경우에만 수락/거절 버튼 -->
+            <!-- 매치 신청 알림인 경우 -->
             <div th:if="${n.type == 'MATCH_REQUEST'}">
-                <form th:action="@{'/notifications/' + ${n.id} + '/accept'}"
-                      method="post" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-success">수락</button>
-                </form>
-                <form th:action="@{'/notifications/' + ${n.id} + '/reject'}"
-                      method="post" class="d-inline ms-1">
-                    <button type="submit" class="btn btn-sm btn-danger">거절</button>
-                </form>
+
+                <!-- 1) 아직 처리 안 된(PENDING) 신청이면 수락 / 거절 버튼 표시 -->
+                <div th:if="${n.relatedMatchRequest != null
+                 and n.relatedMatchRequest.status == 'PENDING'}">
+                    <form th:action="@{'/notifications/' + ${n.id} + '/accept'}"
+                          method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">수락</button>
+                    </form>
+                    <form th:action="@{'/notifications/' + ${n.id} + '/reject'}"
+                          method="post" class="d-inline ms-1">
+                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                    </form>
+                </div>
+
+                <!-- 2) 이미 수락된 신청이면 문구만 표시 -->
+                <div th:if="${n.relatedMatchRequest != null
+                 and n.relatedMatchRequest.status == 'ACCEPTED'}"
+                     class="text-success fw-semibold">
+                    수락되었습니다.
+                </div>
+
+                <!-- 3) 이미 거절된 신청이면 문구만 표시 -->
+                <div th:if="${n.relatedMatchRequest != null
+                 and n.relatedMatchRequest.status == 'REJECTED'}"
+                     class="text-danger fw-semibold">
+                    거절되었습니다.
+                </div>
             </div>
+
         </div>
     </div>
 </div>

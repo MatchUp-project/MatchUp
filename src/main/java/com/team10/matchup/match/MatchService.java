@@ -1,6 +1,7 @@
 package com.team10.matchup.match;
 
 import com.team10.matchup.common.CurrentUserService;
+import com.team10.matchup.event.EventService;
 import com.team10.matchup.notification.NotificationService;
 import com.team10.matchup.team.Team;
 import com.team10.matchup.user.User;
@@ -23,6 +24,8 @@ public class MatchService {
     private final MatchRequestRepository matchRequestRepository;
     private final CurrentUserService currentUserService;
     private final NotificationService notificationService;
+    // ✅ 일정 자동 생성용
+    private final EventService eventService;
 
     // 매치 글 등록
     public MatchPost createMatchPost(int playerCount,
@@ -106,7 +109,7 @@ public class MatchService {
         return request;
     }
 
-    // 수락
+    // ✅ 수락 + 일정 자동 생성
     public void acceptRequest(Long requestId) {
         MatchRequest request = matchRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
@@ -123,11 +126,15 @@ public class MatchService {
                 request
         );
 
-        // TODO: 여기서 팀 일정표에 경기 등록 (나중에 구현)
+        // ⭐ 두 팀 일정 생성 (EventService 안에서 home/away 둘 다 저장)
+        eventService.createMatchEvents(post, request.getRequesterTeam());
     }
 
     // 거절
     public void rejectRequest(Long requestId) {
+
+        System.out.println("[MatchService] acceptRequest 호출, requestId = " + requestId);
+
         MatchRequest request = matchRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
 
