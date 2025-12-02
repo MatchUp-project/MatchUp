@@ -16,42 +16,59 @@ public class BoardCommentService {
     private final BoardCommentRepository boardCommentRepository;
     private final UserService userService;
 
-    // 댓글 등록
+    // ===============================================================
+    // 댓글 작성
+    // ===============================================================
     public BoardComment addComment(Long boardId, String content, Long parentId) {
         User currentUser = userService.getCurrentUser();
         BoardComment comment = new BoardComment(boardId, currentUser.getId(), content, parentId);
         return boardCommentRepository.save(comment);
     }
 
-    // 댓글 + 대댓글 트리 반환
+    // ===============================================================
+    // 댓글 트리 구조 생성
+    // ===============================================================
     @Transactional(readOnly = true)
     public List<BoardCommentResponse> getCommentTree(Long boardId) {
 
-        // 1) 모든 댓글 조회
-        List<BoardComment> comments = boardCommentRepository.findByBoardIdOrderByCreatedAtAsc(boardId);
+        // 1) 댓글 전체 조회
+        List<BoardComment> comments =
+                boardCommentRepository.findByBoardIdOrderByCreatedAtAsc(boardId);
 
-        // 2) 엔티티 → DTO 변환
-        Map<Long, BoardCommentResponse> map = new HashMap<>();
-        List<BoardCommentResponse> roots = new ArrayList<>();
+        // 2) 엔티티 → DTO + username 채우기
+        Map<Long, BoardCommentResponse> map = new LinkedHashMap<>();
 
         for (BoardComment c : comments) {
-            User user = userService.getUserById(c.getUserId());
-            BoardCommentResponse dto = new BoardCommentResponse(c, user.getUsername());
+
+            User u = userService.getUserById(c.getUserId());
+            String username = (u != null) ? u.getUsername() : "탈퇴한 사용자";
+
+            BoardCommentResponse dto = new BoardCommentResponse(c, username);
             map.put(dto.getId(), dto);
         }
 
-        // 3) 부모-자식 연결
+        // 3) 트리 구성
+        List<BoardCommentResponse> roots = new ArrayList<>();
+
         for (BoardCommentResponse dto : map.values()) {
-            if (dto.getParentId() == null) {
-                roots.add(dto); // 최상위 댓글
-            } else {
-                BoardCommentResponse parent = map.get(dto.getParentId());
-                if (parent != null) {
-                    parent.addChild(dto); // 대댓글 추가
-                }
+
+            Long parentId = dto.getParentId();
+
+            // ⭐ 최상위 댓글
+            if (parentId == null) {
+                roots.add(dto);
+                continue;
             }
+
+            // ⭐ 부모 찾기
+            BoardCommentResponse parent = map.get(parentId);
+
+            if (parent != null) {
+                parent.addChild(dto);
+            }
+            // ⭐ 부모가 없으면? → 고아 데이터 → root에 넣지 않고 무시
         }
 
-        return roots; // 최상위 댓글만 반환(안에 children 포함)
+        return roots;
     }
 }

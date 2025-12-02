@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -87,7 +87,6 @@ public class BoardService {
 
         BoardResponse res;
 
-        // PLAYER
         if (board.getCategory() == BoardCategory.PLAYER) {
             var recruit = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
 
@@ -99,7 +98,6 @@ public class BoardService {
                     recruit != null ? recruit.getSkillLevel() : null
             );
         }
-        // TEAM
         else if (board.getCategory() == BoardCategory.TEAM) {
             var team = teamSearchRepository.findByBoardId(board.getId()).orElse(null);
 
@@ -111,19 +109,42 @@ public class BoardService {
                     team != null ? team.getSkillLevel() : null
             );
         }
-        // FREE
         else {
             res = new BoardResponse(board, author.getUsername());
         }
 
-        // ============================================================
-        // ⭐ 댓글 트리 구조 가져오기 ⭐
-        // ============================================================
+        // ===============================================================
+        // ⭐ 댓글 트리 불러오기
+        // ===============================================================
         List<BoardCommentResponse> commentTree = boardCommentService.getCommentTree(id);
-        res.setComments(commentTree != null ? commentTree : new ArrayList<>());
+
+        // ⭐ 최상위 목록에서 null 제거
+        commentTree.removeIf(Objects::isNull);
+
+        // ⭐ children 목록들도 모두 null 제거
+        for (BoardCommentResponse c : commentTree) {
+            cleanChildren(c);
+        }
+
+        res.setComments(commentTree);
 
         return res;
     }
+
+
+    // ===============================================================
+// ⭐ 대댓글 children 재귀 null 제거 함수
+// ===============================================================
+    private void cleanChildren(BoardCommentResponse parent) {
+        // children 목록에서 null 제거
+        parent.getChildren().removeIf(Objects::isNull);
+
+        // 재귀적으로 각 자식의 자식까지 모두 clean
+        for (BoardCommentResponse c : parent.getChildren()) {
+            cleanChildren(c);
+        }
+    }
+
 
 
     // ============================================================
