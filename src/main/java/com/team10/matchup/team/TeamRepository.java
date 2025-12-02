@@ -7,8 +7,9 @@ import java.util.List;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    @Query("SELECT t FROM Team t JOIN TeamMember tm ON t.id = tm.teamId WHERE tm.userId = :userId")
+    @Query("SELECT tm.team FROM TeamMember tm WHERE tm.user.id = :userId")
     List<Team> findTeamsByUserId(Long userId);
-    
+
     List<Team> findByRegion(String region);
 }
+
