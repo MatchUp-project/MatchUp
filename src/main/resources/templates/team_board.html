@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${team.name} + ' - 팀 게시판'">팀 게시판</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/styles.css}" href="/styles.css"/>
+</head>
+<body>
+
+<!-- ===== 상단 유틸 바 + 헤더 (메인 페이지 그대로) ===== -->
+<div class="bg-dark text-white small py-1">
+    <div class="container d-flex justify-content-end gap-3">
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
+
+<header class="border-bottom">
+    <div class="container py-3">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
+
+            <form class="d-flex flex-grow-1 mx-4" role="search">
+                <input class="form-control form-control-lg rounded-start-pill"
+                       type="search" placeholder="팀, 구장, 지역 검색">
+                <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <nav class="mt-3">
+            <ul class="nav main-nav border-top pt-2">
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle active"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item active" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board">커뮤니티</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">매치 신청</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- ===== 본문: 좌측 사이드 메뉴 + 우측 게시판 ===== -->
+<main class="py-4">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- 사이드 메뉴 -->
+            <aside class="col-md-3">
+                <div class="list-group">
+                    <a href="/team/board" class="list-group-item list-group-item-action active">
+                        팀 게시판
+                    </a>
+                    <a href="/team/members" class="list-group-item list-group-item-action">
+                        팀 멤버
+                    </a>
+                    <a href="/team/schedule" class="list-group-item list-group-item-action">
+                        일정표
+                    </a>
+                    <a href="/team/records" class="list-group-item list-group-item-action">
+                        경기 기록
+                    </a>
+                </div>
+            </aside>
+
+            <!-- 게시판 내용 -->
+            <section class="col-md-9">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="m-0" th:text="${team.name} + ' 팀 게시판'">팀 게시판</h4>
+                    <a href="/team/board/new" class="btn btn-primary btn-sm">글쓰기</a>
+                </div>
+
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">번호</th>
+                        <th>제목</th>
+                        <th style="width: 140px;">글쓴이</th>
+                        <th style="width: 140px;">작성일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="post, stat : ${posts}">
+                        <td th:text="${stat.count}">1</td>
+                        <td>
+                            <a th:href="@{'/team/board/' + ${post.id}}"
+                               class="text-decoration-none"
+                               th:text="${post.title}">
+                                제목
+                            </a>
+                        </td>
+                        <td th:text="${post.authorName}">작성자</td>
+                        <td th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}">25-09-02</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(posts)}">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            등록된 게시글이 없습니다.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+        </div>
+    </div>
+</main>
+
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container small d-flex justify-content-between">
+        <div>© 2025 Match-Up</div>
+        <div class="text-white-50">문의: support@matchup.com</div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

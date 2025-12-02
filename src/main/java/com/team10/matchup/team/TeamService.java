@@ -2,6 +2,7 @@ package com.team10.matchup.team;
 
 import com.team10.matchup.user.User;
 import com.team10.matchup.user.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,15 +10,12 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TeamService {
 
     private final TeamRepository teamRepository;
     private final UserService userService;
-
-    public TeamService(TeamRepository teamRepository, UserService userService) {
-        this.teamRepository = teamRepository;
-        this.userService = userService;
-    }
+    private final TeamMemberRepository teamMemberRepository;
 
     // ✅ 팀 생성
     public TeamResponse createTeam(TeamRequest request) {
@@ -25,31 +23,35 @@ public class TeamService {
         // 현재 로그인한 사용자 가져오기
         User user = userService.getCurrentUser();
 
+        // 팀 생성 + leaderId 저장
         Team team = new Team(
                 request.getName(),
                 request.getRegion(),
                 request.getIntro(),
-                user.getId()              // 🔥 leaderId 자동 설정
+                user.getId()
         );
 
         Team saved = teamRepository.save(team);
 
-        // 여기서 나중에 team_member에도 자동 등록 가능
-        // teamMemberService.addLeader(saved.getId(), user.getId());
+        // 팀장도 team_member 테이블에 LEADER로 등록
+        TeamMember leaderMember = TeamMember.builder()
+                .team(saved)
+                .user(user)
+                .role(TeamMember.Role.LEADER)
+                .build();
+
+        teamMemberRepository.save(leaderMember);
 
         return new TeamResponse(saved);
     }
 
-    // ✅ 팀 단일 조회
     @Transactional(readOnly = true)
     public TeamResponse getTeam(Long id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다. id=" + id));
-
         return new TeamResponse(team);
     }
 
-    // ✅ 전체 팀 조회
     @Transactional(readOnly = true)
     public List<TeamResponse> getAllTeams() {
         return teamRepository.findAll()
@@ -58,9 +60,7 @@ public class TeamService {
                 .toList();
     }
 
-    // ✅ 팀 정보 수정
     public TeamResponse updateTeam(Long id, TeamRequest request) {
-
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다. id=" + id));
 
@@ -71,12 +71,10 @@ public class TeamService {
         return new TeamResponse(team);
     }
 
-    // ✅ 팀 삭제
     public void deleteTeam(Long id) {
         if (!teamRepository.existsById(id)) {
             throw new IllegalArgumentException("이미 삭제되었거나 존재하지 않는 팀입니다. id=" + id);
         }
-
         teamRepository.deleteById(id);
     }
 

@@ -56,39 +56,41 @@
 <script>
     function createTeam() {
 
-        const name = document.getElementById('name').value.trim();
-        const region = document.getElementById('region').value.trim();
-        const intro = document.getElementById('intro').value.trim();
-        const errorMsg = document.getElementById('errorMsg');
+    const name = document.getElementById('name').value.trim();
+    const region = document.getElementById('region').value.trim();
+    const intro = document.getElementById('intro').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
 
-        if (name.length === 0) {
-            errorMsg.innerText = "팀 이름을 입력하세요";
-            return;
-        }
-
-        fetch("/api/teams", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: name,
-                region: region,
-                intro: intro
-            })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error();
-            return response.json();
-        })
-        .then(data => {
-            alert("팀이 자동으로 생성되었습니다!");
-            window.location.href = "/team/" + data.id;
-        })
-        .catch(err => {
-            errorMsg.innerText = "팀 생성 중 오류가 발생했습니다.";
-        })
+    if (name.length === 0) {
+        errorMsg.innerText = "팀 이름을 입력하세요";
+        return;
     }
+
+    fetch("/api/teams", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            region: region,
+            intro: intro
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error();
+        return response.json();
+    })
+    .then(data => {
+        alert("팀이 자동으로 생성되었습니다!");
+        // 🔥 여기서 팀 상세 페이지 URL을 바꾼다
+        window.location.href = "/team/detail/" + data.id;
+    })
+    .catch(err => {
+        errorMsg.innerText = "팀 생성 중 오류가 발생했습니다.";
+    })
+}
+
 </script>
 
 </body>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Match-Up</title>
 
+    <!-- ✅ Bootstrap / 아이콘 / 커스텀 CSS 꼭 포함! -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css"/>
@@ -20,26 +21,68 @@
     </div>
 </div>
 
-<!-- 헤더 + 검색 -->
+<!-- ===== 헤더 + 검색 + 상단 메뉴 ===== -->
 <header class="border-bottom">
-    <div class="container py-3 d-flex align-items-center justify-content-between">
-        <a class="navbar-brand fw-bold fs-3 text-primary" href="/">Match-Up</a>
+    <div class="container py-3">
 
-        <form class="d-flex w-50" role="search">
-            <input class="form-control form-control-lg rounded-start-pill"
-                   type="search" placeholder="팀, 구장, 지역 검색">
-            <button class="btn btn-primary btn-lg rounded-end-pill px-4">
-                <i class="bi bi-search"></i>
-            </button>
-        </form>
+        <!-- 1줄 : 로고 + 검색 -->
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 -->
+            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
 
-        <button class="btn btn-outline-secondary">
-            <i class="bi bi-list"></i> 메뉴
-        </button>
+            <!-- 검색 -->
+            <form class="d-flex flex-grow-1 mx-4" role="search">
+                <input class="form-control form-control-lg rounded-start-pill"
+                       type="search" placeholder="팀, 구장, 지역 검색">
+                <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+
+            <!-- (필요하면 우측에 버튼 더 둘 수 있음) -->
+        </div>
+
+        <!-- 2줄 : 상단 메뉴바 -->
+        <nav class="mt-3">
+            <ul class="nav main-nav border-top pt-2">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- 커뮤니티 -->
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board">
+                        커뮤니티
+                    </a>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">
+                        매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
     </div>
 </header>
 
-<!-- 앞으로 있을 매치 / 신청 가능 매치 -->
+<!-- ===== 앞으로 있을 매치 / 신청 가능 매치 ===== -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row g-4">
@@ -54,14 +97,14 @@
 
                     <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-4">
                         <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
+                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀1">
                             <div class="fw-bold">풋또라이</div>
                         </div>
 
                         <div class="fw-bold display-6">VS</div>
 
                         <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
+                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀2">
                             <div class="fw-bold">문돌이</div>
                         </div>
 
@@ -95,12 +138,12 @@
     </div>
 </section>
 
-<!-- 통합 게시판 / 전체 팀 목록 -->
+<!-- ===== 통합 게시판 / 전체 팀 목록 ===== -->
 <section class="py-4">
     <div class="container">
         <div class="row g-4">
 
-            <!-- ✅ 통합 게시판 -->
+            <!-- 통합 게시판 -->
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -115,14 +158,12 @@
                             </a>
                             <span class="text-muted small">25-09-26</span>
                         </li>
-
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/202" class="text-decoration-none">
                                 경기도 고양시 팀 가입 희망합니다
                             </a>
                             <span class="text-muted small">25-08-23</span>
                         </li>
-
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/203" class="text-decoration-none">
                                 청주에서 주말 팀 구합니다(금요일)
@@ -133,7 +174,7 @@
                 </div>
             </div>
 
-            <!-- ✅ 전체 팀 목록 -->
+            <!-- 전체 팀 목록 -->
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -148,14 +189,12 @@
                             </a>
                             <span class="text-muted small">25-09-02</span>
                         </li>
-
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/team/2" class="text-decoration-none">
                                 대구 신생 풋살 팀원 모집(일요일 오전)
                             </a>
                             <span class="text-muted small">25-06-30</span>
                         </li>
-
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/team/3" class="text-decoration-none">
                                 경기 참관 팀원 또는 상대팀 모집합니다.
@@ -170,8 +209,7 @@
     </div>
 </section>
 
-
-<!-- 경기장 -->
+<!-- ===== 경기장 ===== -->
 <section class="py-5">
     <div class="container">
         <h5 class="fw-bold mb-3">⚽ 우리 경기장</h5>
@@ -193,7 +231,7 @@
     </div>
 </section>
 
-<!-- 푸터 -->
+<!-- ===== 푸터 ===== -->
 <footer class="bg-dark text-white py-4">
     <div class="container small d-flex justify-content-between">
         <div>© 2025 Match-Up</div>
@@ -206,3 +244,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
