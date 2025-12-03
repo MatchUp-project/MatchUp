@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- 상단 유틸 바 -->
+<div class="bg-dark text-white small py-1">
+    <div class="container d-flex justify-content-end gap-3">
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
+
+<!-- 상단 유틸 바 -->
+<div class="bg-dark text-white small py-1">
+    <div class="container d-flex justify-content-end gap-3">
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
+
+<!-- ===== 헤더 + 검색 + 상단 메뉴 ===== -->
+<header class="border-bottom">
+    <div class="container py-3">
+
+        <!-- 1줄 : 로고 + 검색 -->
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 -->
+            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
+
+            <!-- 검색 -->
+            <form class="d-flex flex-grow-1 mx-4" role="search">
+                <input class="form-control form-control-lg rounded-start-pill"
+                       type="search" placeholder="팀, 구장, 지역 검색">
+                <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+
+            <!-- (필요하면 우측에 버튼 더 둘 수 있음) -->
+        </div>
+
+        <!-- 2줄 : 상단 메뉴바 -->
+        <!-- 2줄 : 상단 메뉴바 -->
+        <nav class="mt-3">
+            <ul class="nav main-nav border-top pt-2">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- 커뮤니티 -->
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board/list?category=FREE">
+                        커뮤니티
+                    </a>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">
+                        매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="container py-5">
+
+    <h3>✏ 게시글 작성</h3>
+
+    <form id="boardForm">
+
+        <!-- 카테고리 선택 -->
+        <div class="mb-3">
+            <label class="form-label">카테고리</label>
+            <select class="form-select" name="category" id="category">
+                <option value="FREE">자유게시판</option>
+                <option value="PLAYER">선수모집</option>
+                <option value="TEAM">팀구함</option>
+            </select>
+        </div>
+
+        <!-- 공통 제목 -->
+        <div class="mb-3">
+            <label class="form-label">제목</label>
+            <input type="text" class="form-control" name="title" required>
+        </div>
+
+        <!-- 공통 내용 -->
+        <div class="mb-3">
+            <label class="form-label">내용</label>
+            <textarea class="form-control" rows="8" name="content" required></textarea>
+        </div>
+
+        <!-- 선수모집 전용 -->
+        <div id="playerFields" class="d-none">
+
+            <div class="mb-3">
+                <label class="form-label">포지션</label>
+                <select name="positionNeeded" class="form-select">
+                    <option value="FW">FW</option>
+                    <option value="MF">MF</option>
+                    <option value="DF">DF</option>
+                    <option value="GK">GK</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">나이대</label>
+                <input type="text" class="form-control" name="ageRange" placeholder="예: 20~30">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">실력</label>
+                <select name="skillLevel" class="form-select">
+                    <option value="초급">초급</option>
+                    <option value="중급">중급</option>
+                    <option value="상급">상급</option>
+                </select>
+            </div>
+
+        </div>
+
+        <!-- 팀구함 전용 -->
+        <div id="teamFields" class="d-none">
+
+            <div class="mb-3">
+                <label class="form-label">지역</label>
+                <input type="text" class="form-control" name="region" placeholder="예: 서울/대구/청주">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">선호 포지션</label>
+                <select name="preferredPosition" class="form-select">
+                    <option value="FW">FW</option>
+                    <option value="MF">MF</option>
+                    <option value="DF">DF</option>
+                    <option value="GK">GK</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">실력</label>
+                <select name="skillLevel" class="form-select">
+                    <option value="초급">초급</option>
+                    <option value="중급">중급</option>
+                    <option value="상급">상급</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">등록</button>
+        <a href="/board" class="btn btn-secondary">취소</a>
+
+    </form>
+
+</div>
+
+
+<script>
+    const categorySelect = document.getElementById('category');
+    const playerFields = document.getElementById('playerFields');
+    const teamFields = document.getElementById('teamFields');
+
+    // 카테고리 변경 시 입력창 노출 변경
+    categorySelect.addEventListener('change', toggleFields);
+
+    function toggleFields() {
+        const value = categorySelect.value;
+
+        playerFields.classList.add('d-none');
+        teamFields.classList.add('d-none');
+
+        if (value === 'PLAYER') playerFields.classList.remove('d-none');
+        if (value === 'TEAM') teamFields.classList.remove('d-none');
+    }
+
+    toggleFields(); // 초기 실행
+
+
+    // 🔥 폼 제출(fetch) 처리
+    const form = document.getElementById('boardForm');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('/api/board', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.text())
+        .then(id => {
+            alert('작성 완료!');
+            location.href = '/board/' + id;
+        });
+    });
+</script>
+
+</body>
+</html>

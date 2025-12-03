@@ -102,7 +102,7 @@
 
                 <!-- 커뮤니티 -->
                 <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board">
+                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board/list?category=FREE">
                         커뮤니티
                     </a>
                 </li>
@@ -163,15 +163,31 @@
             <!-- 신청 가능 매치 -->
             <div class="col-lg-4">
                 <div class="card h-100 match-card">
-                    <div class="card-header fw-bold">신청 가능 매치</div>
-                    <div class="card-body">
-                        <div class="text-muted">
-                            <div>장소 : 남제주군 종합운동장</div>
-                            <div>날짜 : 2033-03-08</div>
-                            <div>시간 : 10:00</div>
-                        </div>
-                        <a href="#" class="btn btn-secondary w-100 mt-3">신청하기</a>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">신청 가능 매치</span>
+                        <a href="/board/list?category=FREE" class="btn btn-sm btn-outline-secondary">바로가기</a>
                     </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/201" class="text-decoration-none text-primary">
+                                9월 27일 성남수진축구장 - 상대팀 구합니다...
+                            </a>
+                            <span class="text-muted small">25-09-26</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/202" class="text-decoration-none">
+                                경기도 고양시 팀 가입 희망합니다
+                            </a>
+                            <span class="text-muted small">25-08-23</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/203" class="text-decoration-none">
+                                청주에서 주말 팀 구합니다(금요일)
+                            </a>
+                            <span class="text-muted small">25-05-21</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -189,19 +205,19 @@
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span class="fw-bold">통합 게시판</span>
-                        <a href="/board" class="btn btn-sm btn-outline-secondary">바로가기</a>
+                        <a href="/board/list?category=FREE" class="btn btn-sm btn-outline-secondary">바로가기</a>
                     </div>
 
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/201" class="text-decoration-none text-primary">
-                                9월 27일 성남수진축구장 - 상대팀 구합니다...
+                                9월 27일 성남수진축구장
                             </a>
                             <span class="text-muted small">25-09-26</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/202" class="text-decoration-none">
-                                경기도 고양시 팀 가입 희망합니다
+                                경기 신청
                             </a>
                             <span class="text-muted small">25-08-23</span>
                         </li>
