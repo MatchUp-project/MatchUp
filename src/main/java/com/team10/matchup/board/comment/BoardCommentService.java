@@ -40,7 +40,7 @@ public class BoardCommentService {
 
         for (BoardComment c : comments) {
             User u = userService.getUserById(c.getUserId());
-            String username = (u != null) ? u.getUsername() : "탈퇴한 사용자";
+            String username = (u != null) ? u.getName() : "탈퇴한 사용자";
 
             BoardCommentResponse dto = new BoardCommentResponse(c, username);
             map.put(dto.getId(), dto);

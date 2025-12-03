@@ -96,8 +96,7 @@ public class BoardService {
             var recruit = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
 
             res = BoardResponse.ofPlayer(
-                    board,
-                    author.getUsername(),
+                    board,author.getName(),
                     recruit != null ? recruit.getPositionNeeded() : null,
                     recruit != null ? recruit.getAgeRange() : null,
                     recruit != null ? recruit.getSkillLevel() : null
@@ -108,14 +107,14 @@ public class BoardService {
 
             res = BoardResponse.ofTeam(
                     board,
-                    author.getUsername(),
+                    author.getName(),
                     team != null ? team.getRegion() : null,
                     team != null ? team.getPreferredPosition() : null,
                     team != null ? team.getSkillLevel() : null
             );
         }
         else {
-            res = new BoardResponse(board, author.getUsername());
+            res = new BoardResponse(board, author.getName());
         }
 
         // ===============================================================
@@ -186,11 +185,11 @@ public class BoardService {
             BoardPlayerRecruit extra = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
 
             if (extra == null)
-                return new BoardResponse(board, user.getUsername());
+                return new BoardResponse(board, user.getName());
 
             return BoardResponse.ofPlayer(
                     board,
-                    user.getUsername(),
+                    user.getName(),
                     extra.getPositionNeeded(),
                     extra.getAgeRange(),
                     extra.getSkillLevel()
@@ -202,18 +201,18 @@ public class BoardService {
             BoardTeamSearch extra = teamSearchRepository.findByBoardId(board.getId()).orElse(null);
 
             if (extra == null)
-                return new BoardResponse(board, user.getUsername());
+                return new BoardResponse(board, user.getName());
 
             return BoardResponse.ofTeam(
                     board,
-                    user.getUsername(),
+                    user.getName(),
                     extra.getRegion(),
                     extra.getPreferredPosition(),
                     extra.getSkillLevel()
             );
         }
 
-        return new BoardResponse(board, user.getUsername());
+        return new BoardResponse(board, user.getName());
     }
 
 }
