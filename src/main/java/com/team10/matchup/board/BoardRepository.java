@@ -2,6 +2,7 @@ package com.team10.matchup.board;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -21,4 +22,12 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     List<Board> findByCategory(BoardCategory category);
     //List<Board> findTodayPopularBoards();
+
+    @Query(value = "SELECT * FROM board WHERE category = :categoryName ORDER BY id DESC LIMIT :limit", nativeQuery = true)
+    List<Board> findTopByCategoryOrderByIdDesc(
+            @Param("categoryName") String categoryName,
+            @Param("limit") int limit
+    );
+
+
 }

@@ -271,6 +271,16 @@ public class BoardService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getRecentFreeBoards(int limit) {
+        return boardRepository
+                .findTopByCategoryOrderByIdDesc(BoardCategory.FREE.name(), limit)
+                .stream()
+                .map(this::mapBoardToResponse)
+                .toList();
+    }
+
+
 
 
 }
