@@ -5,6 +5,7 @@ import com.team10.matchup.board.comment.BoardCommentResponse;
 import com.team10.matchup.board.comment.BoardCommentService;
 import com.team10.matchup.board.dto.BoardRequest;
 import com.team10.matchup.board.dto.BoardResponse;
+import com.team10.matchup.board.like.BoardLikeRepository;
 import com.team10.matchup.board.player.BoardPlayerRecruit;
 import com.team10.matchup.board.player.BoardPlayerRecruitRepository;
 import com.team10.matchup.board.team.BoardTeamSearch;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +32,7 @@ public class BoardService {
 
     private final BoardCommentRepository boardCommentRepository;
     private final BoardCommentService boardCommentService;
-
+    private final BoardLikeRepository boardLikeRepository;
 
     // ============================================================
     // 글 작성
@@ -176,7 +178,7 @@ public class BoardService {
     // ============================================================
     // 공통 매핑
     // ============================================================
-    private BoardResponse mapBoardToResponse(Board board) {
+    public BoardResponse mapBoardToResponse(Board board) {
 
         User user = userService.getUserById(board.getUserId());
 
@@ -214,5 +216,61 @@ public class BoardService {
 
         return new BoardResponse(board, user.getName());
     }
+
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getTodayPopular() {
+        LocalDate today = LocalDate.now();
+
+        List<Object[]> rows = boardLikeRepository.findTodayPopular(today);
+
+        return rows.stream()
+                .map(row -> {
+                    Long boardId = (Long) row[0];
+                    return boardRepository.findById(boardId)
+                            .map(this::mapBoardToResponse)
+                            .orElse(null);
+                })
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getWeeklyPopular() {
+
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(7);
+
+        List<Object[]> rows = boardLikeRepository.findWeeklyPopular(start, end);
+
+        return rows.stream()
+                .map(row -> {
+                    Long boardId = (Long) row[0];
+                    return boardRepository.findById(boardId)
+                            .map(this::mapBoardToResponse)
+                            .orElse(null);
+                })
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getMonthlyPopular() {
+
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(30);
+
+        List<Object[]> rows = boardLikeRepository.findMonthlyPopular(start, end);
+
+        return rows.stream()
+                .map(row -> {
+                    Long boardId = (Long) row[0];
+                    return boardRepository.findById(boardId)
+                            .map(this::mapBoardToResponse)
+                            .orElse(null);
+                })
+                .toList();
+    }
+
+
 
 }

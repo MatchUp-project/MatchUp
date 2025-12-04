@@ -20,9 +20,9 @@ public class BoardLike {
     private Long userId;
 
     @Column(name = "like_date", nullable = false)
-    private LocalDate likeDate = LocalDate.now();
+    private LocalDate likeDate;
 
-    protected BoardLike(){}
+    protected BoardLike() {}
 
     public BoardLike(Long boardId, Long userId) {
         this.boardId = boardId;

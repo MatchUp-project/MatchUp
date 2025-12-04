@@ -26,17 +26,24 @@ public class BoardPageController {
     @GetMapping("/list")
     public String boardList(
             @RequestParam(value = "category", required = false) BoardCategory category,
+            @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
             Model model
     ) {
-        List<BoardResponse> list =
-                (category != null)
-                        ? boardService.getListByCategory(category)
-                        : boardService.getAllBoards();
+        List<BoardResponse> list;
+
+        switch (sort) {
+            case "today" -> list = boardService.getTodayPopular();
+            case "week"  -> list = boardService.getWeeklyPopular();
+            case "month" -> list = boardService.getMonthlyPopular();
+            default      -> list = (category != null)
+                    ? boardService.getListByCategory(category)
+                    : boardService.getAllBoards();
+        }
 
         model.addAttribute("boards", list);
         model.addAttribute("category", category);
+        model.addAttribute("sort", sort);
 
-        // 제목 표기
         String categoryName = (category == null)
                 ? "통합 게시판"
                 : switch (category) {
@@ -49,6 +56,7 @@ public class BoardPageController {
 
         return "board/board_list";
     }
+
 
     // 글 상세
     @GetMapping("/{id}")

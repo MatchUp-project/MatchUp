@@ -199,10 +199,12 @@
     <div class="content-box mb-5" th:utext="${board.content}"></div>
 
 
-    <!-- 추천 버튼 -->
     <div class="mb-5">
-        <button class="btn btn-outline-danger">❤️ 추천하기</button>
+        <button id="likeBtn" class="btn btn-outline-danger">
+            ❤️ 추천하기 <span id="likeCount">0</span>
+        </button>
     </div>
+
 
 
     <!-- ============================= -->
@@ -331,6 +333,44 @@
         }
     });
 
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const boardId = [[${board.id}]];
+        const likeBtn = document.getElementById("likeBtn");
+        const likeCountSpan = document.getElementById("likeCount");
+
+        // ---------------------------
+        // 1) 추천 수 초기 로드
+        // ---------------------------
+        function loadTodayLikes() {
+            fetch(`/api/board/${boardId}/likes/today`)
+                .then(res => res.json())
+                .then(count => {
+                    likeCountSpan.textContent = count;
+                });
+        }
+
+        loadTodayLikes(); // 페이지 처음 로딩 시 1회 실행
+
+
+        // ---------------------------
+        // 2) 추천 버튼 클릭 이벤트
+        // ---------------------------
+        likeBtn.addEventListener("click", function() {
+
+            fetch(`/api/board/${boardId}/like`, { method: "POST" })
+                .then(res => {
+                    if (res.ok) {
+                        loadTodayLikes(); // 추천 수 다시 로드
+                    } else {
+                        alert("추천 실패!");
+                    }
+                });
+        });
+
+    });
 </script>
 
 
