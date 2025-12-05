@@ -1,20 +1,69 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Match-Up</title>
 
-    <!-- ✅ Bootstrap / 아이콘 / 커스텀 CSS 꼭 포함! -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons (🔔) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
     <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 
-<!-- 상단 유틸 바 -->
+<!-- ====================== -->
+<!-- 🔝 상단 유틸바 (여기에 종 추가됨!) -->
+<!-- ====================== -->
 <div class="bg-dark text-white small py-1">
-    <div class="container d-flex justify-content-end gap-3">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
+
+        <!-- 🔔 알림 드롭다운 -->
+        <div class="dropdown">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <!--Unread 표시용 빨간 점 (필요하면 활성화)-->
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                </span>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+
+            <!-- 최근 알림 헤더 -->
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+
+                <!-- 알림 없을 때 -->
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
+
+                <!-- 알림 있을 때 -->
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span>
+                        <br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 기존 메뉴 -->
         <a href="/" class="link-light text-decoration-none">홈</a>
         <a href="/profile" class="link-light text-decoration-none">내 정보</a>
         <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
@@ -25,24 +74,12 @@
 <header class="border-bottom">
     <div class="container py-3">
 
-        <!-- 1줄 : 로고 + 검색 -->
+        <!-- 1줄 : 로고 -->
         <div class="d-flex align-items-center justify-content-between gap-3">
-            <!-- 로고 -->
             <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
-
-            <!-- 검색 -->
-            <form class="d-flex flex-grow-1 mx-4" role="search">
-                <input class="form-control form-control-lg rounded-start-pill"
-                       type="search" placeholder="팀, 구장, 지역 검색">
-                <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
-                    <i class="bi bi-search"></i>
-                </button>
-            </form>
-
-            <!-- (필요하면 우측에 버튼 더 둘 수 있음) -->
         </div>
 
-        <!-- 2줄 : 상단 메뉴바 -->
+        <!-- 2줄 : 상단 메뉴 -->
         <nav class="mt-3">
             <ul class="nav main-nav border-top pt-2">
 
@@ -82,7 +119,11 @@
     </div>
 </header>
 
-<!-- ===== 앞으로 있을 매치 / 신청 가능 매치 ===== -->
+<!-- ====================================== -->
+<!-- (이 아래부터 너가 준 기존 화면 그대로) -->
+<!-- ====================================== -->
+
+<!-- ===== 앞으로 있을 매치 ===== -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row g-4">
@@ -122,15 +163,31 @@
             <!-- 신청 가능 매치 -->
             <div class="col-lg-4">
                 <div class="card h-100 match-card">
-                    <div class="card-header fw-bold">신청 가능 매치</div>
-                    <div class="card-body">
-                        <div class="text-muted">
-                            <div>장소 : 남제주군 종합운동장</div>
-                            <div>날짜 : 2033-03-08</div>
-                            <div>시간 : 10:00</div>
-                        </div>
-                        <a href="#" class="btn btn-secondary w-100 mt-3">신청하기</a>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">신청 가능 매치</span>
+                        <a href="/match/apply" class="btn btn-sm btn-outline-secondary">바로가기</a>
                     </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/201" class="text-decoration-none text-primary">
+                                9월 27일 성남수진축구장 - 상대팀 구합니다...
+                            </a>
+                            <span class="text-muted small">25-09-26</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/202" class="text-decoration-none">
+                                경기도 고양시 팀 가입 희망합니다
+                            </a>
+                            <span class="text-muted small">25-08-23</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="/board/203" class="text-decoration-none">
+                                청주에서 주말 팀 구합니다(금요일)
+                            </a>
+                            <span class="text-muted small">25-05-21</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -138,7 +195,7 @@
     </div>
 </section>
 
-<!-- ===== 통합 게시판 / 전체 팀 목록 ===== -->
+<!-- ===== 통합 게시판 / 팀 목록 ===== -->
 <section class="py-4">
     <div class="container">
         <div class="row g-4">
@@ -154,13 +211,13 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/201" class="text-decoration-none text-primary">
-                                9월 27일 성남수진축구장 - 상대팀 구합니다...
+                                9월 27일 성남수진축구장
                             </a>
                             <span class="text-muted small">25-09-26</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="/board/202" class="text-decoration-none">
-                                경기도 고양시 팀 가입 희망합니다
+                                경기 신청
                             </a>
                             <span class="text-muted small">25-08-23</span>
                         </li>
@@ -213,7 +270,6 @@
 <section class="py-5">
     <div class="container">
         <h5 class="fw-bold mb-3">⚽ 우리 경기장</h5>
-
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="border p-3">
@@ -241,8 +297,7 @@
     </div>
 </footer>
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
