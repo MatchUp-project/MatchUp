@@ -19,9 +19,6 @@ public class EventCreateForm {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
 
-    @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime endTime;
-
     private String place;
 
     private EventType type = EventType.ETC;

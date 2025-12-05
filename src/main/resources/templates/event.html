@@ -246,15 +246,15 @@
                                 등록된 일정이 없습니다.
                             </div>
 
+                            <!-- 여기 events 리스트에 같은 날 매치 여러 개 다 들어오면 전부 카드로 뜸 -->
                             <div th:each="event : ${events}" class="card mb-2">
                                 <div class="card-body py-2">
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <strong th:text="${event.title}">제목</strong>
                                             <div class="small text-muted">
+                                                <!-- 🔹 시작시간만 표시 -->
                                                 <span th:text="${#temporals.format(event.startAt, 'HH:mm')}">19:00</span>
-                                                ~
-                                                <span th:text="${#temporals.format(event.endAt, 'HH:mm')}">21:00</span>
                                                 <span th:if="${event.place != null}">
                                                     · <span th:text="${event.place}">장소</span>
                                                 </span>
@@ -283,15 +283,10 @@
                                         <input type="date" class="form-control form-control-sm"
                                                th:field="*{date}">
                                     </div>
-                                    <div class="col-3 mb-2">
-                                        <label class="form-label small">시작</label>
+                                    <div class="col-6 mb-2">
+                                        <label class="form-label small">시간</label>
                                         <input type="time" class="form-control form-control-sm"
                                                th:field="*{startTime}">
-                                    </div>
-                                    <div class="col-3 mb-2">
-                                        <label class="form-label small">종료</label>
-                                        <input type="time" class="form-control form-control-sm"
-                                               th:field="*{endTime}">
                                     </div>
                                 </div>
 

@@ -72,7 +72,8 @@
                             <div class="fw-semibold mb-2">
                                 <span th:text="${team.name}">재린FC</span>
                                 <span> vs </span>
-                                <span>상대 팀</span>
+                                <!-- ✅ 여기만 수정: opponentNames 맵에서 상대 팀 이름 가져오기 -->
+                                <span th:text="${opponentNames[m.id]}">상대 팀</span>
                             </div>
                             <div class="text-muted small"
                                  th:text="${#temporals.format(m.matchDatetime, 'yyyy-MM-dd HH:mm')}">

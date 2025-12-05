@@ -27,8 +27,9 @@
 
     <!-- 팀이 있을 때 -->
     <div th:unless="${noTeam}">
+
         <!-- 내 팀 정보 -->
-        <div class="mb-4">
+        <div class="mb-3">
             <h5>내 팀:
                 <span th:text="${team != null ? team.name : '팀 이름'}">팀 이름</span>
             </h5>
@@ -73,13 +74,36 @@
             </div>
         </div>
 
-        <!-- 신청 가능 매치 목록 -->
-        <h5 class="mb-3">신청 가능 매치 목록</h5>
-
-        <div th:if="${#lists.isEmpty(matchPosts)}" class="text-muted mb-3">
-            현재 등록된 매치가 없습니다.
+        <!-- ===== 탭 버튼 (가능 / 불가능) ===== -->
+        <div class="btn-group mb-3" role="group">
+            <a th:href="@{/match/apply(filter='available')}"
+               class="btn"
+               th:classappend="${filter} == 'available' ? ' btn-primary' : ' btn-outline-primary'">
+                매치 신청 가능
+            </a>
+            <a th:href="@{/match/apply(filter='unavailable')}"
+               class="btn"
+               th:classappend="${filter} == 'unavailable' ? ' btn-primary' : ' btn-outline-primary'">
+                매치 신청 불가능
+            </a>
         </div>
 
+        <!-- 제목 -->
+        <h5 class="mb-3"
+            th:text="${filter} == 'available' ? '매치 신청 가능 목록' : '매치 신청 불가능 목록'">
+            매치 신청 목록
+        </h5>
+
+        <!-- 비어 있을 때 메시지 -->
+        <div th:if="${#lists.isEmpty(matchPosts)}" class="text-muted mb-3">
+            <span th:text="${filter} == 'available'
+                           ? '현재 신청 가능한 매치가 없습니다.'
+                           : '현재 신청 불가능한 매치가 없습니다.'">
+                목록이 없습니다.
+            </span>
+        </div>
+
+        <!-- 매치 리스트 -->
         <div class="row g-3" th:each="post : ${matchPosts}">
             <div class="col-12">
                 <div class="card match-card"
@@ -104,33 +128,11 @@
                             </div>
                         </div>
 
-                        <!-- 오른쪽: 상태 / 버튼 -->
-                        <div class="text-end">
+                        <!-- 오른쪽: filter 에 따라 다른 UI -->
+                        <div class="text-end" th:switch="${filter}">
 
-                            <!-- 매치가 이미 완료된 경우 -->
-                            <div th:if="${post.status == 'MATCHED'}"
-                                 class="text-danger fw-semibold mb-2">
-                                이미 매치가 완료됐습니다
-                            </div>
-
-                            <!-- 내가 개설한 매치 -->
-                            <div th:if="${post.createdBy != null and post.createdBy.id == currentUser.id}">
-                                <span class="badge bg-secondary">내가 등록한 매치</span>
-                            </div>
-
-                            <!-- 내가 신청한 매치 -->
-                            <div th:if="${post.status == 'OPEN'
-                                         and post.createdBy != null
-                                         and post.createdBy.id != currentUser.id
-                                         and #lists.contains(requestedMatchIds, post.id)}"
-                                 class="text-primary fw-semibold">
-                                매치 신청 완료됐습니다
-                            </div>
-
-                            <!-- 신청 가능 (아직 신청 안 했고, 내가 만든 글도 아님) -->
-                            <div th:if="${post.status == 'OPEN'
-                                         and (post.createdBy == null or post.createdBy.id != currentUser.id)
-                                         and !#lists.contains(requestedMatchIds, post.id)}">
+                            <!-- ====== 매치 신청 가능 탭 ====== -->
+                            <div th:case="'available'">
                                 <form th:action="@{'/match/' + ${post.id} + '/request'}"
                                       method="post">
                                     <button type="submit" class="btn btn-outline-primary">
@@ -139,15 +141,60 @@
                                 </form>
                             </div>
 
-                            <!-- ⚠ 여기에는 더 이상 '경기 기록 작성' 버튼 없음 -->
+                            <!-- ====== 매치 신청 불가능 탭 ====== -->
+                            <div th:case="'unavailable'">
 
-                        </div>
+                                <!-- 이미 매치 완료 -->
+                                <div th:if="${post.status == 'MATCHED'}"
+                                     class="text-danger fw-semibold mb-2">
+                                    이미 매치가 완료됐습니다
+                                </div>
 
-                    </div> <!-- card-body -->
+                                <!-- 내가 신청한 매치: PENDING -->
+                                <div th:if="${post.status == 'OPEN'
+                                             and post.createdBy != null
+                                             and post.createdBy.id != currentUser.id
+                                             and requestStatusMap[post.id] == 'PENDING'}"
+                                     class="text-primary fw-semibold mb-2">
+                                    매치 신청 완료됐습니다
+                                </div>
+
+                                <!-- 내가 신청한 매치: REJECTED -->
+                                <div th:if="${post.status == 'OPEN'
+                                             and post.createdBy != null
+                                             and post.createdBy.id != currentUser.id
+                                             and requestStatusMap[post.id] == 'REJECTED'}"
+                                     class="text-danger fw-semibold mb-2">
+                                    매치 신청이 거절되었습니다
+                                </div>
+
+                                <!-- 내가 올린 매치(OPEN 상태) -->
+                                <div th:if="${post.status == 'OPEN'
+                                             and post.createdBy != null
+                                             and post.createdBy.id == currentUser.id}">
+                                    <span class="badge bg-secondary mb-2 d-block">
+                                        내가 등록한 매치
+                                    </span>
+
+                                    <form th:action="@{'/match/' + ${post.id} + '/delete'}"
+                                          method="post"
+                                          onsubmit="return confirm('정말 이 매치를 삭제하시겠습니까?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            매치 삭제
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div><!-- /unavailable -->
+
+                        </div><!-- /text-end -->
+
+                    </div><!-- /card-body -->
                 </div>
             </div>
-        </div> <!-- row -->
-    </div> <!-- /팀 있을 때 -->
+        </div><!-- /row -->
+
+    </div><!-- /팀 있을 때 -->
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

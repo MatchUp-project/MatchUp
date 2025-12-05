@@ -18,6 +18,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+// 🔽 여기 두 개 추가
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -51,6 +55,25 @@ public class MatchRecordService {
         Team myTeam = getCurrentTeamOrNull();
         if (myTeam == null) return List.of();
         return matchPostRepository.findByTeamAndStatusOrderByMatchDatetimeDesc(myTeam, "MATCHED");
+    }
+
+    // ✅ 점수 입력 필요 매치들에 대해 matchId -> 상대 팀 이름 맵 생성
+    @Transactional(readOnly = true)
+    public Map<Long, String> getOpponentNamesForMatches(List<MatchPost> posts) {
+        Team myTeam = getCurrentTeamOrNull();
+        if (myTeam == null) {
+            return Map.of();
+        }
+
+        Map<Long, String> result = new HashMap<>();
+
+        for (MatchPost post : posts) {
+            Team opponent = findOpponentTeamForMatch(post.getId(), myTeam);
+            String name = (opponent != null) ? opponent.getName() : "상대 팀";
+            result.put(post.getId(), name);
+        }
+
+        return result;
     }
 
     // ─────────────────── 점수 저장 ───────────────────
