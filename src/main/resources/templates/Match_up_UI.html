@@ -8,44 +8,31 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Icons (🔔) -->
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css"/>
-
-    <style>
-        .home-title-ellipsis {
-            display: inline-block;
-            max-width: 75%;  /* 🔥 제목이 넓어지는 것 방지 */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: middle;
-        }
-    </style>
-
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/style.css"/>
 </head>
 <body>
 
 <!-- ====================== -->
-<!-- 🔝 상단 유틸바 (여기에 종 추가됨!) -->
+<!-- 🔝 상단 유틸바 + 알림 -->
 <!-- ====================== -->
-<div class="bg-dark text-white small py-1">
+<div class="topbar bg-dark text-white small py-1">
     <div class="container d-flex justify-content-end align-items-center gap-3">
 
         <!-- 🔔 알림 드롭다운 -->
-        <div class="dropdown">
-            <a class="text-white text-decoration-none dropdown-toggle"
-               href="#" id="notiDropdown" data-bs-toggle="dropdown">
-                <i class="bi bi-bell-fill"></i>
-                <!--Unread 표시용 빨간 점 (필요하면 활성화)-->
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                </span>
-        </a>
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none" href="#"
+               id="notiDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell-fill fs-5"></i>
 
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <!-- (선택) 안 읽은 알림 빨간 점 -->
+                <span class="noti-dot"></span>
+            </a>
 
-            <!-- 최근 알림 헤더 -->
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notiDropdown">
                 <li class="dropdown-header fw-semibold">최근 알림</li>
 
                 <!-- 알림 없을 때 -->
@@ -56,18 +43,19 @@
 
                 <!-- 알림 있을 때 -->
                 <li th:each="noti : ${recentNotifications}">
-                    <a class="dropdown-item" th:href="@{/notifications}">
-                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span>
-                        <br>
+                    <a class="dropdown-item small" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
                         <small class="text-muted"
-                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}">
+                            03-01 13:20
+                        </small>
                     </a>
                 </li>
 
                 <li><hr class="dropdown-divider"></li>
 
                 <li>
-                    <a class="dropdown-item text-center fw-semibold"
+                    <a class="dropdown-item text-center fw-semibold small"
                        th:href="@{/notifications}">
                         모든 알림 보기
                     </a>
@@ -75,30 +63,33 @@
             </ul>
         </div>
 
-        <!-- 기존 메뉴 -->
+        <!-- 유틸 메뉴 -->
         <a href="/" class="link-light text-decoration-none">홈</a>
         <a href="/profile" class="link-light text-decoration-none">내 정보</a>
         <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
     </div>
 </div>
 
-<!-- ===== 헤더 + 검색 + 상단 메뉴 ===== -->
-<header class="border-bottom">
+<!-- ====================== -->
+<!-- 헤더 + 상단 메뉴 -->
+<!-- ====================== -->
+<header class="app-header">
     <div class="container py-3">
 
-        <!-- 1줄 : 로고 -->
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
+        <!-- 로고 -->
+        <div class="d-flex align-items-center justify-content-between">
+            <a class="brand m-0 text-decoration-none" href="/">Match-Up</a>
         </div>
 
-        <!-- 2줄 : 상단 메뉴 -->
+        <!-- 상단 메뉴 -->
         <nav class="mt-3">
             <ul class="nav main-nav border-top pt-2">
 
                 <!-- 팀 (드롭다운) -->
                 <li class="nav-item dropdown">
                     <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
-                       href="#" id="teamMenu"
+                       href="#"
+                       id="teamMenu"
                        role="button"
                        data-bs-toggle="dropdown"
                        aria-expanded="false">
@@ -114,14 +105,16 @@
 
                 <!-- 커뮤니티 -->
                 <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board/list?category=FREE">
+                    <a class="nav-link px-4 fw-semibold main-nav-link"
+                       href="/board/list?category=FREE">
                         커뮤니티
                     </a>
                 </li>
 
                 <!-- 매치 신청 -->
                 <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">
+                    <a class="nav-link px-4 fw-semibold main-nav-link"
+                       href="/match/apply">
                         매치 신청
                     </a>
                 </li>
@@ -131,188 +124,170 @@
     </div>
 </header>
 
-<!-- ====================================== -->
-<!-- (이 아래부터 너가 준 기존 화면 그대로) -->
-<!-- ====================================== -->
+<!-- ====================== -->
+<!-- 메인 컨텐츠 -->
+<!-- ====================== -->
+<main class="app-main">
 
-<!-- ===== 앞으로 있을 매치 ===== -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row g-4">
+    <!-- ===== 앞으로 있을 매치 / 신청 가능 매치 ===== -->
+    <section class="section-gap">
+        <div class="container">
+            <div class="row g-4">
 
-            <!-- 앞으로 있을 매치 -->
-            <div class="col-lg-8">
-                <div class="card h-100 match-card">
-                    <div class="card-header d-flex justify-content-between">
-                        <span class="fw-bold">앞으로 있을 매치</span>
-                        <a href="/events" class="btn btn-sm btn-outline-secondary">전체보기</a>
-                    </div>
-
-                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-4">
-                        <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀1">
-                            <div class="fw-bold">풋또라이</div>
+                <!-- 앞으로 있을 매치 -->
+                <div class="col-lg-8">
+                    <div class="app-card next-match-card">
+                        <div class="next-match-header">
+                            <div class="section-title mb-0">
+                                앞으로 있을 매치
+                                <span class="badge bg-primary-subtle text-primary">다가오는 경기</span>
+                            </div>
+                            <a href="/events" class="btn btn-outline-primary-soft btn-sm">전체보기</a>
                         </div>
 
-                        <div class="fw-bold display-6">VS</div>
+                        <div class="next-match-main">
+                            <div class="team-vs">
+                                <div class="team-pill">
+                                    <div class="team-pill-logo">풋또라이</div>
+                                    <div class="team-pill-name">풋또라이</div>
+                                    <div class="team-stat">0전 0승 0무 0패</div>
+                                </div>
 
-                        <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀2">
-                            <div class="fw-bold">문돌이</div>
+                                <div class="vs-text">VS</div>
+
+                                <div class="team-pill">
+                                    <div class="team-pill-logo">문돌이</div>
+                                    <div class="team-pill-name">문돌이</div>
+                                    <div class="team-stat">0전 0승 0무 0패</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column justify-content-between gap-3">
+                                <div class="match-meta">
+                                    <div><strong>장소</strong> : 충북대학교 대운동장</div>
+                                    <div><strong>날짜</strong> : 2025-03-28</div>
+                                    <div><strong>시간</strong> : 09:40</div>
+                                </div>
+                                <div class="next-match-actions">
+                                    <a href="#" class="btn btn-outline-primary-soft btn-sm">매치 상세</a>
+                                    <a href="#" class="btn btn-primary btn-sm btn-primary-pill">라인업 보기</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 신청 가능 매치 -->
+                <div class="col-lg-4">
+                    <div class="app-card p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="section-title mb-0">신청 가능 매치</h2>
+                            <a href="/match/apply" class="btn btn-outline-primary-soft btn-sm">바로가기</a>
                         </div>
 
-                        <div class="text-muted">
-                            <div>장소 : 충북대학교 대운동장</div>
-                            <div>날짜 : 2025-03-28</div>
-                            <div>시간 : 09:40</div>
+                        <ul class="simple-list">
+                            <li>
+                                <a href="/board/201">
+                                    9월 27일 성남수진축구장 - 상대팀 구합니다...
+                                </a>
+                                <span class="meta">25-09-26</span>
+                            </li>
+                            <li>
+                                <a href="/board/202">경기도 고양시 팀 가입 희망합니다</a>
+                                <span class="meta">25-08-23</span>
+                            </li>
+                            <li>
+                                <a href="/board/203">청주에서 주말 팀 구합니다(금요일)</a>
+                                <span class="meta">25-05-21</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 통합 게시판 / 전체 팀 목록 ===== -->
+    <section class="section-gap">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- 통합 게시판 -->
+                <div class="col-lg-6">
+                    <div class="app-card p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="section-title mb-0">통합 게시판</h2>
+                            <a href="/board/list?category=FREE"
+                               class="btn btn-outline-primary-soft btn-sm">바로가기</a>
                         </div>
 
-                        <a href="#" class="btn btn-outline-primary">매치 상세</a>
+                        <ul class="simple-list">
+                            <li>
+                                <a href="/board/201">9월 27일 성남수진축구장</a>
+                                <span class="meta">25-09-26</span>
+                            </li>
+                            <li>
+                                <a href="/board/202">경기 신청</a>
+                                <span class="meta">25-08-23</span>
+                            </li>
+                            <li>
+                                <a href="/board/203">청주에서 주말 팀 구합니다(금요일)</a>
+                                <span class="meta">25-05-21</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
 
-            <!-- 신청 가능 매치 -->
-            <div class="col-lg-4">
-                <div class="card h-100 match-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">신청 가능 매치</span>
-                        <a href="/match/apply" class="btn btn-sm btn-outline-secondary">바로가기</a>
+                <!-- 전체 팀 목록 -->
+                <div class="col-lg-6">
+                    <div class="app-card p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="section-title mb-0">전체 팀 목록</h2>
+                            <a href="/team_list" class="btn btn-outline-primary-soft btn-sm">바로가기</a>
+                        </div>
+
+                        <ul class="simple-list">
+                            <li>
+                                <a href="/team/1">
+                                    Sunday FC 같이 즐겁게 운동하실 분 모집합니다.
+                                </a>
+                                <span class="meta">25-09-02</span>
+                            </li>
+                            <li>
+                                <a href="/team/2">
+                                    대구 신생 풋살 팀원 모집(일요일 오전)
+                                </a>
+                                <span class="meta">25-06-30</span>
+                            </li>
+                            <li>
+                                <a href="/team/3">
+                                    경기 참관 팀원 또는 상대팀 모집합니다.
+                                </a>
+                                <span class="meta">25-06-23</span>
+                            </li>
+                        </ul>
                     </div>
-
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/201" class="text-decoration-none text-primary">
-                                9월 27일 성남수진축구장 - 상대팀 구합니다...
-                            </a>
-                            <span class="text-muted small">25-09-26</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/202" class="text-decoration-none">
-                                경기도 고양시 팀 가입 희망합니다
-                            </a>
-                            <span class="text-muted small">25-08-23</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/203" class="text-decoration-none">
-                                청주에서 주말 팀 구합니다(금요일)
-                            </a>
-                            <span class="text-muted small">25-05-21</span>
-                        </li>
-                    </ul>
                 </div>
-            </div>
 
-        </div>
-    </div>
-</section>
-
-<!-- ===== 통합 게시판 / 팀 목록 ===== -->
-<section class="py-4">
-    <div class="container">
-        <div class="row g-4">
-
-            <!-- 통합 게시판 -->
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">통합 게시판</span>
-                        <a href="/board/list?category=FREE" class="btn btn-sm btn-outline-secondary">바로가기</a>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-
-                        <!-- 🔥 최신 글 3개 반복 출력 -->
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            th:each="post : ${recentFree}">
-                            <a th:href="@{/board/{id}(id=${post.id})}"
-                               th:text="${post.title}"
-                               class="text-decoration-none text-primary home-title-ellipsis"></a>
-
-                            <span class="text-muted small"
-                                  th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}"></span>
-                        </li>
-
-
-
-                        <!-- 게시글이 없을 경우 -->
-                        <li class="list-group-item text-muted text-center py-3"
-                            th:if="${#lists.isEmpty(recentFree)}">
-                            등록된 게시글이 없습니다.
-                        </li>
-
-                    </ul>
-                </div>
-            </div>
-
-
-
-            <!-- 전체 팀 목록 -->
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">전체 팀 목록</span>
-                        <a href="/team_list" class="btn btn-sm btn-outline-secondary">바로가기</a>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/1" class="text-decoration-none">
-                                Sunday FC 같이 즐겁게 운동하실 분 모집합니다.
-                            </a>
-                            <span class="text-muted small">25-09-02</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/2" class="text-decoration-none">
-                                대구 신생 풋살 팀원 모집(일요일 오전)
-                            </a>
-                            <span class="text-muted small">25-06-30</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/3" class="text-decoration-none">
-                                경기 참관 팀원 또는 상대팀 모집합니다.
-                            </a>
-                            <span class="text-muted small">25-06-23</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<!-- ===== 경기장 ===== -->
-<section class="py-5">
-    <div class="container">
-        <h5 class="fw-bold mb-3">⚽ 우리 경기장</h5>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="border p-3">
-                    <h6>청주종합경기장</h6>
-                    <small>충북 청주시 흥덕구</small>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="border p-3">
-                    <h6>용인축구센터</h6>
-                    <small>경기도 용인시</small>
-                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ===== 푸터 ===== -->
-<footer class="bg-dark text-white py-4">
-    <div class="container small d-flex justify-content-between">
-        <div>© 2025 Match-Up</div>
-        <div class="text-white-50">
+
+</main>
+
+<!-- ====================== -->
+<!-- 푸터 -->
+<!-- ====================== -->
+<footer class="app-footer">
+    <div class="container small d-flex flex-wrap justify-content-between gap-2">
+        <span>© 2025 Match-Up</span>
+        <span class="text-muted">
             문의: support@matchup.com
-        </div>
+        </span>
     </div>
 </footer>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
