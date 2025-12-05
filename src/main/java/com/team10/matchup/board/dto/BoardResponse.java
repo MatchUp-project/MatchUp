@@ -95,4 +95,9 @@ public class BoardResponse {
     public String getRegion() { return region; }
     public String getPreferredPosition() { return preferredPosition; }
 
+    private boolean mine;
+    public boolean isMine() { return mine; }
+    public void setMine(boolean mine) { this.mine = mine; }
+
+
 }

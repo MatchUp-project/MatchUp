@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface BoardTeamSearchRepository extends JpaRepository<BoardTeamSearch, Long> {
     Optional<BoardTeamSearch> findByBoardId(Long boardId);
+    void deleteByBoardId(Long boardId);
+
 }

@@ -91,5 +91,13 @@ public class BoardPageController {
         return "redirect:/board/list?category=" + request.getCategory();
     }
 
+    @PostMapping("/{id}/delete")
+    public String deleteBoard(@PathVariable Long id) {
+
+        boardService.delete(id);
+
+        return "redirect:/board/list";
+    }
+
 }
 

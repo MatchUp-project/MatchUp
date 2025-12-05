@@ -177,6 +177,15 @@
         <span class="badge bg-primary" th:text="${board.category}"></span>
     </div>
 
+    <!-- 삭제 버튼 (본인 글일 때만 보임) -->
+    <div class="d-flex justify-content-end mb-3" th:if="${board.mine}">
+        <form th:action="@{/board/{id}/delete(id=${board.id})}"
+              method="post"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+            <button class="btn btn-danger btn-sm">삭제</button>
+        </form>
+    </div>
+
     <!-- PLAYER 상세 -->
     <div th:if="${board.category.name() == 'PLAYER'}"
          class="p-3 mb-4 border rounded bg-light">

@@ -91,6 +91,7 @@ public class BoardService {
         board.increaseViewCount();
 
         User author = userService.getUserById(board.getUserId());
+        User current = userService.getCurrentUser();   // ✅ 로그인한 유저
 
         BoardResponse res;
 
@@ -98,7 +99,7 @@ public class BoardService {
             var recruit = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
 
             res = BoardResponse.ofPlayer(
-                    board,author.getName(),
+                    board, author.getName(),
                     recruit != null ? recruit.getPositionNeeded() : null,
                     recruit != null ? recruit.getAgeRange() : null,
                     recruit != null ? recruit.getSkillLevel() : null
@@ -119,19 +120,17 @@ public class BoardService {
             res = new BoardResponse(board, author.getName());
         }
 
-        // ===============================================================
-        // ⭐ 댓글 트리 불러오기
-        // ===============================================================
+        // ✅ 여기에서 mine 플래그 설정
+        if (current != null && Objects.equals(board.getUserId(), current.getId())) {
+            res.setMine(true);
+        }
+
+        // 댓글 트리
         List<BoardCommentResponse> commentTree = boardCommentService.getCommentTree(id);
-
-        // ⭐ 최상위 목록에서 null 제거
         commentTree.removeIf(Objects::isNull);
-
-        // ⭐ children 목록들도 모두 null 제거
         for (BoardCommentResponse c : commentTree) {
             cleanChildren(c);
         }
-
         res.setComments(commentTree);
 
         return res;
@@ -158,21 +157,21 @@ public class BoardService {
     // ============================================================
     @Transactional(readOnly = true)
     public List<BoardResponse> getListByCategory(BoardCategory category) {
-
-        return boardRepository.findByCategoryOrderByIdDesc(category)
+        return boardRepository.findByCategoryAndDeletedFalseOrderByIdDesc(category)
                 .stream()
                 .map(this::mapBoardToResponse)
                 .toList();
     }
+
 
     @Transactional(readOnly = true)
     public List<BoardResponse> getAllBoards() {
-
-        return boardRepository.findAll()
+        return boardRepository.findByDeletedFalseOrderByIdDesc()
                 .stream()
                 .map(this::mapBoardToResponse)
                 .toList();
     }
+
 
 
     // ============================================================
@@ -181,41 +180,58 @@ public class BoardService {
     public BoardResponse mapBoardToResponse(Board board) {
 
         User user = userService.getUserById(board.getUserId());
+        User current = userService.getCurrentUser();
+
+        BoardResponse res;
 
         if (board.getCategory() == BoardCategory.PLAYER) {
 
             BoardPlayerRecruit extra = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
 
-            if (extra == null)
-                return new BoardResponse(board, user.getName());
-
-            return BoardResponse.ofPlayer(
-                    board,
-                    user.getName(),
-                    extra.getPositionNeeded(),
-                    extra.getAgeRange(),
-                    extra.getSkillLevel()
-            );
+            if (extra == null) {
+                res = new BoardResponse(board, user.getName());
+            } else {
+                res = BoardResponse.ofPlayer(
+                        board,
+                        user.getName(),
+                        extra.getPositionNeeded(),
+                        extra.getAgeRange(),
+                        extra.getSkillLevel()
+                );
+            }
         }
 
-        if (board.getCategory() == BoardCategory.TEAM) {
+        else if (board.getCategory() == BoardCategory.TEAM) {
 
             BoardTeamSearch extra = teamSearchRepository.findByBoardId(board.getId()).orElse(null);
 
-            if (extra == null)
-                return new BoardResponse(board, user.getName());
-
-            return BoardResponse.ofTeam(
-                    board,
-                    user.getName(),
-                    extra.getRegion(),
-                    extra.getPreferredPosition(),
-                    extra.getSkillLevel()
-            );
+            if (extra == null) {
+                res = new BoardResponse(board, user.getName());
+            } else {
+                res = BoardResponse.ofTeam(
+                        board,
+                        user.getName(),
+                        extra.getRegion(),
+                        extra.getPreferredPosition(),
+                        extra.getSkillLevel()
+                );
+            }
         }
 
-        return new BoardResponse(board, user.getName());
+        else {
+            res = new BoardResponse(board, user.getName());
+        }
+
+        // ⭐⭐ 핵심 추가: 본인 글인지 표시 ⭐⭐
+        if (current != null) {
+            res.setMine(Objects.equals(board.getUserId(), current.getId()));
+        }
+
+        return res;
     }
+
+
+
 
     @Transactional(readOnly = true)
     public List<BoardResponse> getTodayPopular() {
@@ -274,12 +290,37 @@ public class BoardService {
     @Transactional(readOnly = true)
     public List<BoardResponse> getRecentFreeBoards(int limit) {
         return boardRepository
-                .findTopByCategoryOrderByIdDesc(BoardCategory.FREE.name(), limit)
+                .findTopRecentByCategory(BoardCategory.FREE.name(), limit)
                 .stream()
                 .map(this::mapBoardToResponse)
                 .toList();
     }
 
+    @Transactional
+    public void delete(Long id) {
+
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. id=" + id));
+
+        User current = userService.getCurrentUser();
+
+        if (!Objects.equals(board.getUserId(), current.getId())) {
+            throw new IllegalStateException("본인 게시글만 삭제할 수 있습니다.");
+        }
+
+        // 댓글 삭제 (FK CASCADE가 있으면 생략 가능)
+        boardCommentRepository.deleteByBoardId(id);
+
+        // 좋아요 삭제 (CASCADE 없으면 필요)
+        boardLikeRepository.deleteByBoardId(id);
+
+        // PLAYER/TEAM 추가정보 삭제
+        playerRecruitRepository.deleteByBoardId(id);
+        teamSearchRepository.deleteByBoardId(id);
+
+        // 마지막으로 게시글 삭제
+        boardRepository.delete(board);
+    }
 
 
 

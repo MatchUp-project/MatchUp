@@ -40,4 +40,6 @@ public interface BoardLikeRepository extends JpaRepository<BoardLike, Long> {
     """)
     List<Object[]> findMonthlyPopular(LocalDate startDate, LocalDate endDate);
 
+    void deleteByBoardId(Long boardId);
+
 }

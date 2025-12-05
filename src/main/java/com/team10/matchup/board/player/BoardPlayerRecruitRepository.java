@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface BoardPlayerRecruitRepository extends JpaRepository<BoardPlayerRecruit, Long> {
     Optional<BoardPlayerRecruit> findByBoardId(Long boardId);
+    void deleteByBoardId(Long boardId);
+
 }
