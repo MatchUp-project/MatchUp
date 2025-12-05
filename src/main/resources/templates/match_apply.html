@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>매치 신청 | Match-Up</title>
 
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles.css}">
     <style>
@@ -28,14 +29,16 @@
     <div th:unless="${noTeam}">
         <!-- 내 팀 정보 -->
         <div class="mb-4">
-            <h5>내 팀: <span th:text="${team != null ? team.name : '팀 이름'}">팀 이름</span></h5>
+            <h5>내 팀:
+                <span th:text="${team != null ? team.name : '팀 이름'}">팀 이름</span>
+            </h5>
         </div>
 
         <!-- 매치 등록 폼 -->
         <div class="card mb-4">
             <div class="card-header">새로운 매치 등록</div>
             <div class="card-body">
-                <form th:action="@{/match/create}" method="post">
+                <form th:action="@{/match/create}" method="post" th:object="${matchCreateForm}">
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">팀 이름</label>
@@ -45,22 +48,22 @@
                         <div class="col-md-3">
                             <label class="form-label">인원 수</label>
                             <input type="number" class="form-control"
-                                   name="playerCount" min="1" required>
+                                   th:field="*{playerCount}" min="1" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">경기장 위치</label>
                             <input type="text" class="form-control"
-                                   name="location" required>
+                                   th:field="*{location}" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">날짜</label>
                             <input type="date" class="form-control"
-                                   name="date" required>
+                                   th:field="*{date}" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">시간</label>
                             <input type="time" class="form-control"
-                                   name="time" required>
+                                   th:field="*{time}" required>
                         </div>
                     </div>
                     <div class="mt-3 text-end">
@@ -82,6 +85,7 @@
                 <div class="card match-card"
                      th:classappend="${post.status == 'MATCHED'} ? ' matched' : ''">
                     <div class="card-body d-flex justify-content-between align-items-center">
+
                         <!-- 왼쪽: 매치 정보 -->
                         <div>
                             <div class="mb-1">
@@ -91,7 +95,8 @@
                                 </span>
                             </div>
                             <div class="small text-muted">
-                                장소: <span th:text="${post.location}">장소</span><br>
+                                장소:
+                                <span th:text="${post.location}">장소</span><br>
                                 일시:
                                 <span th:text="${#temporals.format(post.matchDatetime, 'yyyy-MM-dd HH:mm')}">
                                     2025-03-28 09:40
@@ -115,17 +120,17 @@
 
                             <!-- 내가 신청한 매치 -->
                             <div th:if="${post.status == 'OPEN'
-                 and post.createdBy != null
-                 and post.createdBy.id != currentUser.id
-                 and #lists.contains(requestedMatchIds, post.id)}"
+                                         and post.createdBy != null
+                                         and post.createdBy.id != currentUser.id
+                                         and #lists.contains(requestedMatchIds, post.id)}"
                                  class="text-primary fw-semibold">
                                 매치 신청 완료됐습니다
                             </div>
 
                             <!-- 신청 가능 (아직 신청 안 했고, 내가 만든 글도 아님) -->
                             <div th:if="${post.status == 'OPEN'
-                 and (post.createdBy == null or post.createdBy.id != currentUser.id)
-                 and !#lists.contains(requestedMatchIds, post.id)}">
+                                         and (post.createdBy == null or post.createdBy.id != currentUser.id)
+                                         and !#lists.contains(requestedMatchIds, post.id)}">
                                 <form th:action="@{'/match/' + ${post.id} + '/request'}"
                                       method="post">
                                     <button type="submit" class="btn btn-outline-primary">
@@ -133,6 +138,9 @@
                                     </button>
                                 </form>
                             </div>
+
+                            <!-- ⚠ 여기에는 더 이상 '경기 기록 작성' 버튼 없음 -->
+
                         </div>
 
                     </div> <!-- card-body -->

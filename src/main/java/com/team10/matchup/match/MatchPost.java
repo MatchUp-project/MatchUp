@@ -46,6 +46,11 @@ public class MatchPost {
     @Column(nullable = false, length = 20)
     private String status = "OPEN";
 
+    // ✅ 매칭이 확정된 상대 팀 (점수 입력할 때 상대팀 이름으로 사용)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matched_team_id")
+    private Team matchedTeam;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
