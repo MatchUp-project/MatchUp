@@ -36,6 +36,19 @@
             align-self: flex-start;
         }
 
+       .btn-write {
+            height: 38px;                  /* select 높이 동일 */
+            padding: 0 16px;               /* 가로 여백 */
+            font-size: 0.9rem;
+            display: inline-flex;          /* 버튼을 flex로 */
+            align-items: center;           /* 세로 가운데 정렬 */
+            justify-content: center;       /* 가로 가운데 정렬 */
+            white-space: nowrap;           /* 줄바꿈 금지 */
+            word-break: keep-all;          /* 글자 단위 줄바꿈 금지 */
+        }
+
+
+
 
     </style>
 </head>
@@ -122,11 +135,42 @@
             th:text="${categoryName != null ? categoryName : '통합 게시판'}">
         </h4>
 
-        <a th:href="@{/board/write(category=${category})}"
-           class="btn btn-primary btn-sm">
-            글쓰기
-        </a>
+        <div class="d-flex gap-2">
+
+            <!-- 👍 category 값을 data 속성으로 넣는다 -->
+            <select class="form-select form-select-sm"
+                    th:data-category="${category}"
+                    onchange="changeSort(this)">
+                <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
+                <option value="today"  th:selected="${sort == 'today'}">오늘 인기글</option>
+                <option value="week"   th:selected="${sort == 'week'}">주간 인기글</option>
+                <option value="month"  th:selected="${sort == 'month'}">월간 인기글</option>
+            </select>
+
+            <a th:href="@{/board/write(category=${category})}"
+               class="btn btn-primary btn-write">글쓰기</a>
+        </div>
+
     </div>
+
+    <!-- 👍 안전한 JS 함수 -->
+    <script>
+        function changeSort(selectEl) {
+            const category = selectEl.dataset.category || '';
+            const sort = selectEl.value;
+
+            // category가 비면 전체 목록으로 이동
+            if (!category) {
+                location.href = `/board/list?sort=${sort}`;
+            } else {
+                location.href = `/board/list?category=${category}&sort=${sort}`;
+            }
+        }
+    </script>
+
+
+
+
 
     <!-- ===== 좌측 카테고리 + 우측 테이블 ===== -->
     <div class="row g-4">
