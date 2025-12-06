@@ -9,7 +9,7 @@
 
 <div class="container py-5">
 
-    <!-- 헤더는 나중에 fragment로 바꾸면 됨 -->
+    <!-- 헤더 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold">팀 멤버 관리</h3>
         <a href="/" class="btn btn-outline-secondary btn-sm">메인으로</a>
@@ -46,46 +46,62 @@
                 <span>팀 멤버</span>
                 <span th:if="${isLeader}" class="text-muted small">팀장만 멤버를 관리할 수 있습니다.</span>
             </div>
+
             <div class="card-body p-0">
                 <table class="table mb-0">
                     <thead class="table-light">
                     <tr>
                         <th>이름</th>
                         <th>역할</th>
-                        <th>가입일</th>
+                        <th>포지션</th>
                         <th th:if="${isLeader}">관리</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     <tr th:each="member : ${members}">
-                        <!-- User 엔티티 필드명에 맞게 수정 (username / nickname / name 등) -->
-                        <td th:text="${member.user.username}">홍길동</td>
-                        <td th:text="${member.role}">PLAYER</td>
-                        <td th:text="${#temporals.format(member.joinedAt, 'yyyy-MM-dd HH:mm')}">
-                            2025-11-29 00:00
+                        <!-- 이름 -->
+                        <td th:text="${member.user.name}">홍길동</td>
+
+                        <!-- 역할: LEADER → 팀장 / 그 외 → 멤버 -->
+                        <td>
+                            <span th:if="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
+                                팀장
+                            </span>
+                            <span th:unless="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
+                                멤버
+                            </span>
                         </td>
+
+                        <!-- 포지션 -->
+                        <td th:text="${member.user.position}">골키퍼</td>
+
+                        <!-- 팀장일 때 삭제 버튼 -->
                         <td th:if="${isLeader}">
-                            <form th:action="@{'/team/members/' + ${member.id} + '/delete'}" method="post"
+                            <form th:action="@{'/team/members/' + ${member.id} + '/delete'}"
+                                  method="post"
                                   onsubmit="return confirm('정말 삭제하시겠습니까?');">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
                             </form>
                         </td>
                     </tr>
+
+                    <!-- 멤버 없음 -->
                     <tr th:if="${#lists.isEmpty(members)}">
-                        <td colspan="4" class="text-center text-muted py-3">
+                        <td th:colspan="${isLeader} ? 4 : 3"
+                            class="text-center text-muted py-3">
                             아직 팀 멤버가 없습니다.
                         </td>
                     </tr>
+
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 팀장 전용 멤버 추가 폼 -->
+        <!-- 멤버 추가 -->
         <div th:if="${isLeader}" class="card mt-4">
-            <div class="card-header">
-                멤버 추가
-            </div>
+            <div class="card-header">멤버 추가</div>
             <div class="card-body">
                 <form th:action="@{/team/members/add}" method="post" class="row g-2">
                     <div class="col-auto">

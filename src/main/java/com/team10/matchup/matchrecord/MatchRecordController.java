@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+// 🔽 추가
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,10 +34,15 @@ public class MatchRecordController {
         List<MatchRecord> records = matchRecordService.getRecordsForCurrentTeam();
         List<MatchPost> matchedMatches = matchRecordService.getMatchedPostsForCurrentTeam();
 
+        // ✅ matchId -> 상대 팀 이름
+        Map<Long, String> opponentNames =
+                matchRecordService.getOpponentNamesForMatches(matchedMatches);
+
         model.addAttribute("noTeam", false);
         model.addAttribute("team", team);
         model.addAttribute("records", records);
         model.addAttribute("matchedMatches", matchedMatches);
+        model.addAttribute("opponentNames", opponentNames);  // 👈 여기 추가
 
         return "match_record";   // 목록용 템플릿
     }

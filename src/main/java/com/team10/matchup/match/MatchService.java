@@ -1,8 +1,6 @@
 package com.team10.matchup.match;
 
 import com.team10.matchup.common.CurrentUserService;
-import com.team10.matchup.event.EventService;
-import com.team10.matchup.notification.NotificationService;
 import com.team10.matchup.team.Team;
 import com.team10.matchup.user.User;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,129 +22,140 @@ public class MatchService {
     private final MatchPostRepository matchPostRepository;
     private final MatchRequestRepository matchRequestRepository;
     private final CurrentUserService currentUserService;
-    private final NotificationService notificationService;
-    // ✅ 일정 자동 생성용
-    private final EventService eventService;
 
-    // 매치 글 등록
-    public MatchPost createMatchPost(int playerCount,
-                                     String location,
-                                     LocalDate date,
-                                     LocalTime time) {
+    /* ===================== 조회 ===================== */
 
-        User currentUser = currentUserService.getCurrentUser();
-        Team team = currentUserService.getCurrentUserTeamOrNull();
-
-        if (team == null) {
-            throw new IllegalStateException("사용자가 속한 팀이 없습니다.");
-        }
-
-        MatchPost post = new MatchPost();
-        post.setTeam(team);
-        post.setCreatedBy(currentUser);
-        post.setPlayerCount(playerCount);
-        post.setLocation(location);
-        post.setMatchDatetime(LocalDateTime.of(date, time));
-        post.setStatus("OPEN");
-
-        return matchPostRepository.save(post);
-    }
-
-    // 전체 매치 목록
+    // 전체 매치 가져오기
     @Transactional(readOnly = true)
     public List<MatchPost> getAllMatchPosts() {
         return matchPostRepository.findAllByOrderByCreatedAtDesc();
     }
 
-    // 현재 사용자가 이미 신청한 매치 id 목록
+    // (예전) 내가 신청한 매치 ID 목록 – 안 써도 되지만 놔둬도 됨
     @Transactional(readOnly = true)
     public List<Long> getRequestedMatchIdsForCurrentUser() {
-        User currentUser = currentUserService.getCurrentUser();
-        return matchRequestRepository.findByRequesterUser_Id(currentUser.getId())
+        User user = currentUserService.getCurrentUser();
+
+        return matchRequestRepository.findByRequesterUser_Id(user.getId())
                 .stream()
                 .map(req -> req.getMatchPost().getId())
                 .collect(Collectors.toList());
     }
 
-    // 매치 신청
-    public MatchRequest requestMatch(Long matchPostId) {
-        User currentUser = currentUserService.getCurrentUser();
-        Team requesterTeam = currentUserService.getCurrentUserTeamOrNull();
+    // ✅ 새로 추가: 내가 신청한 매치의 [matchPostId -> status] 맵
+    @Transactional(readOnly = true)
+    public Map<Long, String> getMyRequestStatusMap() {
+        User user = currentUserService.getCurrentUser();
 
-        if (requesterTeam == null) {
-            throw new IllegalStateException("사용자가 속한 팀이 없습니다.");
-        }
-
-        MatchPost post = matchPostRepository.findById(matchPostId)
-                .orElseThrow(() -> new IllegalArgumentException("매치 글을 찾을 수 없습니다."));
-
-        // 자기 팀 매치에는 신청 못하게
-        if (post.getTeam().getId().equals(requesterTeam.getId())) {
-            throw new IllegalStateException("자신의 팀이 올린 매치에는 신청할 수 없습니다.");
-        }
-
-        // 이미 신청했는지 체크
-        matchRequestRepository.findByMatchPost_IdAndRequesterUser_Id(matchPostId, currentUser.getId())
-                .ifPresent(req -> {
-                    throw new IllegalStateException("이미 이 매치에 신청했습니다.");
-                });
-
-        // 신청 생성
-        MatchRequest request = new MatchRequest();
-        request.setMatchPost(post);
-        request.setRequesterTeam(requesterTeam);
-        request.setRequesterUser(currentUser);
-        request = matchRequestRepository.save(request);
-
-        // 🔔 글 작성자에게 알림 보내기
-        User receiver = post.getCreatedBy();
-        notificationService.send(
-                receiver,
-                "MATCH_REQUEST",
-                requesterTeam.getName() + " 팀에서 매치 신청이 왔습니다.",
-                request
-        );
-
-        return request;
+        return matchRequestRepository.findByRequesterUser_Id(user.getId())
+                .stream()
+                .collect(Collectors.toMap(
+                        req -> req.getMatchPost().getId(),
+                        MatchRequest::getStatus,
+                        (oldVal, newVal) -> newVal   // 혹시 중복 있으면 마지막 값 사용
+                ));
     }
 
-    // ✅ 수락 + 일정 자동 생성
-    public void acceptRequest(Long requestId) {
-        MatchRequest request = matchRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
+    /* ===================== 매치 생성 ===================== */
 
-        request.accept();
-        MatchPost post = request.getMatchPost();
-        post.setStatus("MATCHED");
+    public void createMatchPost(int playerCount, String location,
+                                LocalDate date, LocalTime time) {
 
-        // 🔔 신청자에게 알림
-        notificationService.send(
-                request.getRequesterUser(),
-                "MATCH_ACCEPTED",
-                "매치 신청이 수락되었습니다.",
-                request
-        );
+        User user = currentUserService.getCurrentUser();
+        Team team = currentUserService.getCurrentUserTeamOrNull();
 
-        // ⭐ 두 팀 일정 생성 (EventService 안에서 home/away 둘 다 저장)
-        eventService.createMatchEvents(post, request.getRequesterTeam());
+        MatchPost post = new MatchPost();
+        post.setTeam(team);
+        post.setCreatedBy(user);
+        post.setPlayerCount(playerCount);
+        post.setLocation(location);
+        post.setMatchDatetime(LocalDateTime.of(date, time));
+        post.setStatus("OPEN");
+
+        matchPostRepository.save(post);
     }
 
-    // 거절
-    public void rejectRequest(Long requestId) {
+    /* ===================== 매치 신청 ===================== */
 
-        System.out.println("[MatchService] acceptRequest 호출, requestId = " + requestId);
+    public void requestMatch(Long matchId) {
 
-        MatchRequest request = matchRequestRepository.findById(requestId)
+        User requester = currentUserService.getCurrentUser();
+
+        MatchPost post = matchPostRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("매치를 찾을 수 없습니다."));
+
+        boolean exists = matchRequestRepository
+                .findByMatchPost_IdAndRequesterUser_Id(matchId, requester.getId())
+                .isPresent();
+
+        if (exists) {
+            return;
+        }
+
+        MatchRequest req = new MatchRequest();
+        req.setMatchPost(post);
+        req.setRequesterUser(requester);
+        req.setStatus("PENDING");
+
+        matchRequestRepository.save(req);
+    }
+
+    /* ===================== 매치 삭제 ===================== */
+
+    public void deleteMatch(Long matchId) {
+
+        MatchPost post = matchPostRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("매치를 찾을 수 없습니다."));
+
+        User current = currentUserService.getCurrentUser();
+
+        if (!post.getCreatedBy().getId().equals(current.getId())) {
+            throw new IllegalStateException("내가 등록한 매치만 삭제할 수 있습니다.");
+        }
+
+        if ("MATCHED".equals(post.getStatus())) {
+            throw new IllegalStateException("이미 매치 완료된 매치는 삭제할 수 없습니다.");
+        }
+
+        matchPostRepository.delete(post);
+    }
+
+    /* ===================== 신청 수락 / 거절 ===================== */
+
+    public void acceptRequest(Long matchRequestId) {
+        MatchRequest req = matchRequestRepository.findById(matchRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
+        acceptRequest(req);
+    }
 
-        request.reject();
+    public void acceptRequest(MatchRequest req) {
 
-        // 🔔 신청자에게 알림
-        notificationService.send(
-                request.getRequesterUser(),
-                "MATCH_REJECTED",
-                "매치 신청이 거절되었습니다.",
-                request
-        );
+        if (!"PENDING".equals(req.getStatus())) {
+            return;
+        }
+
+        req.setStatus("ACCEPTED");
+        req.setRespondedAt(LocalDateTime.now());
+
+        MatchPost post = req.getMatchPost();
+        if (post != null) {
+            post.setStatus("MATCHED");
+        }
+    }
+
+    public void rejectRequest(Long matchRequestId) {
+        MatchRequest req = matchRequestRepository.findById(matchRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("매치 신청을 찾을 수 없습니다."));
+        rejectRequest(req);
+    }
+
+    public void rejectRequest(MatchRequest req) {
+
+        if (!"PENDING".equals(req.getStatus())) {
+            return;
+        }
+
+        req.setStatus("REJECTED");
+        req.setRespondedAt(LocalDateTime.now());
     }
 }

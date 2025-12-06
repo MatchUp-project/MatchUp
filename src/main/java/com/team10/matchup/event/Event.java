@@ -30,8 +30,6 @@ public class Event {
     @Column(name = "start_at")
     private LocalDateTime startAt;
 
-    @Column(name = "end_at")
-    private LocalDateTime endAt;
 
     @Column(name = "place", length = 100)
     private String place;
