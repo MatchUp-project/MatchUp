@@ -1,6 +1,7 @@
 package com.team10.matchup.match;
 
 import com.team10.matchup.common.CurrentUserService;
+import com.team10.matchup.notification.NotificationRepository;
 import com.team10.matchup.notification.NotificationService;
 import com.team10.matchup.notification.NotificationType;
 import com.team10.matchup.team.Team;
@@ -27,6 +28,8 @@ public class MatchService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final CurrentUserService currentUserService;
+    private final NotificationRepository notificationRepository;
+
 
     /* ===================== 조회 ===================== */
 
@@ -135,6 +138,7 @@ public class MatchService {
 
     /* ===================== 매치 삭제 ===================== */
 
+    @Transactional
     public void deleteMatch(Long matchId) {
 
         MatchPost post = matchPostRepository.findById(matchId)
@@ -150,10 +154,25 @@ public class MatchService {
             throw new IllegalStateException("이미 매치 완료된 매치는 삭제할 수 없습니다.");
         }
 
+        // 🔥 1) 이 매치의 모든 MatchRequest 조회
+        List<MatchRequest> requests = matchRequestRepository.findByMatchPostId(matchId);
+
+        for (MatchRequest req : requests) {
+            // 🔥 1-1) 이 요청과 연결된 Notification 먼저 삭제
+            notificationRepository.deleteAll(
+                    notificationRepository.findByRelatedMatchRequest(req)
+            );
+        }
+
+        // 🔥 2) match_request 전부 삭제
+        matchRequestRepository.deleteAll(requests);
+
+        // 🔥 3) 마지막으로 매치 삭제
         matchPostRepository.delete(post);
-
-
     }
+
+
+
 
     /* ===================== 신청 수락 / 거절 ===================== */
 
