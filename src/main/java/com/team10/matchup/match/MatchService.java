@@ -1,8 +1,12 @@
 package com.team10.matchup.match;
 
 import com.team10.matchup.common.CurrentUserService;
+import com.team10.matchup.notification.NotificationRepository;
+import com.team10.matchup.notification.NotificationService;
+import com.team10.matchup.notification.NotificationType;
 import com.team10.matchup.team.Team;
 import com.team10.matchup.user.User;
+import com.team10.matchup.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +25,11 @@ public class MatchService {
 
     private final MatchPostRepository matchPostRepository;
     private final MatchRequestRepository matchRequestRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
     private final CurrentUserService currentUserService;
+    private final NotificationRepository notificationRepository;
+
 
     /* ===================== 조회 ===================== */
 
@@ -81,6 +89,12 @@ public class MatchService {
 
         User requester = currentUserService.getCurrentUser();
 
+        // 🔥 신청자의 팀 가져오기 (null이면 신청 불가능)
+        Team requesterTeam = currentUserService.getCurrentUserTeamOrNull();
+        if (requesterTeam == null) {
+            throw new IllegalStateException("팀에 소속된 사용자만 매치를 신청할 수 있습니다.");
+        }
+
         MatchPost post = matchPostRepository.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("매치를 찾을 수 없습니다."));
 
@@ -89,19 +103,42 @@ public class MatchService {
                 .isPresent();
 
         if (exists) {
-            return;
+            return; // 이미 신청함 → 아무 동작 안 하고 끝
         }
 
+        // 🔥 신규 신청 생성 (너의 기존 코드 유지)
         MatchRequest req = new MatchRequest();
         req.setMatchPost(post);
         req.setRequesterUser(requester);
+        req.setRequesterTeam(requesterTeam);
         req.setStatus("PENDING");
 
-        matchRequestRepository.save(req);
+        matchRequestRepository.save(req); // 저장
+
+        // ==========================================================
+        // ⭐ 추가된 부분: 매치 생성자의 "팀장"에게 알림 보내기
+        // ==========================================================
+
+        // (1) 매치 글 작성자의 팀장 ID 가져오기
+        Long leaderId = post.getTeam().getLeaderId();
+
+        // (2) 팀장 유저 찾기
+        User leader = userRepository.findById(leaderId)
+                .orElseThrow(() -> new IllegalArgumentException("팀장을 찾을 수 없습니다."));
+
+        // (3) 알림 발송
+        notificationService.send(
+                leader,
+                NotificationType.MATCH_REQUEST.name(),
+                requester.getName() + " 님이 매치를 신청했습니다.",
+                req
+        );
     }
+
 
     /* ===================== 매치 삭제 ===================== */
 
+    @Transactional
     public void deleteMatch(Long matchId) {
 
         MatchPost post = matchPostRepository.findById(matchId)
@@ -117,8 +154,25 @@ public class MatchService {
             throw new IllegalStateException("이미 매치 완료된 매치는 삭제할 수 없습니다.");
         }
 
+        // 🔥 1) 이 매치의 모든 MatchRequest 조회
+        List<MatchRequest> requests = matchRequestRepository.findByMatchPostId(matchId);
+
+        for (MatchRequest req : requests) {
+            // 🔥 1-1) 이 요청과 연결된 Notification 먼저 삭제
+            notificationRepository.deleteAll(
+                    notificationRepository.findByRelatedMatchRequest(req)
+            );
+        }
+
+        // 🔥 2) match_request 전부 삭제
+        matchRequestRepository.deleteAll(requests);
+
+        // 🔥 3) 마지막으로 매치 삭제
         matchPostRepository.delete(post);
     }
+
+
+
 
     /* ===================== 신청 수락 / 거절 ===================== */
 

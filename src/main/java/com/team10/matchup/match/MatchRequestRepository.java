@@ -14,4 +14,7 @@ public interface MatchRequestRepository extends JpaRepository<MatchRequest, Long
 
     // ✅ status 를 String 으로 받도록 수정 (Enum 아님!)
     List<MatchRequest> findByMatchPost_IdAndStatus(Long matchId, String status);
+
+    List<MatchRequest> findByMatchPostId(Long matchPostId);
+
 }
