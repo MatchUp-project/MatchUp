@@ -158,4 +158,21 @@ public class MatchService {
         req.setStatus("REJECTED");
         req.setRespondedAt(LocalDateTime.now());
     }
+
+    @Transactional(readOnly = true)
+    public MatchPost getNearestMatchedMatch() {
+        return matchPostRepository
+                .findFirstByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getUpcomingMatchedMatches() {
+        return matchPostRepository
+                .findAllByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                );
+    }
+
 }

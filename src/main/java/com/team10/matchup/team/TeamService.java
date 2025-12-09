@@ -85,4 +85,12 @@ public class TeamService {
                 .toList();
     }
 
+    public void updateIntro(Long id, String intro) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+
+        team.setIntro(intro);
+    }
+
+
 }
