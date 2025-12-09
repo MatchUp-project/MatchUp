@@ -3,115 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <title>팀 멤버 관리</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 프로젝트 공통 CSS -->
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+
+    <style>
+        /* ===== 잔디 배경 + 기본 레이아웃 (팀 목록 페이지와 동일) ===== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+            color: #111827;
+            display: flex;
+            justify-content: center;
+            padding: 48px 16px 64px;
+            background:
+                linear-gradient(180deg, rgba(15,23,42,0.25), rgba(15,23,42,0.4)),
+                url("/images/pitch-bg.png") center/cover no-repeat fixed;
+        }
+
+        .team-page {
+            width: 100%;
+            max-width: 1120px;
+        }
+
+        /* ===== 상단 타이틀 ===== */
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            color: #f9fafb;
+            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.9);
+        }
+        .team-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .team-title {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-title-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #9ca3af);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.65);
+            font-size: 15px;
+        }
+        .team-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .btn-create {
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #f9fafb;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+        }
+        .btn-create:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        /* ===== 표 공통 스타일 (팀 목록과 맞춤) ===== */
+        .team-table-container {
+            width: 100%;
+        }
+
+        table.team-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;           /* 행 간격 없이 딱 붙게 */
+            font-size: 14px;
+            color: #0f172a;
+            table-layout: fixed;          /* 열 폭 고정 */
+        }
+
+        .team-table colgroup col {
+            width: 25%;                  /* 이름 / 역할 / 포지션 / 관리 동일 폭 */
+        }
+
+        .team-table thead {
+            background: rgba(243, 244, 246, 0.85);
+        }
+        .team-table thead th {
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.9);
+            text-align: center;
+        }
+
+        .team-table tbody tr {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4);
+        }
+        .team-table tbody tr:hover {
+            background: rgba(251, 191, 36, 0.55);
+        }
+        .team-table tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(209, 213, 219, 0.8);
+            text-align: center;           /* 기본은 가운데 정렬 */
+        }
+
+        .team-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #9ca3af);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+            font-size: 15px;
+            margin-right: 10px;
+        }
+
+        .team-name {
+            font-weight: 600;
+        }
+
+        /* 이름 열만 왼쪽 정렬 (아이콘 + 이름) */
+        .team-table td.col-name {
+            text-align: left;
+        }
+
+        .btn-main {
+            border-radius: 999px;
+            font-size: 12px;
+            padding: 6px 16px;
+            margin-top: 18px;
+            border-color: #e5e7eb;
+            color: #f9fafb;
+            background: rgba(15, 23, 42, 0.7);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        .btn-main:hover {
+            background: #111827;
+        }
+
+        .btn-delete {
+            border-radius: 999px;
+            font-size: 12px;
+            padding: 6px 14px;
+        }
+
+        .member-info-bar {
+            background: rgba(255, 255, 255, 0.40);
+            backdrop-filter: blur(8px);
+            padding: 14px 18px;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .member-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 14px;
+        }
+        .member-team-name {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .member-team-region {
+            font-size: 13px;
+            color: #4b5563;
+        }
+        .leader-badge {
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 12px;
+            border: none;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #f9fafb;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        .member-alert {
+            font-size: 13px;
+            padding: 10px 18px;
+            background: rgba(59, 130, 246, 0.92);
+            color: #eff6ff;
+            text-shadow: 0 1px 2px rgba(15,23,42,0.8);
+        }
+        .member-alert-error {
+            background: rgba(248, 113, 113, 0.95);
+            color: #fef2f2;
+        }
+
+        .member-add-row {
+            background: rgba(255,255,255,0.38);
+            backdrop-filter: blur(6px);
+            padding: 14px 18px 18px;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 20px rgba(15,23,42,0.6);
+            border-top: 1px solid rgba(209, 213, 219, 0.9);
+        }
+        .member-add-label {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+        .member-add-input {
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+        .member-add-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+        }
+
+        .btn-add {
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 13px;
+            border: none;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #f9fafb;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+        }
+        .btn-add:hover {
+            filter: brightness(1.05);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-5">
+<div class="team-page">
 
-    <!-- 헤더 -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold">팀 멤버 관리</h3>
-        <a href="/" class="btn btn-outline-secondary btn-sm">메인으로</a>
+    <!-- 상단 헤더 -->
+    <div class="team-header">
+        <div class="team-header-left">
+            <div class="team-title">
+                <span class="team-title-icon">⚽</span>
+                <span>팀 멤버 관리</span>
+            </div>
+            <div class="team-subtitle">팀 구성원을 관리하고 역할을 확인하세요.</div>
+        </div>
+
+        <a th:href="@{/}" class="btn btn-create">메인으로</a>
     </div>
 
     <!-- 팀이 없는 경우 -->
-    <div th:if="${hasTeam} == false">
-        <div class="alert alert-warning">
-            사용자가 속한 팀이 없습니다.
+    <div th:if="${hasTeam} == false" class="team-table-container">
+        <div class="member-alert member-alert-error" style="border-radius:12px;">
+            사용자가 속한 팀이 없습니다. 먼저 팀을 생성하거나 가입해 주세요.
         </div>
     </div>
 
     <!-- 팀이 있는 경우 -->
-    <div th:if="${hasTeam} == true">
+    <div th:if="${hasTeam} == true" class="team-table-container">
 
-        <!-- 팀 정보 -->
-        <div class="card mb-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="mb-0" th:text="${team.name}">팀 이름</h4>
-                    <small class="text-muted" th:text="${team.region}">지역</small>
+        <!-- 팀 정보 바 -->
+        <div class="member-info-bar">
+            <div class="member-info-left">
+                <div class="member-team-name" th:text="${team.name}">팀 이름</div>
+                <div class="member-team-region">
+                    지역 :
+                    <span th:text="${team.region}">청주</span>
                 </div>
-                <span class="badge bg-primary" th:if="${isLeader}">팀장</span>
             </div>
+            <button type="button" class="leader-badge" th:if="${isLeader}">
+                팀장
+            </button>
         </div>
 
         <!-- 메시지 -->
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        <div th:if="${msg}" class="alert alert-success" th:text="${msg}"></div>
+        <div th:if="${msg}" class="member-alert" th:text="${msg}"></div>
+        <div th:if="${error}" class="member-alert member-alert-error" th:text="${error}"></div>
 
-        <!-- 멤버 목록 -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>팀 멤버</span>
-                <span th:if="${isLeader}" class="text-muted small">팀장만 멤버를 관리할 수 있습니다.</span>
-            </div>
+        <!-- ===== 멤버 목록 표 ===== -->
+        <table class="team-table">
+            <colgroup>
+                <col />  <!-- 이름 -->
+                <col />  <!-- 역할 -->
+                <col />  <!-- 포지션 -->
+                <col th:if="${isLeader}" /> <!-- 관리 -->
+            </colgroup>
 
-            <div class="card-body p-0">
-                <table class="table mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>이름</th>
-                        <th>역할</th>
-                        <th>포지션</th>
-                        <th th:if="${isLeader}">관리</th>
-                    </tr>
-                    </thead>
+            <thead>
+            <tr>
+                <th>이름</th>
+                <th>역할</th>
+                <th>포지션</th>
+                <th th:if="${isLeader}">관리</th>
+            </tr>
+            </thead>
 
-                    <tbody>
-                    <tr th:each="member : ${members}">
-                        <!-- 이름 -->
-                        <td th:text="${member.user.name}">홍길동</td>
-
-                        <!-- 역할: LEADER → 팀장 / 그 외 → 멤버 -->
-                        <td>
-                            <span th:if="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
-                                팀장
-                            </span>
-                            <span th:unless="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
-                                멤버
-                            </span>
-                        </td>
-
-                        <!-- 포지션 -->
-                        <td th:text="${member.user.position}">골키퍼</td>
-
-                        <!-- 팀장일 때 삭제 버튼 -->
-                        <td th:if="${isLeader}">
-                            <form th:action="@{'/team/members/' + ${member.id} + '/delete'}"
-                                  method="post"
-                                  onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-                            </form>
-                        </td>
-                    </tr>
-
-                    <!-- 멤버 없음 -->
-                    <tr th:if="${#lists.isEmpty(members)}">
-                        <td th:colspan="${isLeader} ? 4 : 3"
-                            class="text-center text-muted py-3">
-                            아직 팀 멤버가 없습니다.
-                        </td>
-                    </tr>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 멤버 추가 -->
-        <div th:if="${isLeader}" class="card mt-4">
-            <div class="card-header">멤버 추가</div>
-            <div class="card-body">
-                <form th:action="@{/team/members/add}" method="post" class="row g-2">
-                    <div class="col-auto">
-                        <input type="text" name="username" class="form-control" placeholder="추가할 회원 아이디">
+            <tbody>
+            <tr th:each="member : ${members}">
+                <!-- 이름 열 -->
+                <td class="col-name">
+                    <div class="d-flex align-items-center">
+                        <div class="team-avatar">⚽</div>
+                        <span class="team-name" th:text="${member.user.name}">홍길동</span>
                     </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary">추가</button>
-                    </div>
-                </form>
+                </td>
+
+                <!-- 역할 열 : 팀장 / 멤버 -->
+                <td>
+                    <span th:if="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
+                        팀장
+                    </span>
+                    <span th:unless="${member.role == T(com.team10.matchup.team.TeamMember.Role).LEADER}">
+                        멤버
+                    </span>
+                </td>
+
+                <!-- 포지션 열 : 값 없으면 '미설정' -->
+                <td th:text="${member.user.position != null && !#strings.isEmpty(member.user.position) ? member.user.position : '미설정'}">
+                    미설정
+                </td>
+
+                <!-- 관리 열 -->
+                <td th:if="${isLeader}">
+                    <form th:action="@{'/team/members/' + ${member.id} + '/delete'}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                        <button type="submit" class="btn btn-outline-danger btn-delete">삭제</button>
+                    </form>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(members)}">
+                <td colspan="4" class="text-center py-3">
+                    아직 팀 멤버가 없습니다.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 멤버 추가 영역 -->
+        <div th:if="${isLeader}" class="member-add-row">
+            <div class="member-add-label">
+                멤버 추가 · 추가할 회원 아이디를 입력하면 팀에 초대됩니다.
             </div>
+            <form th:action="@{/team/members/add}" method="post" class="d-flex gap-2">
+                <input type="text" name="username" class="form-control member-add-input"
+                       placeholder="추가할 회원 아이디">
+                <button type="submit" class="btn btn-add">추가</button>
+            </form>
         </div>
 
     </div>
