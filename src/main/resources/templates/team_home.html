@@ -6,28 +6,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f5f6f8;
-        }
-        .container {
-            max-width: 1000px;
-            margin-top: 40px;
-        }
+        body { background-color: #f5f6f8; }
+        .container { max-width: 1000px; margin-top: 40px; }
         .team-header {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background-color: white; padding: 30px; border-radius: 15px;
+            margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .tab-box {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-        }
-        .nav-link {
-            cursor: pointer;
-        }
+        .tab-box { background-color: white; padding: 30px; border-radius: 15px; }
+        .nav-link { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -43,9 +29,9 @@
     </div>
 
     <!-- 탭 메뉴 -->
-    <ul class="nav nav-tabs mb-3" id="teamTab">
+    <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
-            <a class="nav-link active" onclick="showTab('board')">게시판</a>
+            <a class="nav-link active" onclick="showTab('about')">팀 소개</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" onclick="showTab('members')">멤버</a>
@@ -58,46 +44,98 @@
         </li>
     </ul>
 
+
     <!-- 내용 영역 -->
     <div class="tab-box">
 
-        <div id="board">
-            <h5>팀 게시판</h5>
-            <p>팀 전용 게시판입니다.</p>
+        <!-- 팀 소개 -->
+        <div id="about">
+            <h5>팀 소개</h5>
+            <p th:text="${team.intro} ?: '아직 소개가 없습니다.'"></p>
+
+            <div th:if="${currentUser.id == team.leaderId}">
+                <a th:href="@{/team/{id}/edit-intro(id=${team.id})}"
+                   class="btn btn-outline-primary btn-sm">팀 소개 수정하기</a>
+            </div>
         </div>
 
+        <!-- 멤버 -->
         <div id="members" style="display:none;">
             <h5>팀 멤버</h5>
-            <p>이 팀에 소속된 멤버 목록이 표시됩니다.</p>
+
+            <ul class="list-group mt-3" th:if="${not #lists.isEmpty(members)}">
+                <li class="list-group-item" th:each="m : ${members}">
+                    <b th:text="${m.user.name}"></b>
+                    <span class="text-muted">(<span th:text="${m.role}"></span>)</span>
+                </li>
+            </ul>
+
+            <p class="text-muted" th:if="${#lists.isEmpty(members)}">등록된 팀원이 없습니다.</p>
         </div>
 
+        <!-- 일정 -->
         <div id="calendar" style="display:none;">
             <h5>일정표</h5>
-            <p>훈련 / 경기 일정이 표시됩니다.</p>
+
+            <div class="mt-3" th:if="${not #lists.isEmpty(events)}">
+                <div class="border rounded p-2 mb-2" th:each="e : ${events}">
+                    <b th:text="${e.title}">일정명</b>
+                    <div class="text-muted small">
+                        <span th:text="${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')}"></span>
+                        · <span th:text="${e.place}"></span>
+                        · <span th:text="${e.type}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-muted" th:if="${#lists.isEmpty(events)}">등록된 일정이 없습니다.</p>
         </div>
 
+        <!-- 경기 기록 -->
         <div id="record" style="display:none;">
             <h5>경기 기록</h5>
-            <p>이 팀의 경기 기록입니다.</p>
+
+            <div class="mt-3" th:if="${not #lists.isEmpty(records)}">
+
+                <div class="border rounded p-2 mb-2" th:each="r : ${records}">
+                    <b>
+                        <span th:text="${r.team1.name}"></span>
+                        VS
+                        <span th:text="${r.team2.name}"></span>
+                    </b>
+
+                    <div class="text-muted small">
+                        점수 :
+                        <span th:text="${r.team1Score}"></span> :
+                        <span th:text="${r.team2Score}"></span>
+                        · 날짜 :
+                        <span th:text="${#temporals.format(r.matchDate, 'yyyy-MM-dd')}"></span>
+                        · 장소 :
+                        <span th:text="${r.place}"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="text-muted" th:if="${#lists.isEmpty(records)}">경기 기록이 없습니다.</p>
         </div>
 
     </div>
 
-</div>
+    <!-- JS -->
+    <script>
+        function showTab(tab) {
+            const tabs = ['about', 'members', 'calendar', 'record'];
 
+            tabs.forEach(t => {
+                document.getElementById(t).style.display = (t === tab) ? 'block' : 'none';
+            });
 
-<script>
-    function showTab(tab) {
-        const tabs = ['board', 'members', 'calendar', 'record'];
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
 
-        tabs.forEach(t => {
-            document.getElementById(t).style.display = (t === tab) ? 'block' : 'none';
-        });
-
-        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-</script>
 
 </body>
 </html>

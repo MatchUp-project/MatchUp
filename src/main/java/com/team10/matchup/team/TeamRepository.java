@@ -11,5 +11,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findTeamsByUserId(Long userId);
 
     List<Team> findByRegion(String region);
+
+    List<Team> findTop3ByOrderByCreatedAtDesc();
+
 }
 

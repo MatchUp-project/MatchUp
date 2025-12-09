@@ -158,4 +158,105 @@ public class MatchService {
         req.setStatus("REJECTED");
         req.setRespondedAt(LocalDateTime.now());
     }
+
+    @Transactional(readOnly = true)
+    public MatchPost getNearestMatchedMatch() {
+        return matchPostRepository
+                .findFirstByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getUpcomingMatchedMatches() {
+        return matchPostRepository
+                .findAllByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public MatchPost getNearestUpcomingMatch() {
+
+        List<MatchPost> list = matchPostRepository
+                .findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                );
+
+        // matchedTeam 없는 잘못된 데이터 제거
+        list = list.stream()
+                .filter(m -> m.getMatchedTeam() != null)
+                .toList();
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getUpcomingMatches() {
+        return matchPostRepository
+                .findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "MATCHED", LocalDateTime.now()
+                ).stream()
+                .filter(m -> m.getMatchedTeam() != null)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getAvailableMatchPreview(int limit) {
+
+        User user = currentUserService.getCurrentUser();
+        Team team = currentUserService.getCurrentUserTeamOrNull();
+
+        // 팀 없으면 아무것도 보여주지 않음
+        if (team == null) return List.of();
+
+        // 내가 신청한 matchPostId → status map
+        Map<Long, String> myReqMap = getMyRequestStatusMap();
+
+        // 전체 매치
+        List<MatchPost> all = matchPostRepository
+                .findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "OPEN", LocalDateTime.now()
+                );
+
+        return all.stream()
+                .filter(m -> {
+
+                    // 내가 만든 매치는 제외
+                    boolean mine = m.getCreatedBy() != null &&
+                            m.getCreatedBy().getId().equals(user.getId());
+
+                    // 이미 신청한 매치는 제외
+                    boolean requested = myReqMap.containsKey(m.getId());
+
+                    return !mine && !requested;
+                })
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getAvailableMatchesForHome(int limit) {
+
+        User currentUser = currentUserService.getCurrentUser();
+        Long myUserId = currentUser.getId();
+
+        // 내가 신청한 매치 상태 map
+        Map<Long, String> myRequestMap = getMyRequestStatusMap();
+
+        return matchPostRepository.findByStatusOrderByMatchDatetimeAsc("OPEN")  // 앞으로 있을 오픈 매치
+                .stream()
+                .filter(post -> {
+                    boolean notMine = !post.getCreatedBy().getId().equals(myUserId);
+                    boolean notRequested = !myRequestMap.containsKey(post.getId());
+                    return notMine && notRequested;
+                })
+                .limit(limit)
+                .toList();
+    }
+
+
+
+
 }
