@@ -92,4 +92,12 @@ public class MatchController {
         // 보통 내가 올린 매치는 '불가능' 탭에서 보니까 거기로 돌아가게
         return "redirect:/match/apply?filter=unavailable";
     }
+
+    // 전체 예정된 매치 목록 페이지
+    @GetMapping("/upcoming")
+    public String upcomingMatches(Model model) {
+        model.addAttribute("matches", matchService.getUpcomingMatchedMatches());
+        return "match_upcoming";
+    }
+
 }

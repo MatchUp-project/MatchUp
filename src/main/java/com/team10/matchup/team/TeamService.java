@@ -92,5 +92,8 @@ public class TeamService {
         team.setIntro(intro);
     }
 
+    public List<Team> getRecentTeams(int limit) {
+        return teamRepository.findTop3ByOrderByCreatedAtDesc();
+    }
 
 }

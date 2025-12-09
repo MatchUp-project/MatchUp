@@ -38,27 +38,23 @@
             <a class="text-white text-decoration-none dropdown-toggle"
                href="#" id="notiDropdown" data-bs-toggle="dropdown">
                 <i class="bi bi-bell-fill"></i>
-                <!--Unread 표시용 빨간 점 (필요하면 활성화)-->
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                </span>
-        </a>
 
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <!-- 빨간 점 -->
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
 
-            <!-- 최근 알림 헤더 -->
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+
                 <li class="dropdown-header fw-semibold">최근 알림</li>
 
-                <!-- 알림 없을 때 -->
                 <li th:if="${#lists.isEmpty(recentNotifications)}"
                     class="dropdown-item text-muted">
                     알림이 없습니다.
                 </li>
 
-                <!-- 알림 있을 때 -->
                 <li th:each="noti : ${recentNotifications}">
                     <a class="dropdown-item" th:href="@{/notifications}">
-                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span>
-                        <br>
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
                         <small class="text-muted"
                                th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
                     </a>
@@ -74,6 +70,7 @@
                 </li>
             </ul>
         </div>
+
 
         <!-- 기존 메뉴 -->
         <a href="/" class="link-light text-decoration-none">홈</a>
@@ -145,29 +142,47 @@
                 <div class="card h-100 match-card">
                     <div class="card-header d-flex justify-content-between">
                         <span class="fw-bold">앞으로 있을 매치</span>
-                        <a href="/events" class="btn btn-sm btn-outline-secondary">전체보기</a>
+                        <a href="/match/upcoming" class="btn btn-sm btn-outline-secondary">전체보기</a>
                     </div>
 
-                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-4">
+                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-4"
+                         th:if="${nearestMatch != null}">
+
+                        <!-- 왼쪽 팀 -->
                         <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀1">
-                            <div class="fw-bold">풋또라이</div>
+                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
+                            <div class="fw-bold">
+                                <a th:href="@{/team/detail/{id}(id=${nearestMatch.team.id})}"
+                                   th:text="${nearestMatch.team.name}"></a>
+                            </div>
                         </div>
 
                         <div class="fw-bold display-6">VS</div>
 
+                        <!-- 오른쪽 팀 -->
                         <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2" alt="팀2">
-                            <div class="fw-bold">문돌이</div>
+                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
+                            <div th:if="${nearestMatch.matchedTeam != null}">
+                                <a th:href="@{/team/detail/{id}(id=${nearestMatch.matchedTeam.id})}"
+                                   th:text="${nearestMatch.matchedTeam.name}">
+                                </a>
+                            </div>
+
+                            <div th:if="${nearestMatch.matchedTeam == null}">
+                                <span class="text-muted">상대팀 미정</span>
+                            </div>
+
                         </div>
 
+                        <!-- 날짜/시간/장소 -->
                         <div class="text-muted">
-                            <div>장소 : 충북대학교 대운동장</div>
-                            <div>날짜 : 2025-03-28</div>
-                            <div>시간 : 09:40</div>
+                            <div>장소 : <span th:text="${nearestMatch.location}"></span></div>
+                            <div>날짜 : <span th:text="${#temporals.format(nearestMatch.matchDatetime, 'yyyy-MM-dd')}"></span></div>
+                            <div>시간 : <span th:text="${#temporals.format(nearestMatch.matchDatetime, 'HH:mm')}"></span></div>
                         </div>
 
-                        <a href="#" class="btn btn-outline-primary">매치 상세</a>
+                        <a th:href="@{/match/detail/{id}(id=${nearestMatch.id})}"
+                           class="btn btn-outline-primary">매치 상세</a>
                     </div>
                 </div>
             </div>
@@ -181,25 +196,25 @@
                     </div>
 
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/201" class="text-decoration-none text-primary">
-                                9월 27일 성남수진축구장 - 상대팀 구합니다...
-                            </a>
-                            <span class="text-muted small">25-09-26</span>
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="m : ${availableMatches}">
+                            <a th:href="@{/match/detail/{id}(id=${m.id})}"
+                               th:text="${m.location + ' - ' + m.team.name}"
+                               class="text-decoration-none text-primary"></a>
+
+                            <span class="text-muted small"
+                                  th:text="${#temporals.format(m.matchDatetime, 'yy-MM-dd')}"></span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/202" class="text-decoration-none">
-                                경기도 고양시 팀 가입 희망합니다
-                            </a>
-                            <span class="text-muted small">25-08-23</span>
+
+                        <li class="list-group-item text-muted text-center py-3"
+                            th:if="${#lists.isEmpty(availableMatches)}">
+                            신청 가능한 매치가 없습니다.
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/board/203" class="text-decoration-none">
-                                청주에서 주말 팀 구합니다(금요일)
-                            </a>
-                            <span class="text-muted small">25-05-21</span>
-                        </li>
+
                     </ul>
+
+
                 </div>
             </div>
 
@@ -256,25 +271,29 @@
                     </div>
 
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/1" class="text-decoration-none">
-                                Sunday FC 같이 즐겁게 운동하실 분 모집합니다.
-                            </a>
-                            <span class="text-muted small">25-09-02</span>
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="t : ${teams}">
+
+                            <!-- 팀 상세보기 링크 -->
+                            <a th:href="@{/team/detail/{id}(id=${t.id})}"
+                               th:text="${t.name}"
+                               class="text-decoration-none"></a>
+
+                            <!-- 생성일 표시 -->
+                            <span class="text-muted small"
+                                  th:text="${#temporals.format(t.createdAt, 'yy-MM-dd')}"></span>
+
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/2" class="text-decoration-none">
-                                대구 신생 풋살 팀원 모집(일요일 오전)
-                            </a>
-                            <span class="text-muted small">25-06-30</span>
+
+                        <!-- 팀이 없을 때 -->
+                        <li class="list-group-item text-muted text-center py-3"
+                            th:if="${#lists.isEmpty(teams)}">
+                            등록된 팀이 없습니다.
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/team/3" class="text-decoration-none">
-                                경기 참관 팀원 또는 상대팀 모집합니다.
-                            </a>
-                            <span class="text-muted small">25-06-23</span>
-                        </li>
+
                     </ul>
+
                 </div>
             </div>
 

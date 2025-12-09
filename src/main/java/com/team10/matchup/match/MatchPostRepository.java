@@ -21,5 +21,16 @@ public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
             String status, LocalDateTime now
     );
 
+    List<MatchPost> findByStatusOrderByMatchDatetimeAsc(String status);
+
+
+    List<MatchPost> findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+            String status,
+            LocalDateTime matchDatetime
+    );
+
+
+
+
 }
 
