@@ -96,8 +96,11 @@ public class MatchController {
     // 전체 예정된 매치 목록 페이지
     @GetMapping("/upcoming")
     public String upcomingMatches(Model model) {
-        model.addAttribute("matches", matchService.getUpcomingMatchedMatches());
+
+        model.addAttribute("matches", matchService.getMyTeamUpcomingMatches());
+
         return "match_upcoming";
     }
+
 
 }

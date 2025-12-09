@@ -17,6 +17,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+
 
 @Service
 @RequiredArgsConstructor
@@ -188,14 +190,26 @@ public class MatchService {
             return;
         }
 
+        // 1) 신청자 팀 가져오기
+        Team opponentTeam = req.getRequesterTeam();
+        if (opponentTeam == null) {
+            throw new IllegalStateException("신청자의 팀 정보가 없습니다.");
+        }
+
+        // 2) 매치 정보 가져오기
+        MatchPost post = req.getMatchPost();
+
+        // 3) MatchRequest 상태 변경
         req.setStatus("ACCEPTED");
         req.setRespondedAt(LocalDateTime.now());
 
-        MatchPost post = req.getMatchPost();
-        if (post != null) {
-            post.setStatus("MATCHED");
-        }
+        // 4) 매치 상태를 MATCHED로 변경
+        post.setStatus("MATCHED");
+
+        // 5) 상대팀 세팅 (중요!!)
+        post.setMatchedTeam(opponentTeam);
     }
+
 
     public void rejectRequest(Long matchRequestId) {
         MatchRequest req = matchRequestRepository.findById(matchRequestId)
@@ -232,18 +246,23 @@ public class MatchService {
     @Transactional(readOnly = true)
     public MatchPost getNearestUpcomingMatch() {
 
-        List<MatchPost> list = matchPostRepository
-                .findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
-                        "MATCHED", LocalDateTime.now()
-                );
+        // 로그인한 유저의 팀 가져오기
+        Team myTeam = currentUserService.getCurrentUserTeamOrNull();
+        if (myTeam == null) {
+            return null;   // 팀이 없는 사람은 아무것도 안 보이게
+        }
 
-        // matchedTeam 없는 잘못된 데이터 제거
-        list = list.stream()
-                .filter(m -> m.getMatchedTeam() != null)
-                .toList();
+        // 내 팀이 등록한 MATCHED 매치 중 가장 가까운 매치 찾기
+        List<MatchPost> list = matchPostRepository
+                .findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        myTeam,
+                        "MATCHED",
+                        LocalDateTime.now()
+                );
 
         return list.isEmpty() ? null : list.get(0);
     }
+
 
 
     @Transactional(readOnly = true)
@@ -308,6 +327,31 @@ public class MatchService {
                 })
                 .limit(limit)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getMyTeamUpcomingMatches() {
+
+        Team myTeam = currentUserService.getCurrentUserTeamOrNull();
+        if (myTeam == null) return List.of();
+
+        // 내가 등록한 MATCHED 매치들
+        List<MatchPost> created = matchPostRepository
+                .findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        myTeam, "MATCHED", LocalDateTime.now()
+                );
+
+        // 내가 상대팀으로 매칭된 MATCHED 매치들
+        List<MatchPost> accepted = matchPostRepository
+                .findByMatchedTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        myTeam, "MATCHED", LocalDateTime.now()
+                );
+
+        // 두 개 합치기
+        created.addAll(accepted);
+        return created.stream()
+                .sorted(Comparator.comparing(MatchPost::getMatchDatetime))
+                .collect(Collectors.toList());
     }
 
 

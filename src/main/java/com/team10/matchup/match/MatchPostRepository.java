@@ -29,6 +29,19 @@ public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
             LocalDateTime matchDatetime
     );
 
+    List<MatchPost> findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+            Team team,
+            String status,
+            LocalDateTime now
+    );
+
+    List<MatchPost> findByMatchedTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+            Team matchedTeam,
+            String status,
+            LocalDateTime now
+    );
+
+
 
 
 
