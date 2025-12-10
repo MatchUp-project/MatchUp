@@ -5,4 +5,3 @@ public enum MatchStatus {
     MATCHED,    // 매치 성사
     CANCELED    // 취소
 }
-

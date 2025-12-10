@@ -10,33 +10,32 @@
 
     <style>
         :root {
-            --auth-blue: #1f3b70;
-            --auth-pink: #c06aa7;
-            --auth-peach: #e7b48f;
-            --auth-card-bg: rgba(255, 255, 255, 0.92);
-            --auth-text-main: #0f172a;
-            --auth-text-muted: #6b7280;
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
         }
 
         * { box-sizing: border-box; }
 
-        /* ===== 배경 (그라디언트) ===== */
+        /* 🔆 배경 그라데이션 조금 더 밝게 */
         body.auth-body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: var(--auth-text-main);
+            color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
             background:
-                radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.5), transparent 55%),
-                radial-gradient(circle at 0% 100%, rgba(226, 232, 255, 0.5), transparent 55%),
-                radial-gradient(circle at 100% 0%, rgba(148, 163, 253, 0.45), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(248, 250, 252, 0.55), transparent 55%),
-                linear-gradient(135deg, var(--auth-peach), var(--auth-pink), var(--auth-blue));
-            background-size: cover;
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.25) 0, transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(34,197,94,0.26) 0, transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(15,23,42,0.8) 0, transparent 65%),
+                #050b1f; /* 기존보다 살짝 밝은 네이비 */
         }
 
         .auth-wrapper {
@@ -44,80 +43,78 @@
             max-width: 420px;
         }
 
-        /* ===== 가운데 로그인 카드 ===== */
         .auth-card {
             position: relative;
-            padding: 36px 32px 30px;      /* 아바타 삭제해서 위쪽 패딩 줄임 */
+            padding: 32px 30px 26px;
             border-radius: 26px;
-            background: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.97),
-                rgba(243, 244, 246, 0.9)
-            );
-            box-shadow: 0 26px 60px rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(16px);
+            background: var(--bg-panel);
+            box-shadow: 0 22px 60px rgba(0,0,0,0.85);
+            border: 1px solid #020617;
             text-align: center;
         }
 
-        /* 카드 아래 받침대 느낌 */
         .auth-card::after {
             content: "";
             position: absolute;
             left: 50%;
-            bottom: -24px;
+            bottom: -20px;
             transform: translateX(-50%);
-            width: 68%;
-            height: 34px;
-            border-radius: 18px;
-            background: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.96),
-                rgba(229, 231, 235, 0.9)
-            );
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.25);
+            width: 64%;
+            height: 26px;
+            border-radius: 999px;
+            background: #020617;
+            filter: blur(6px);
+            opacity: 0.9;
             z-index: -1;
         }
 
-        /* ===== 타이틀 영역 ===== */
-        .auth-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
+        .auth-logo {
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            font-size: 20px;
+            margin-bottom: 18px;
         }
 
-        .auth-subtitle {
-            font-size: 13px;
-            color: var(--auth-text-muted);
-            margin-bottom: 22px;
+        .auth-logo span {
+            color: var(--accent-green);
         }
 
-        /* ===== 폼 스타일 ===== */
+        .auth-alert {
+            font-size: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
         .auth-form .input-wrapper {
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             text-align: left;
         }
 
         .auth-form .form-label {
             font-size: 12px;
-            color: var(--auth-text-muted);
+            color: var(--text-muted);
             margin-bottom: 4px;
         }
 
         .auth-input-group {
             display: flex;
             align-items: center;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            background: rgba(15, 23, 42, 0.06);
+            background: #020617;
+            border: 1px solid #111827;
         }
 
         .auth-input-icon {
-            width: 44px;
+            width: 46px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(15, 23, 42, 0.12);
-            color: #ffffff;
+            background: #050b18;
+            color: var(--accent-green-soft);
         }
 
         .auth-input-icon i {
@@ -130,67 +127,58 @@
             background: transparent;
             font-size: 14px;
             padding: 9px 12px;
-            color: var(--auth-text-main);
+            color: var(--text-main);
         }
 
         .auth-form .form-control:focus {
             box-shadow: none;
             outline: none;
-            background: rgba(255, 255, 255, 0.75);
+            background: #020617;
         }
 
+        /* 👀 플레이스홀더 조금 더 잘 보이게 (너무 밝지 않게) */
         .auth-form .form-control::placeholder {
-            color: #9ca3af;
+            color: rgba(156,163,175,0.95); /* 기존보다 밝지만 흰색까진 아님 */
         }
 
-        .auth-extra-row {
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-            color: var(--auth-text-muted);
-        }
-
-        .auth-extra-row a {
-            text-decoration: none;
-            color: var(--auth-text-muted);
-        }
-
-        .auth-extra-row a:hover {
-            text-decoration: underline;
-        }
-
-        /* ===== LOGIN 버튼 (단색, 배경과 어울리게) ===== */
+        /* LOGIN 버튼 */
         .auth-btn-main {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 10px;
             border-radius: 999px;
-            border: none;
+            border: 1px solid var(--accent-green-soft);
             padding: 10px 0;
             font-size: 13px;
             letter-spacing: 0.15em;
             font-weight: 600;
             text-transform: uppercase;
-            background: #243b6b;                     /* 단색 딥블루 */
-            color: #f9fafb;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+            background:
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.15), transparent 55%),
+                #050b18;
+            color: var(--text-main);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.8);
+            transition: background .18s ease, color .18s ease,
+                        box-shadow .18s ease, transform .1s ease;
         }
 
+        /* 🟢 호버 시 완전 단색 라임 */
         .auth-btn-main:hover {
-            background: #1b2e54;                    /* 살짝 더 진하게 */
+            background: var(--accent-green);
+            color: #020617;
+            border-color: var(--accent-green);
+            box-shadow: 0 12px 28px rgba(163,255,18,0.55);
+            transform: translateY(-1px);
         }
 
         .auth-btn-main:active {
-            transform: translateY(1px);
-            box-shadow: 0 5px 12px rgba(15, 23, 42, 0.35);
+            transform: translateY(0);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.85);
         }
 
-        /* ===== 하단 회원가입 안내 (가독성 ↑) ===== */
         .auth-footer {
             margin-top: 18px;
             font-size: 12px;
-            color: var(--auth-text-main);
+            color: var(--text-muted);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -198,26 +186,19 @@
         }
 
         .auth-footer a {
-            color: #111827;
+            color: var(--text-main);
             font-weight: 600;
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 4px 14px;
+            background: #020617;
+            padding: 5px 16px;
             border-radius: 999px;
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+            border: 1px solid #111827;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.75);
         }
 
         .auth-footer a:hover {
-            background: #e5e7eb;
-        }
-
-        /* ===== 알림 메시지 ===== */
-        .auth-alert {
-            font-size: 12px;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            padding: 8px 10px;
-            text-align: left;
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
         }
     </style>
 </head>
@@ -226,11 +207,10 @@
 <div class="auth-wrapper">
     <div class="auth-card">
 
-        <!-- 제목 -->
-        <h1 class="auth-title">Match-Up 로그인</h1>
-        <p class="auth-subtitle">계정으로 로그인하여 매치와 팀을 관리하세요.</p>
+        <!-- 로고 -->
+        <div class="auth-logo">MATCH<span>UP</span></div>
 
-        <!-- 로그인 실패 / 로그아웃 메시지 -->
+        <!-- 로그인 실패 메시지 -->
         <div th:if="${param.error}" class="auth-alert alert alert-danger">
             아이디 또는 비밀번호가 올바르지 않습니다.
         </div>
@@ -241,22 +221,18 @@
             정상적으로 로그아웃되었습니다.
         </div>
 
-        <!-- ★ SecurityConfig: loginProcessingUrl("/perform_login") 기준 -->
+        <!-- 로그인 폼 -->
         <form class="auth-form" th:action="@{/perform_login}" method="post">
 
-            <!-- 아이디 / 이메일 -->
+            <!-- 아이디 -->
             <div class="input-wrapper">
                 <label for="username" class="form-label">Email ID / 아이디</label>
                 <div class="auth-input-group">
                     <div class="auth-input-icon">
                         <i class="bi bi-person"></i>
                     </div>
-                    <input type="text"
-                           class="form-control"
-                           id="username"
-                           name="username"
-                           placeholder="example@matchup.com"
-                           required>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="example@matchup.com" required>
                 </div>
             </div>
 
@@ -267,30 +243,13 @@
                     <div class="auth-input-icon">
                         <i class="bi bi-lock-fill"></i>
                     </div>
-                    <input type="password"
-                           class="form-control"
-                           id="password"
-                           name="password"
-                           placeholder="비밀번호를 입력하세요"
-                           required>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="비밀번호를 입력하세요" required>
                 </div>
-            </div>
-
-            <!-- 체크박스 / 비밀번호 찾기 -->
-            <div class="auth-extra-row">
-                <div class="form-check m-0">
-                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember-me">
-                    <label class="form-check-label" for="rememberMe">
-                        Remember me
-                    </label>
-                </div>
-                <a href="#">Forgot Password?</a>
             </div>
 
             <!-- 로그인 버튼 -->
-            <button type="submit" class="auth-btn-main">
-                LOGIN
-            </button>
+            <button type="submit" class="auth-btn-main">LOGIN</button>
         </form>
 
         <!-- 회원가입 안내 -->
@@ -298,6 +257,7 @@
             <span>아직 Match-Up 계정이 없으신가요?</span>
             <a th:href="@{/signup}">새 계정 만들기</a>
         </div>
+
     </div>
 </div>
 

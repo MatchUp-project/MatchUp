@@ -6,212 +6,364 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- 공통 스타일 -->
     <link rel="stylesheet" th:href="@{/style.css}"/>
 
     <style>
         :root {
-            --page-text-main: #111827;
-            --page-card-bg: rgba(255, 255, 255, 0.96);
-            --page-border: rgba(226, 232, 240, 0.9);
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #020617;
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+            --accent-red: #fb2d4b;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-subtle: #111827;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        /* ===== 배경 + 기본 레이아웃 ===== */
-        body {
+        body.home-body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: var(--page-text-main);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
+            background:
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.18) 0, transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(34,197,94,0.20) 0, transparent 55%),
+                #0c1120;
+        }
+
+        a { text-decoration: none; }
+
+        /* ===== 상단 유틸바 (대시보드와 동일) ===== */
+        .topbar {
+            background: #050b24;
+            color: #e5e7eb;
+            border-bottom: 1px solid #050b24;
+            font-size: 13px;
+        }
+
+        .topbar a {
+            font-size: 13px;
+        }
+
+        /* ===== 헤더 / 네비게이션 (대시보드와 동일) ===== */
+        header.main-header {
+            background: #050b24;
+            border-bottom: 1px solid #050b24;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+        }
+
+        header.main-header .navbar-brand {
+            color: #f9fafb;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .main-nav {
+            border-top: none !important;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .main-nav .nav-item {
+            margin-right: 0;
+        }
+
+        .main-nav .main-nav-link {
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 6px 18px !important;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            background: #020617;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .main-nav .main-nav-link:hover,
+        .main-nav .main-nav-link:focus,
+        .main-nav .show > .main-nav-link {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.5);
+        }
+
+        .dropdown-menu {
+            background: #020617;
+            border-color: #111827;
+            font-size: 13px;
+        }
+
+        .dropdown-menu .dropdown-item {
+            color: #e5e7eb;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background: #111827;
+            color: var(--accent-green);
+        }
+
+        /* ===== 메인 영역 ===== */
+        main.profile-main {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            padding: 40px 16px;
-            background:
-                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
-                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
-            position: relative;
-            overflow: hidden;
+            padding: 40px 16px 60px;
         }
 
-        body::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background:
-                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
-                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
-            opacity: 0.9;
-            z-index: -1;
-            filter: blur(4px);
-        }
-
-        /* ===== 왼쪽 위 메인으로 버튼 ===== */
-        .home-link {
-            position: fixed;
-            top: 24px;
-            left: 32px;
-            padding: 7px 16px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.82);
-            color: #f9fafb;
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.55);
-        }
-
-        .home-link:hover {
-            background: #020617;
-            color: #f9fafb;
-        }
-
-        /* ===== 중앙 카드 ===== */
-        .profile-page {
+        .profile-card {
             width: 100%;
             max-width: 520px;
+            border-radius: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.75);
+            padding: 32px 38px 28px;
         }
 
-        .edit-card {
-            width: 100%;
-            border-radius: 28px;
-            background: var(--page-card-bg);
-            box-shadow:
-                0 18px 45px rgba(15, 23, 42, 0.28),
-                0 0 0 1px rgba(148, 163, 184, 0.18);
-            padding: 32px 40px 28px;
-            backdrop-filter: blur(16px);
-        }
-
-        .edit-title {
+        .profile-title {
             font-size: 20px;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 24px;
-            color: #0f172a;
+            margin-bottom: 26px;
+            color: #e5e7eb;
         }
 
-        .form-label {
-            font-size: 14px;
+        .profile-label {
+            font-size: 13px;
             font-weight: 600;
-            color: #374151;
+            color: #d1d5db;
+            margin-bottom: 6px;
         }
 
-        .form-control {
+        .profile-input {
             font-size: 14px;
             border-radius: 999px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #1f2933;
             padding: 9px 14px;
-            background-color: rgba(249, 250, 251, 0.95);
+            background-color: #020617;
+            color: #e5e7eb;
+            width: 100%;
+            outline: none;
             transition:
-                border-color 0.15s ease,
-                box-shadow 0.15s ease,
-                background-color 0.15s ease,
+                border-color 0.16s ease,
+                box-shadow 0.16s ease,
+                background-color 0.16s ease,
                 transform 0.12s ease;
         }
 
-        .form-control:focus {
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
-            background-color: #ffffff;
+        .profile-input::placeholder {
+            color: #6b7280;
+        }
+
+        .profile-input:focus {
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 3px rgba(34,197,94,0.25);
+            background-color: #02081f;
             transform: translateY(-1px);
         }
 
-        /* ===== 버튼 영역 ===== */
-        .edit-actions {
+        .profile-actions {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-top: 24px;
+            margin-top: 26px;
         }
 
-        .btn-save {
+        .btn-save-profile {
             border-radius: 999px;
             font-size: 14px;
             padding: 10px 24px;
-            border: none;
-            background: #16a34a;
-            color: #f9fafb;
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.6);
+            border: 1px solid var(--accent-green-soft);
+            background: transparent;
+            color: var(--accent-green-soft);
+            width: 100%;
+            font-weight: 600;
+            letter-spacing: 0.04em;
         }
 
-        .btn-save:hover {
-            background: #15803d;
-            color: #f9fafb;
+        .btn-save-profile:hover {
+            background: var(--accent-green-soft);
+            color: #020617;
         }
 
-        .btn-cancel {
+        .btn-cancel-profile {
             border-radius: 999px;
             font-size: 14px;
             padding: 10px 24px;
-            border: none;
-            background: #6b7280;
+            border: 1px solid #4b5563;
+            background: #111827;
+            color: #e5e7eb;
+            width: 100%;
+        }
+
+        .btn-cancel-profile:hover {
+            background: #1f2937;
             color: #f9fafb;
         }
 
-        .btn-cancel:hover {
-            background: #4b5563;
-            color: #f9fafb;
+        footer.site-footer {
+            background: #020617;
+            color: #9ca3af;
+            border-top: 1px solid #020617;
+            font-size: 12px;
         }
 
-        /* ===== 아래 도크 ===== */
-        .page-dock {
-            width: 260px;
-            height: 24px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+        footer.site-footer .text-white-50 {
+            color: #6b7280 !important;
         }
     </style>
 </head>
-<body>
+<body class="home-body">
 
-<!-- 맨 왼쪽 위 메인으로 버튼 -->
-<a th:href="@{/}" class="home-link">메인으로</a>
+<!-- ================= 상단 유틸바 ================= -->
+<div class="topbar text-white small py-1">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
 
-<div class="profile-page">
-    <!-- 프로필 수정 카드 -->
-    <div class="edit-card">
-        <div class="edit-title">프로필 수정</div>
+        <!-- 🔔 알림 드롭다운 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
 
-        <form th:action="@{/profile/edit}" method="post" th:object="${user}">
-            <div class="mb-3">
-                <label class="form-label">이름</label>
-                <input type="text" class="form-control" th:field="*{name}">
-            </div>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
 
-            <div class="mb-3">
-                <label class="form-label">이메일</label>
-                <input type="email" class="form-control" th:field="*{email}">
-            </div>
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
 
-            <div class="mb-3">
-                <label class="form-label">포지션</label>
-                <input type="text" class="form-control" th:field="*{position}">
-            </div>
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
 
-            <div class="mb-1">
-                <label class="form-label">생년월일</label>
-                <input type="date" class="form-control" th:field="*{birth}">
-            </div>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-            <div class="edit-actions">
-                <button type="submit" class="btn btn-save">저장</button>
-                <a th:href="@{/profile}" class="btn btn-cancel">취소</a>
-            </div>
-        </form>
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
     </div>
 </div>
 
-<!-- 카드 아래 도크 -->
-<div class="page-dock"></div>
+<!-- ================= 헤더 ================= -->
+<header class="main-header border-0 pt-3">
+    <div class="container pb-2">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 : MATCH + UP 라임색 -->
+            <a class="navbar-brand fw-bold fs-3 m-0" href="/">
+                MATCH<span style="color: var(--accent-green);">UP</span>
+            </a>
+        </div>
 
+        <nav class="mt-3">
+            <ul class="nav main-nav">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-people-fill me-1"></i> 팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- 커뮤니티 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/board/list?category=FREE">
+                        <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
+                    </a>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/match/apply">
+                        <i class="bi bi-trophy-fill me-1"></i> 매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- ================= 메인: 프로필 수정 카드 ================= -->
+<main class="profile-main">
+    <div class="profile-card">
+        <div class="profile-title">프로필 수정</div>
+
+        <form th:action="@{/profile/edit}" method="post" th:object="${user}">
+            <div class="mb-3">
+                <label class="profile-label">이름</label>
+                <input type="text" class="profile-input" th:field="*{name}">
+            </div>
+
+            <div class="mb-3">
+                <label class="profile-label">이메일</label>
+                <input type="email" class="profile-input" th:field="*{email}">
+            </div>
+
+            <div class="mb-3">
+                <label class="profile-label">포지션</label>
+                <input type="text" class="profile-input" th:field="*{position}">
+            </div>
+
+            <div class="mb-1">
+                <label class="profile-label">생년월일</label>
+                <input type="date" class="profile-input" th:field="*{birth}">
+            </div>
+
+            <div class="profile-actions">
+                <button type="submit" class="btn-save-profile">저장</button>
+                <a th:href="@{/profile}" class="btn-cancel-profile text-center">취소</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- ================= 푸터 ================= -->
+<footer class="site-footer py-4 mt-3">
+    <div class="container small d-flex justify-content-between">
+        <div>© 2025 Match-Up</div>
+        <div class="text-white-50">문의: support@matchup.com</div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
