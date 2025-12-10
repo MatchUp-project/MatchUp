@@ -41,6 +41,14 @@ public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
             LocalDateTime now
     );
 
+    // 일정표: 특정 기간 내 MATCHED 경기 조회 (내 팀이 등록했거나 매칭된 경우 모두 포함)
+    List<MatchPost> findByTeamOrMatchedTeamAndStatusAndMatchDatetimeBetweenOrderByMatchDatetimeAsc(
+            Team team,
+            Team matchedTeam,
+            String status,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
 
 

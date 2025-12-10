@@ -19,15 +19,18 @@ public class PostService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final UserService userService;
+    private final PostCommentRepository postCommentRepository;
 
     public PostService(PostRepository postRepository,
                        TeamMemberRepository teamMemberRepository,
                        TeamRepository teamRepository,
-                       UserService userService) {
+                       UserService userService,
+                       PostCommentRepository postCommentRepository) {
         this.postRepository = postRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.teamRepository = teamRepository;
         this.userService = userService;
+        this.postCommentRepository = postCommentRepository;
     }
 
     /**
@@ -71,5 +74,20 @@ public class PostService {
         return postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. id=" + id));
     }
-}
 
+    @Transactional(readOnly = true)
+    public PostResponse getPostSummary(Long id) {
+        return new PostResponse(getPost(id));
+    }
+
+    public void deleteMyPost(Long postId) {
+        User me = userService.getCurrentUser();
+        Post post = getPost(postId);
+        if (!post.getAuthor().getId().equals(me.getId())) {
+            throw new IllegalStateException("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+        // 댓글 먼저 제거 후 게시글 삭제 (FK 제약 보호)
+        postCommentRepository.deleteByPostId(postId);
+        postRepository.delete(post);
+    }
+}

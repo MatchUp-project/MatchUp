@@ -15,6 +15,8 @@ public class TeamBoardController {
 
     private final PostService postService;
     private final TeamRepository teamRepository;
+    private final PostCommentService postCommentService;
+    private final com.team10.matchup.user.UserService userService;
 
     // ✅ 팀 게시판 메인
     @GetMapping("/team/board")
@@ -62,13 +64,32 @@ public class TeamBoardController {
     public String postDetail(@PathVariable Long postId, Model model) {
 
         var post = postService.getPost(postId);
+        var comments = postCommentService.getComments(postId);
+        var current = userService.getCurrentUser();
+
         model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
+        model.addAttribute("currentUserId", current != null ? current.getId() : null);
         return "team_post_detail";
     }
 
     @org.springframework.web.bind.annotation.PostMapping("/team/board/new")
     public String createPost(@ModelAttribute PostCreateRequest request) {
         postService.createPostForMyTeam(request);
+        return "redirect:/team/board";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/team/board/{postId}/comments")
+    public String addComment(@PathVariable Long postId,
+                             @org.springframework.web.bind.annotation.RequestParam("content") String content,
+                             @org.springframework.web.bind.annotation.RequestParam(value = "parentId", required = false) Long parentId) {
+        postCommentService.addComment(postId, content, parentId);
+        return "redirect:/team/board/" + postId;
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/team/board/{postId}/delete")
+    public String deletePost(@PathVariable Long postId) {
+        postService.deleteMyPost(postId);
         return "redirect:/team/board";
     }
 }

@@ -1,6 +1,7 @@
 package com.team10.matchup.event;
 
 import com.team10.matchup.match.MatchPost;
+import com.team10.matchup.match.MatchPostRepository;
 import com.team10.matchup.matchrecord.MatchRecord;
 import com.team10.matchup.matchrecord.MatchRecordRepository;
 import com.team10.matchup.team.Team;
@@ -22,9 +23,10 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final MatchRecordRepository matchRecordRepository;   // ✅ 추가
+    private final MatchRecordRepository matchRecordRepository;   // 경기 기록 완료분
+    private final MatchPostRepository matchPostRepository;       // 매치 일정(기록 전 포함)
 
-    // ───────────────── 월 달력 표시용 ─────────────────
+    // 월 달력 표시용
     @Transactional(readOnly = true)
     public List<Event> getEventsForMonth(Team team, YearMonth ym) {
         LocalDateTime start = ym.atDay(1).atStartOfDay();
@@ -35,12 +37,12 @@ public class EventService {
         );
     }
 
-    // ───────────────── 오른쪽 “선택 날짜 일정” ─────────────────
+    // 선택된 날짜 일정 조회 (개인 일정 + 경기 기록 + 기록전 MATCHED 매치)
     @Transactional(readOnly = true)
     public List<Event> getEventsForDate(Team team, LocalDate date) {
 
         LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end   = date.plusDays(1).atStartOfDay();   // 다음날 00:00
+        LocalDateTime end   = date.plusDays(1).atStartOfDay();   // 자정 00:00
 
         // 1) 개인 일정(Event 테이블)
         List<Event> result = new ArrayList<>(
@@ -49,14 +51,13 @@ public class EventService {
                 )
         );
 
-        // 2) 경기 기록(MatchRecord) → 뷰용 Event 객체로 추가
+        // 2) 경기 기록(MatchRecord) 기반 Event 임시 생성
         List<MatchRecord> records =
                 matchRecordRepository.findByTeam1OrTeam2AndMatchDateBetweenOrderByMatchDateAsc(
                         team, team, start, end
                 );
 
         for (MatchRecord rec : records) {
-            // 상대 팀 찾기
             Team opponent = rec.getTeam1().getId().equals(team.getId())
                     ? rec.getTeam2()
                     : rec.getTeam1();
@@ -68,7 +69,6 @@ public class EventService {
             pseudo.setPlace(rec.getPlace());
             pseudo.setType(EventType.MATCH);
 
-            // 이미 같은 시간/제목의 MATCH 이벤트가 있으면 중복 추가 X
             boolean exists = result.stream().anyMatch(e ->
                     e.getType() == EventType.MATCH &&
                             e.getStartAt() != null &&
@@ -76,16 +76,44 @@ public class EventService {
                             e.getTitle().equals(pseudo.getTitle())
             );
             if (!exists) {
-                result.add(pseudo);   // DB에 저장 안 하고 화면에만 쓸 객체
+                result.add(pseudo);
             }
         }
 
-        // 시간 순으로 정렬
+        // 3) MATCHED 상태지만 점수 미기입된 매치(Event에 없는 경우) 추가
+        List<MatchPost> matchedPosts =
+                matchPostRepository.findByTeamOrMatchedTeamAndStatusAndMatchDatetimeBetweenOrderByMatchDatetimeAsc(
+                        team, team, "MATCHED", start, end
+                );
+
+        for (MatchPost post : matchedPosts) {
+            Team opponent = (post.getTeam() != null && post.getTeam().getId().equals(team.getId()))
+                    ? post.getMatchedTeam()
+                    : post.getTeam();
+
+            Event pseudo = new Event();
+            pseudo.setTeam(team);
+            pseudo.setTitle("[매치] vs " + (opponent != null ? opponent.getName() : "상대"));
+            pseudo.setStartAt(post.getMatchDatetime());
+            pseudo.setPlace(post.getLocation());
+            pseudo.setType(EventType.MATCH);
+
+            boolean exists = result.stream().anyMatch(e ->
+                    e.getType() == EventType.MATCH &&
+                            e.getStartAt() != null &&
+                            e.getStartAt().equals(pseudo.getStartAt()) &&
+                            e.getTitle().equals(pseudo.getTitle())
+            );
+            if (!exists) {
+                result.add(pseudo);
+            }
+        }
+
         result.sort(Comparator.comparing(Event::getStartAt));
         return result;
     }
 
-    // ───────────────── 개인 일정 저장 (오른쪽 폼) ─────────────────
+    // 개인 일정 저장 (오른쪽 폼)
     public void createPersonalEvent(Team team, EventCreateForm form) {
         if (form.getDate() == null) return;
 
@@ -103,7 +131,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    // ───────────────── 매치 성사 시 양 팀 일정 자동 생성 ─────────────────
+    // 매치 성사 시 양 팀 일정 자동 생성
     public void createMatchEvents(MatchPost post, Team opponentTeam) {
 
         LocalDateTime start = post.getMatchDatetime();
