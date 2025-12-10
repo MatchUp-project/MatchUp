@@ -19,7 +19,8 @@ public class BoardPageController {
     // 메인
     @GetMapping
     public String boardHome() {
-        return "board/board_main";
+        // 단일 리스트 화면으로 통일
+        return "redirect:/board/list";
     }
 
     // 목록
