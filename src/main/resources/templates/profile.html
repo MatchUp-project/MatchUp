@@ -11,39 +11,75 @@
     <link rel="stylesheet" th:href="@{/style.css}"/>
 
     <style>
-        /* ===== 잔디 배경 + 기본 레이아웃 ===== */
+        :root {
+            --page-text-main: #111827;
+            --page-text-muted: #6b7280;
+            --page-card-bg: rgba(255, 255, 255, 0.96);
+            --page-border: rgba(226, 232, 240, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* ===== Apple 느낌 그라데이션 배경 ===== */
         body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: #111827;
+            color: var(--page-text-main);
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 32px 16px 64px;
+            gap: 20px;
+            padding: 40px 16px;
             background:
-                    linear-gradient(180deg, rgba(15,23,42,0.25), rgba(15,23,42,0.4)),
-                    url("/images/pitch-bg.png") center/cover no-repeat fixed;
+                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
+                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
+            position: relative;
+            overflow: hidden;
         }
 
+        body::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
+            opacity: 0.9;
+            z-index: -1;
+            filter: blur(4px);
+        }
+
+        /* ===== 카드 컨테이너 ===== */
         .profile-page {
             width: 100%;
-            max-width: 1120px;
+            max-width: 920px;
+            background: var(--page-card-bg);
+            border-radius: 28px;
+            padding: 22px 26px 20px;
+            box-shadow:
+                0 24px 65px rgba(15, 23, 42, 0.35),
+                0 0 0 1px rgba(148, 163, 184, 0.16);
+            backdrop-filter: blur(18px);
         }
 
-        /* ===== 상단 앱 로고 ===== */
+        /* ===== 상단 Match-Up 로고 ===== */
         .app-nav {
             display: flex;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
 
         .app-brand {
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 800;
             letter-spacing: 0.02em;
             text-decoration: none;
-            color: #16a34a;            /* 초록색 로고 */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+            color: #16a34a;
         }
 
         .app-brand:hover {
@@ -53,15 +89,14 @@
         /* ===== 프로필 헤더 ===== */
         .profile-header {
             margin-bottom: 10px;
-            color: #f9fafb;
-            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.9);
+            color: var(--page-text-main);
         }
 
         .profile-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 700;
         }
 
@@ -72,24 +107,24 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #9ca3af);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.65);
+            background: radial-gradient(circle at 30% 30%, #f9fafb, #9ca3af);
+            box-shadow: 0 4px 10px rgba(15,23,42,0.25);
             font-size: 16px;
         }
 
         .profile-subtitle {
             font-size: 13px;
-            opacity: 0.9;
+            color: var(--page-text-muted);
             margin-top: 4px;
         }
 
-        /* ===== 표 카드 ===== */
+        /* ===== 프로필 카드 & 표 ===== */
         .profile-card {
-            margin-top: 14px;
-            border-radius: 18px;
+            margin-top: 10px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
+            border: 1px solid var(--page-border);
+            background: #f9fafb;
         }
 
         table.profile-table {
@@ -100,24 +135,31 @@
         }
 
         .profile-table thead {
-            background: rgba(243, 244, 246, 0.9);
+            background: rgba(243, 244, 246, 0.95);
         }
 
         .profile-table thead th {
             padding: 10px 24px;
             font-size: 13px;
             font-weight: 600;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.9);
+            border-bottom: 1px solid rgba(209, 213, 219, 0.9);
         }
 
-        .profile-table tbody tr {
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(6px);
+        .profile-table tbody tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .profile-table tbody tr:nth-child(even) {
+            background: rgba(249, 250, 251, 0.98);
         }
 
         .profile-table tbody td {
             padding: 12px 24px;
-            border-bottom: 1px solid rgba(209, 213, 219, 0.8);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+        }
+
+        .profile-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .profile-label {
@@ -125,28 +167,36 @@
             font-weight: 600;
         }
 
-        /* ===== 버튼 ===== */
-        .btn-edit {
-        border-radius: 999px;
-        font-size: 14px;
-        padding: 10px 32px;
-        margin-top: 18px;
-        border: none;
-        background: #16a34a;                     /* ✅ 초록색 */
-        color: #f9fafb;
-        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.6);  /* 초록 그림자 */
-        }
-
-        .btn-edit:hover {
-        background: #15803d;    /* 조금 더 진한 초록 */
-        color: #f9fafb;
-        }
-
+        /* ===== 버튼 & 푸터 ===== */
         .profile-footer {
             display: flex;
             justify-content: center;
-            padding-bottom: 8px;
-            background: rgba(255,255,255,0.3);
+            padding: 14px 0 16px;
+            background: #f9fafb;
+        }
+
+        .btn-edit {
+            border-radius: 999px;
+            font-size: 14px;
+            padding: 10px 32px;
+            border: none;
+            background: #16a34a;
+            color: #f9fafb;
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.6);
+        }
+
+        .btn-edit:hover {
+            background: #15803d;
+            color: #f9fafb;
+        }
+
+        /* ===== 카드 아래 도크 ===== */
+        .page-dock {
+            width: 260px;
+            height: 24px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
         }
     </style>
 </head>
@@ -154,7 +204,7 @@
 
 <div class="profile-page">
 
-    <!-- 상단 Match-Up 로고 (초록색, 메인으로 이동) -->
+    <!-- 상단 Match-Up 로고 (메인으로 이동) -->
     <div class="app-nav">
         <a class="app-brand" th:href="@{/}">
             Match-Up
@@ -164,7 +214,7 @@
     <!-- 프로필 헤더 -->
     <div class="profile-header">
         <div class="profile-title">
-            <span class="profile-title-icon">👤</span>
+
             <span>내 프로필</span>
         </div>
         <div class="profile-subtitle">
@@ -217,6 +267,9 @@
     </div>
 
 </div>
+
+<!-- 하단 도크 -->
+<div class="page-dock"></div>
 
 </body>
 </html>

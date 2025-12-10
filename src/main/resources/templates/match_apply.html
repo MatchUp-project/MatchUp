@@ -10,33 +10,68 @@
     <link rel="stylesheet" th:href="@{/styles.css}"/>
 
     <style>
-        /* ====== 잔디 배경 + 기본 레이아웃 (2번 페이지와 동일) ====== */
+        :root {
+            --page-text-main: #111827;
+            --page-text-muted: #6b7280;
+            --page-card-bg: rgba(255, 255, 255, 0.96);
+            --page-border: rgba(226, 232, 240, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* ===== Apple 느낌 그라데이션 배경 + 중앙 카드 ===== */
         body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: #111827;
+            color: var(--page-text-main);
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 48px 16px 64px;
+            gap: 20px;
+            padding: 40px 16px;
             background:
-                    linear-gradient(180deg, rgba(15,23,42,0.25), rgba(15,23,42,0.4)),
-                    url("/images/pitch-bg.png") center/cover no-repeat fixed;
+                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
+                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
+            opacity: 0.9;
+            z-index: -1;
+            filter: blur(4px);
         }
 
         .match-page {
             width: 100%;
             max-width: 1120px;
+            background: var(--page-card-bg);
+            border-radius: 28px;
+            padding: 24px 26px 24px;
+            box-shadow:
+                0 24px 65px rgba(15, 23, 42, 0.35),
+                0 0 0 1px rgba(148, 163, 184, 0.16);
+            backdrop-filter: blur(18px);
         }
 
-        /* ====== 상단 타이틀 (2번이랑 같은 스타일) ====== */
+        /* ====== 상단 타이틀 ====== */
         .match-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
-            color: #f9fafb;
-            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.9);
+            margin-bottom: 18px;
+            color: var(--page-text-main);
         }
 
         .match-header-left {
@@ -46,28 +81,13 @@
         }
 
         .match-title {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .match-title-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #9ca3af);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.65);
-            font-size: 15px;
         }
 
         .match-subtitle {
             font-size: 13px;
-            opacity: 0.9;
+            color: var(--page-text-muted);
         }
 
         .match-header-right {
@@ -80,19 +100,19 @@
             padding: 6px 14px;
             border-radius: 999px;
             font-size: 12px;
-            background: rgba(15,23,42,0.8);
+            background: #020617;
             color: #e5e7eb;
             border: 1px solid rgba(148,163,184,0.8);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            box-shadow: 0 6px 16px rgba(15,23,42,0.55);
         }
 
-        /* ====== 유리 카드 공통 (2번 표 느낌 그대로) ====== */
+        /* ====== 유리 카드 공통 ====== */
         .glass-card {
-            background: rgba(243, 244, 246, 0.88);
-            backdrop-filter: blur(8px);
+            background: rgba(249, 250, 251, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.8);
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.25);
         }
 
         /* ====== 매치 등록 카드 ====== */
@@ -112,8 +132,8 @@
             display: inline-flex;
             border-radius: 999px;
             padding: 3px;
-            background: rgba(15,23,42,0.85);
-            box-shadow: 0 10px 24px rgba(15,23,42,0.7);
+            background: #020617;
+            box-shadow: 0 10px 24px rgba(15,23,42,0.55);
             margin-bottom: 14px;
         }
 
@@ -129,32 +149,30 @@
         .match-tab-group a.active-tab {
             background: linear-gradient(135deg, #2563eb, #22c55e);
             color: #f9fafb;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        /* ====== 섹션 제목 ====== */
+        /* ====== 섹션 제목 & 빈 목록 텍스트 ====== */
         .match-section-title {
             font-size: 15px;
             font-weight: 600;
-            color: #f9fafb;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            color: var(--page-text-main);
             margin-bottom: 8px;
         }
 
         .match-empty-text {
             font-size: 13px;
-            color: #e5e7eb;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            color: var(--page-text-muted);
             margin-bottom: 12px;
         }
 
-        /* ====== 매치 카드 리스트 (2번 표 느낌의 반투명 카드) ====== */
+        /* ====== 매치 카드 리스트 ====== */
         .match-card {
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(6px);
-            border-radius: 14px;
-            border: 1px solid rgba(148, 163, 184, 0.8);
-            box-shadow: 0 8px 22px rgba(15,23,42,0.75);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(4px);
+            border-radius: 16px;
+            border: 1px solid var(--page-border);
+            box-shadow: 0 10px 26px rgba(15,23,42,0.25);
             color: #0f172a;
         }
 
@@ -169,7 +187,7 @@
 
         .match-meta {
             font-size: 13px;
-            color: #4b5563;
+            color: var(--page-text-muted);
         }
 
         .match-card.matched {
@@ -180,14 +198,13 @@
             font-size: 13px;
         }
 
-        /* 오른쪽 액션 버튼 영역 */
         .match-card-actions form button {
             font-size: 13px;
             padding: 6px 14px;
             border-radius: 999px;
         }
 
-        /* ====== 메인으로 버튼 (2번 페이지와 동일 느낌) ====== */
+        /* ====== 메인으로 버튼 ====== */
         .btn-main {
             border-radius: 999px;
             font-size: 12px;
@@ -195,8 +212,8 @@
             margin-top: 18px;
             border-color: #e5e7eb;
             color: #f9fafb;
-            background: rgba(15, 23, 42, 0.7);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.55);
         }
 
         .btn-main:hover {
@@ -211,10 +228,7 @@
     <!-- ===== 상단 헤더 ===== -->
     <div class="match-header">
         <div class="match-header-left">
-            <div class="match-title">
-                <span class="match-title-icon">⚽</span>
-                <span>매치 신청</span>
-            </div>
+            <div class="match-title">매치 신청</div>
             <div class="match-subtitle">
                 내 팀의 매치를 등록하고, 다른 팀과 매칭해 보세요.
             </div>

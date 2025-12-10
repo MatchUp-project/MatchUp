@@ -11,87 +11,83 @@
     <link rel="stylesheet" th:href="@{/style.css}"/>
 
     <style>
-        /* ===== 잔디 배경 + 기본 레이아웃 ===== */
+        :root {
+            --page-text-main: #111827;
+            --page-card-bg: rgba(255, 255, 255, 0.96);
+            --page-border: rgba(226, 232, 240, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* ===== 배경 + 기본 레이아웃 ===== */
         body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: #111827;
+            color: var(--page-text-main);
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 32px 16px 64px;
+            gap: 20px;
+            padding: 40px 16px;
             background:
-                linear-gradient(180deg, rgba(15,23,42,0.25), rgba(15,23,42,0.4)),
-                url("/images/pitch-bg.png") center/cover no-repeat fixed;
+                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
+                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
+            position: relative;
+            overflow: hidden;
         }
 
+        body::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
+            opacity: 0.9;
+            z-index: -1;
+            filter: blur(4px);
+        }
+
+        /* ===== 왼쪽 위 메인으로 버튼 ===== */
+        .home-link {
+            position: fixed;
+            top: 24px;
+            left: 32px;
+            padding: 7px 16px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.82);
+            color: #f9fafb;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.55);
+        }
+
+        .home-link:hover {
+            background: #020617;
+            color: #f9fafb;
+        }
+
+        /* ===== 중앙 카드 ===== */
         .profile-page {
             width: 100%;
-            max-width: 1120px;
-        }
-
-        /* ===== 상단 앱 로고 ===== */
-        .app-nav {
-            display: flex;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .app-brand {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-            text-decoration: none;
-            color: #16a34a; /* 초록색 로고 */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.45);
-        }
-
-        .app-brand:hover {
-            color: #22c55e;
-        }
-
-        /* ===== 헤더 텍스트 ===== */
-        .profile-header {
-            margin-bottom: 10px;
-            color: #f9fafb;
-            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.9);
-        }
-
-        .profile-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .profile-title-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #9ca3af);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.65);
-            font-size: 16px;
-        }
-
-        .profile-subtitle {
-            font-size: 13px;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-
-        /* ===== 수정 폼 카드 ===== */
-        .edit-card {
-            margin: 18px auto 0;
             max-width: 520px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.92);
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.6);
+        }
+
+        .edit-card {
+            width: 100%;
+            border-radius: 28px;
+            background: var(--page-card-bg);
+            box-shadow:
+                0 18px 45px rgba(15, 23, 42, 0.28),
+                0 0 0 1px rgba(148, 163, 184, 0.18);
             padding: 32px 40px 28px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px);
         }
 
         .edit-title {
@@ -110,7 +106,22 @@
 
         .form-control {
             font-size: 14px;
-            border-radius: 10px;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            padding: 9px 14px;
+            background-color: rgba(249, 250, 251, 0.95);
+            transition:
+                border-color 0.15s ease,
+                box-shadow 0.15s ease,
+                background-color 0.15s ease,
+                transform 0.12s ease;
+        }
+
+        .form-control:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+            background-color: #ffffff;
+            transform: translateY(-1px);
         }
 
         /* ===== 버튼 영역 ===== */
@@ -126,13 +137,13 @@
             font-size: 14px;
             padding: 10px 24px;
             border: none;
-            background: #16a34a; /* ✅ 초록색 저장 버튼 */
+            background: #16a34a;
             color: #f9fafb;
             box-shadow: 0 8px 20px rgba(22, 163, 74, 0.6);
         }
 
         .btn-save:hover {
-            background: #15803d; /* 조금 더 진한 초록 */
+            background: #15803d;
             color: #f9fafb;
         }
 
@@ -141,7 +152,7 @@
             font-size: 14px;
             padding: 10px 24px;
             border: none;
-            background: #6b7280; /* 회색 */
+            background: #6b7280;
             color: #f9fafb;
         }
 
@@ -149,35 +160,27 @@
             background: #4b5563;
             color: #f9fafb;
         }
+
+        /* ===== 아래 도크 ===== */
+        .page-dock {
+            width: 260px;
+            height: 24px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+        }
     </style>
 </head>
 <body>
 
+<!-- 맨 왼쪽 위 메인으로 버튼 -->
+<a th:href="@{/}" class="home-link">메인으로</a>
+
 <div class="profile-page">
-
-    <!-- 상단 Match-Up 로고 (메인으로 이동) -->
-    <div class="app-nav">
-        <a class="app-brand" th:href="@{/}">
-            Match-Up
-        </a>
-    </div>
-
-    <!-- 헤더 -->
-    <div class="profile-header">
-        <div class="profile-title">
-            <span class="profile-title-icon">✏️</span>
-            <span>프로필 수정</span>
-        </div>
-        <div class="profile-subtitle">
-            Match-Up에서 사용할 내 정보를 수정할 수 있어요.
-        </div>
-    </div>
-
-    <!-- 수정 폼 카드 -->
+    <!-- 프로필 수정 카드 -->
     <div class="edit-card">
         <div class="edit-title">프로필 수정</div>
 
-        <!-- 필요에 따라 th:object 는 프로젝트에 맞게 바꿔서 사용 -->
         <form th:action="@{/profile/edit}" method="post" th:object="${user}">
             <div class="mb-3">
                 <label class="form-label">이름</label>
@@ -200,18 +203,15 @@
             </div>
 
             <div class="edit-actions">
-                <button type="submit" class="btn btn-save">
-                    저장
-                </button>
-
-                <a th:href="@{/profile}" class="btn btn-cancel">
-                    취소
-                </a>
+                <button type="submit" class="btn btn-save">저장</button>
+                <a th:href="@{/profile}" class="btn btn-cancel">취소</a>
             </div>
         </form>
     </div>
-
 </div>
+
+<!-- 카드 아래 도크 -->
+<div class="page-dock"></div>
 
 </body>
 </html>

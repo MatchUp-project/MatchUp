@@ -3,12 +3,229 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>통합 게시판</title>
+    <title>커뮤니티 | Match-Up</title>
 
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- 프로젝트 공통 스타일 (있으면 유지) -->
+    <link rel="stylesheet" th:href="@{/style.css}"/>
 
     <style>
+        :root {
+            --page-text-main: #111827;
+            --page-text-muted: #6b7280;
+            --page-card-bg: rgba(255, 255, 255, 0.96);
+            --page-border: rgba(226, 232, 240, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* ===== 팀 목록 페이지와 같은 그라디언트 배경 ===== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+            color: var(--page-text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 16px 64px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
+                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
+                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
+            opacity: 0.9;
+            z-index: -1;
+            filter: blur(4px);
+        }
+
+        /* ===== 가운데 카드 ===== */
+        .board-page {
+            width: 100%;
+            max-width: 1120px;
+            background: var(--page-card-bg);
+            border-radius: 28px;
+            padding: 24px 26px 22px;
+            box-shadow:
+                0 24px 65px rgba(15, 23, 42, 0.35),
+                0 0 0 1px rgba(148, 163, 184, 0.16);
+            backdrop-filter: blur(18px);
+        }
+
+        /* ===== 상단 타이틀 + 정렬/글쓰기 ===== */
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            color: var(--page-text-main);
+        }
+
+        .board-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .board-title-main {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .board-subtitle {
+            font-size: 13px;
+            color: var(--page-text-muted);
+        }
+
+        .board-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-write {
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #f9fafb;
+            box-shadow: 0 8px 18px rgba(22, 163, 74, 0.55);
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            word-break: keep-all;
+        }
+
+        .btn-write:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            color: #f9fafb;
+        }
+
+        .board-sort {
+            font-size: 13px;
+            height: 38px;
+            border-radius: 999px;
+        }
+
+        /* ===== 좌측 카테고리 + 우측 테이블 레이아웃 ===== */
+        .board-layout {
+            display: flex;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        .board-sidebar {
+            width: 220px;
+        }
+
+        .board-content {
+            flex: 1;
+        }
+
+        .board-sidebar .list-group {
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35);
+        }
+
+        .board-sidebar .list-group-item {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-bottom: 1px solid rgba(209, 213, 219, 0.9);
+            font-size: 14px;
+        }
+
+        .board-sidebar .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .board-sidebar .list-group-item.active {
+            background: rgba(37, 99, 235, 0.95);
+            color: #f9fafb;
+            font-weight: 600;
+        }
+
+        /* ===== 게시판 테이블 (팀 목록 표 느낌) ===== */
+        .board-table-wrapper {
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--page-border);
+        }
+
+        table.board-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #0f172a;
+            table-layout: fixed;
+        }
+
+        .board-table thead {
+            background: rgba(243, 244, 246, 0.96);
+        }
+
+        .board-table thead th {
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.9);
+        }
+
+        .board-table tbody tr {
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .board-table tbody tr + tr {
+            border-top: 1px solid rgba(229, 231, 235, 0.9);
+        }
+
+        .board-table tbody tr:hover {
+            background: rgba(243, 244, 246, 0.98);
+        }
+
+        .board-table tbody td {
+            padding: 12px 18px;
+        }
+
+        /* 번호 / 추가 정보 / 작성자 / 작성일 폭 */
+        .board-table th:nth-child(1),
+        .board-table td:nth-child(1) { width: 80px; text-align: center; }
+
+        .board-table th:nth-child(3),
+        .board-table td:nth-child(3) { width: 260px; }
+
+        .board-table th:nth-child(4),
+        .board-table td:nth-child(4) { width: 150px; text-align: center; }
+
+        .board-table th:nth-child(5),
+        .board-table td:nth-child(5) { width: 120px; text-align: center; }
+
+        .board-table th:nth-child(2),
+        .board-table td:nth-child(2) { text-align: left; }
+
         /* 제목 말줄임 */
         .table-title-ellipsis {
             display: block;
@@ -18,7 +235,7 @@
             text-overflow: ellipsis;
         }
 
-        /* 추가 정보도 말줄임 */
+        /* 추가 정보 말줄임 */
         .table-extra-col {
             max-width: 260px;
             overflow: hidden;
@@ -26,119 +243,43 @@
             text-overflow: ellipsis;
         }
 
-        /* 테이블 레이아웃 안정화 */
-        table {
-            table-layout: fixed;
+        /* 게시글 없음 */
+        .board-empty {
+            text-align: center;
+            padding: 32px 0;
+            color: rgba(31, 41, 55, 0.75);
         }
 
-        /* col 높이 균등 맞추기 */
-        aside.col-md-3, section.col-md-9 {
-            align-self: flex-start;
+        /* 아래 도크 */
+        .page-dock {
+            width: 260px;
+            height: 24px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
         }
-
-       .btn-write {
-            height: 38px;                  /* select 높이 동일 */
-            padding: 0 16px;               /* 가로 여백 */
-            font-size: 0.9rem;
-            display: inline-flex;          /* 버튼을 flex로 */
-            align-items: center;           /* 세로 가운데 정렬 */
-            justify-content: center;       /* 가로 가운데 정렬 */
-            white-space: nowrap;           /* 줄바꿈 금지 */
-            word-break: keep-all;          /* 글자 단위 줄바꿈 금지 */
-        }
-
-
-
-
     </style>
 </head>
 <body>
 
-<!-- 상단 유틸 바 -->
-<div class="bg-dark text-white small py-1">
-    <div class="container d-flex justify-content-end gap-3">
-        <a href="/" class="link-light text-decoration-none">홈</a>
-        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
-        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
-    </div>
-</div>
+<div class="board-page">
 
-<!-- ===== 헤더 + 검색 + 상단 메뉴 ===== -->
-<header class="border-bottom">
-    <div class="container py-3">
-
-        <!-- 1줄 : 로고 + 검색 -->
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <!-- 로고 -->
-            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
-
-            <!-- 검색 -->
-            <form class="d-flex flex-grow-1 mx-4" role="search">
-                <input class="form-control form-control-lg rounded-start-pill"
-                       type="search" placeholder="팀, 구장, 지역 검색">
-                <button class="btn btn-primary btn-lg rounded-end-pill px-4" type="submit">
-                    <i class="bi bi-search"></i>
-                </button>
-            </form>
-
-            <!-- (필요하면 우측에 버튼 더 둘 수 있음) -->
+    <!-- 상단 헤더 -->
+    <div class="board-header">
+        <div class="board-header-left">
+            <div class="board-title-main"
+                 th:text="${categoryName != null ? categoryName : '통합 게시판'}">
+                통합 게시판
+            </div>
+            <div class="board-subtitle">
+                Match-Up 커뮤니티에서 팀과 선수들의 이야기를 나눠보세요.
+            </div>
         </div>
 
-        <!-- 2줄 : 상단 메뉴바 -->
-        <!-- 2줄 : 상단 메뉴바 -->
-        <nav class="mt-3">
-            <ul class="nav main-nav border-top pt-2">
+        <div class="board-header-right">
 
-                <!-- 팀 (드롭다운) -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
-                       href="#" id="teamMenu"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                        팀
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
-                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
-                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
-                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
-                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
-                    </ul>
-                </li>
-
-                <!-- 커뮤니티 -->
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board/list?category=FREE">
-                        커뮤니티
-                    </a>
-                </li>
-
-                <!-- 매치 신청 -->
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">
-                        매치 신청
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
-    </div>
-</header>
-
-
-<div class="container py-5">
-
-    <!-- ===== 제목 + 글쓰기 버튼 (카테고리 밖, 가장 위) ===== -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <h4 class="fw-bold"
-            th:text="${categoryName != null ? categoryName : '통합 게시판'}">
-        </h4>
-
-        <div class="d-flex gap-2">
-
-            <!-- 👍 category 값을 data 속성으로 넣는다 -->
-            <select class="form-select form-select-sm"
+            <!-- 정렬 셀렉트 -->
+            <select class="form-select board-sort"
                     th:data-category="${category}"
                     onchange="changeSort(this)">
                 <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
@@ -147,37 +288,20 @@
                 <option value="month"  th:selected="${sort == 'month'}">월간 인기글</option>
             </select>
 
+            <!-- 글쓰기 버튼 -->
             <a th:href="@{/board/write(category=${category})}"
-               class="btn btn-primary btn-write">글쓰기</a>
+               class="btn btn-write">
+                글쓰기
+            </a>
         </div>
-
     </div>
 
-    <!-- 👍 안전한 JS 함수 -->
-    <script>
-        function changeSort(selectEl) {
-            const category = selectEl.dataset.category || '';
-            const sort = selectEl.value;
+    <!-- 좌측 카테고리 + 우측 게시판 -->
+    <div class="board-layout">
 
-            // category가 비면 전체 목록으로 이동
-            if (!category) {
-                location.href = `/board/list?sort=${sort}`;
-            } else {
-                location.href = `/board/list?category=${category}&sort=${sort}`;
-            }
-        }
-    </script>
-
-
-
-
-
-    <!-- ===== 좌측 카테고리 + 우측 테이블 ===== -->
-    <div class="row g-4">
-
-        <!-- 좌측 메뉴 -->
-        <aside class="col-md-3">
-            <div class="list-group shadow-sm">
+        <!-- 좌측 카테고리 -->
+        <aside class="board-sidebar">
+            <div class="list-group">
                 <a th:href="@{/board/list(category='FREE')}"
                    class="list-group-item list-group-item-action"
                    th:classappend="${category?.name() == 'FREE'} ? ' active'">
@@ -199,56 +323,79 @@
         </aside>
 
         <!-- 우측 테이블 -->
-        <section class="col-md-9">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                <tr>
-                    <th style="width:80px;">번호</th>
-                    <th>제목</th>
-                    <th style="width:230px;">추가 정보</th>
-                    <th style="width:150px;">작성자</th>
-                    <th style="width:120px;">작성일</th>
-                </tr>
-                </thead>
+        <section class="board-content">
+            <div class="board-table-wrapper">
+                <table class="board-table">
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>제목</th>
+                        <th>추가 정보</th>
+                        <th>작성자</th>
+                        <th>작성일</th>
+                    </tr>
+                    </thead>
 
-                <tbody>
-                <tr th:each="post, stat : ${boards}">
-                    <td th:text="${stat.count}"></td>
+                    <tbody>
+                    <tr th:each="post, stat : ${boards}">
+                        <td th:text="${stat.count}">1</td>
 
-                    <td>
-                        <a th:href="@{/board/{id}(id=${post.id})}"
-                           th:text="${post.title}"
-                           class="text-decoration-none fw-semibold table-title-ellipsis"></a>
-                    </td>
+                        <td>
+                            <a th:href="@{/board/{id}(id=${post.id})}"
+                               th:text="${post.title}"
+                               class="text-decoration-none fw-semibold table-title-ellipsis">
+                                게시글 제목
+                            </a>
+                        </td>
 
-                    <td class="table-extra-col">
-                        <span th:if="${post.category?.name() == 'FREE'}">-</span>
+                        <td class="table-extra-col">
+                            <span th:if="${post.category?.name() == 'FREE'}">-</span>
 
-                        <span th:if="${post.category?.name() == 'PLAYER'}"
-                              th:text="|포지션: ${post.positionNeeded} / 나이: ${post.ageRange} / 실력: ${post.skillLevel}|"></span>
+                            <span th:if="${post.category?.name() == 'PLAYER'}"
+                                  th:text="|포지션: ${post.positionNeeded} / 나이: ${post.ageRange} / 실력: ${post.skillLevel}|">
+                                포지션: -, 나이: -, 실력: -
+                            </span>
 
-                        <span th:if="${post.category?.name() == 'TEAM'}"
-                              th:text="|지역: ${post.region} / 포지션: ${post.preferredPosition} / 실력: ${post.skillLevel}|"></span>
-                    </td>
+                            <span th:if="${post.category?.name() == 'TEAM'}"
+                                  th:text="|지역: ${post.region} / 포지션: ${post.preferredPosition} / 실력: ${post.skillLevel}|">
+                                지역: -, 포지션: -, 실력: -
+                            </span>
+                        </td>
 
-                    <td th:text="${post.username}"></td>
-                    <td th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}"></td>
-                </tr>
+                        <td th:text="${post.username}">작성자</td>
+                        <td th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}">25-12-05</td>
+                    </tr>
 
-                <tr th:if="${#lists.isEmpty(boards)}">
-                    <td colspan="5" class="text-center text-muted py-4">
-                        등록된 게시글이 없습니다.
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                    <tr th:if="${#lists.isEmpty(boards)}">
+                        <td colspan="5" class="board-empty">
+                            등록된 게시글이 없습니다.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
-    </div>
-</div>
+    </div><!-- /.board-layout -->
+</div><!-- /.board-page -->
 
+<!-- 아래 도크 -->
+<div class="page-dock"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function changeSort(selectEl) {
+        const category = selectEl.dataset.category || '';
+        const sort = selectEl.value;
+
+        if (!category) {
+            location.href = `/board/list?sort=${sort}`;
+        } else {
+            location.href = `/board/list?category=${category}&sort=${sort}`;
+        }
+    }
+</script>
 
 </body>
 </html>
