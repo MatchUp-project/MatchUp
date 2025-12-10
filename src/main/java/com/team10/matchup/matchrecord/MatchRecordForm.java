@@ -7,6 +7,8 @@ import java.time.LocalTime;
 
 public class MatchRecordForm {
 
+    // 매치 포스트 ID (점수 입력 후 상태 변경용)
+    private Long matchId;
     private Long id;
 
     // 상대 팀
@@ -33,6 +35,9 @@ public class MatchRecordForm {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getMatchId() { return matchId; }
+    public void setMatchId(Long matchId) { this.matchId = matchId; }
 
     public Long getTeam2Id() { return team2Id; }
     public void setTeam2Id(Long team2Id) { this.team2Id = team2Id; }

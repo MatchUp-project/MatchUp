@@ -15,12 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-// 🔽 여기 두 개 추가
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +32,10 @@ public class MatchRecordService {
     private final MatchPostRepository matchPostRepository;
     private final MatchRequestRepository matchRequestRepository;
 
-    // ─────────────────── 공통 유틸 ───────────────────
-
     @Transactional(readOnly = true)
     public Team getCurrentTeamOrNull() {
         return currentUserService.getCurrentUserTeamOrNull();
     }
-
-    // ─────────────────── 목록용 메서드 ───────────────────
 
     @Transactional(readOnly = true)
     public List<MatchRecord> getRecordsForCurrentTeam() {
@@ -57,7 +51,7 @@ public class MatchRecordService {
         return matchPostRepository.findByTeamAndStatusOrderByMatchDatetimeDesc(myTeam, "MATCHED");
     }
 
-    // ✅ 점수 입력 필요 매치들에 대해 matchId -> 상대 팀 이름 맵 생성
+    // matchId -> 상대 팀 이름 맵
     @Transactional(readOnly = true)
     public Map<Long, String> getOpponentNamesForMatches(List<MatchPost> posts) {
         Team myTeam = getCurrentTeamOrNull();
@@ -76,20 +70,32 @@ public class MatchRecordService {
         return result;
     }
 
-    // ─────────────────── 점수 저장 ───────────────────
-
     public void saveRecord(MatchRecordForm form) {
         Team myTeam = getCurrentTeamOrNull();
         if (myTeam == null) {
-            throw new IllegalStateException("사용자가 속한 팀이 없습니다.");
+            throw new IllegalStateException("로그인한 사용자의 팀을 찾을 수 없습니다.");
+        }
+
+        if (form.getMatchId() == null) {
+            throw new IllegalArgumentException("매치 정보가 없습니다.");
         }
 
         if (form.getTeam2Id() == null) {
-            throw new IllegalArgumentException("상대 팀이 선택되지 않았습니다.");
+            throw new IllegalArgumentException("상대 팀을 선택해주세요.");
         }
 
         Team opponent = teamRepository.findById(form.getTeam2Id())
                 .orElseThrow(() -> new IllegalArgumentException("상대 팀을 찾을 수 없습니다."));
+
+        MatchPost post = matchPostRepository.findById(form.getMatchId())
+                .orElseThrow(() -> new IllegalArgumentException("매치 정보를 찾을 수 없습니다."));
+
+        boolean relatedToMyTeam =
+                (post.getTeam() != null && post.getTeam().getId().equals(myTeam.getId())) ||
+                        (post.getMatchedTeam() != null && post.getMatchedTeam().getId().equals(myTeam.getId()));
+        if (!relatedToMyTeam) {
+            throw new IllegalStateException("내 팀과 관련 없는 매치입니다.");
+        }
 
         MatchRecord record = new MatchRecord();
         record.setTeam1(myTeam);
@@ -107,14 +113,15 @@ public class MatchRecordService {
         }
 
         matchRecordRepository.save(record);
-    }
 
-    // ─────────────────── 점수 입력 폼 생성 ───────────────────
+        // 점수 입력 완료 후 상태 변경 → "점수 입력 필요" 목록에서 제거
+        post.setStatus("RECORDED");
+    }
 
     @Transactional(readOnly = true)
     public MatchRecordForm createFormFromAcceptedMatch(Long matchId) {
         MatchPost post = matchPostRepository.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("매치를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("매칭된 경기를 찾을 수 없습니다."));
 
         Team myTeam = getCurrentTeamOrNull();
         if (myTeam == null) {
@@ -122,8 +129,9 @@ public class MatchRecordService {
         }
 
         MatchRecordForm form = new MatchRecordForm();
+        form.setMatchId(matchId);
 
-        // 1) 경기 일시 / 장소
+        // 1) 날짜/시간
         LocalDateTime dt = post.getMatchDatetime();
         if (dt != null) {
             form.setMatchDate(dt.toLocalDate());
@@ -131,14 +139,14 @@ public class MatchRecordService {
         }
         form.setPlace(post.getLocation());
 
-        // 2) 상대 팀 찾기
+        // 2) 상대 팀
         Team opponentTeam = findOpponentTeamForMatch(matchId, myTeam);
         if (opponentTeam != null) {
             form.setTeam2Id(opponentTeam.getId());
             form.setTeam2Name(opponentTeam.getName());
         }
 
-        // 3) 기본 점수 0
+        // 3) 초기 점수 0
         form.setTeam1Score(0);
         form.setTeam2Score(0);
 
@@ -146,33 +154,28 @@ public class MatchRecordService {
     }
 
     /**
-     * matchId + 내 팀을 기준으로, 수락된 매치 요청 중 "상대 팀" 을 찾아주는 메서드
+     * matchId + 내 팀 기준으로 상대 팀 찾기
      */
     @Transactional(readOnly = true)
     protected Team findOpponentTeamForMatch(Long matchId, Team myTeam) {
 
-        // ✅ status 를 "ACCEPTED" 문자열로 조회한다 (Enum 아님)
         List<MatchRequest> acceptedRequests =
                 matchRequestRepository.findByMatchPost_IdAndStatus(matchId, "ACCEPTED");
 
         for (MatchRequest req : acceptedRequests) {
-            // 요청을 보낸 유저 (필드 이름에 맞게 getRequesterUser / getRequester 중 하나일 것)
             Long requesterUserId = req.getRequesterUser().getId();
 
-            // 그 유저가 어떤 팀에 속해 있는지 찾는다.
             Optional<TeamMember> tmOpt = teamMemberRepository.findFirstByUser_Id(requesterUserId);
 
             if (tmOpt.isPresent()) {
                 Team candidateTeam = tmOpt.get().getTeam();
 
-                // 내 팀과 다르면 그 팀이 상대 팀
                 if (!candidateTeam.getId().equals(myTeam.getId())) {
                     return candidateTeam;
                 }
             }
         }
 
-        // 찾지 못한 경우
         return null;
     }
 }

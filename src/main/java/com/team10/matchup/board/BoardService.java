@@ -13,6 +13,8 @@ import com.team10.matchup.board.team.BoardTeamSearchRepository;
 import com.team10.matchup.user.User;
 import com.team10.matchup.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -290,7 +292,11 @@ public class BoardService {
     @Transactional(readOnly = true)
     public List<BoardResponse> getRecentFreeBoards(int limit) {
         return boardRepository
-                .findTopRecentByCategory(BoardCategory.FREE.name(), limit)
+                .findByCategoryAndDeletedFalse(
+                        BoardCategory.FREE,
+                        PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "id"))
+                )
+                .getContent()
                 .stream()
                 .map(this::mapBoardToResponse)
                 .toList();

@@ -27,6 +27,7 @@
                 <form th:action="@{/team/records/score}" th:object="${recordForm}" method="post">
 
                     <input type="hidden" th:field="*{id}"/>
+                    <input type="hidden" th:field="*{matchId}"/>
 
                     <div class="row g-3 mb-3">
                         <!-- 상대 팀 이름 -->
