@@ -32,7 +32,13 @@
                     <h4 class="mb-0" th:text="${team.name}">팀 이름</h4>
                     <small class="text-muted" th:text="${team.region}">지역</small>
                 </div>
-                <span class="badge bg-primary" th:if="${isLeader}">팀장</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary" th:if="${isLeader}">팀장</span>
+                    <form th:if="${canLeave}" th:action="@{/team/members/leave}" method="post"
+                          onsubmit="return confirm('팀을 탈퇴하시겠습니까?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">팀 탈퇴</button>
+                    </form>
+                </div>
             </div>
         </div>
 

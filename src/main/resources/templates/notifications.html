@@ -56,28 +56,35 @@
 
     <div class="list-group" th:each="n : ${notifications}">
         <div class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
+            <div class="me-3">
                 <div th:text="${n.content}">알림 내용</div>
                 <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
             </div>
 
-            <div th:if="${n.type == 'MATCH_REQUEST'}">
-                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'PENDING'}">
-                    <form th:action="@{'/notifications/' + ${n.id} + '/accept'}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-success">수락</button>
-                    </form>
-                    <form th:action="@{'/notifications/' + ${n.id} + '/reject'}" method="post" class="d-inline ms-1">
-                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
-                    </form>
+            <div class="d-flex align-items-center gap-2">
+                <div th:if="${n.type == 'MATCH_REQUEST'}">
+                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'PENDING'}">
+                        <form th:action="@{'/notifications/' + ${n.id} + '/accept'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">수락</button>
+                        </form>
+                        <form th:action="@{'/notifications/' + ${n.id} + '/reject'}" method="post" class="d-inline ms-1">
+                            <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                        </form>
+                    </div>
+                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'ACCEPTED'}"
+                         class="text-success fw-semibold">
+                        매치가 수락되었습니다.
+                    </div>
+                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'REJECTED'}"
+                         class="text-danger fw-semibold">
+                        매치가 거절되었습니다.
+                    </div>
                 </div>
-                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'ACCEPTED'}"
-                     class="text-success fw-semibold">
-                    매치가 수락되었습니다.
-                </div>
-                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'REJECTED'}"
-                     class="text-danger fw-semibold">
-                    매치가 거절되었습니다.
-                </div>
+
+                <!-- 삭제(X) 버튼 -->
+                <form th:action="@{'/notifications/' + ${n.id} + '/delete'}" method="post" class="ms-2">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="삭제">×</button>
+                </form>
             </div>
         </div>
     </div>

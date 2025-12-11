@@ -56,6 +56,8 @@ public class TeamInvitationService {
         User target = userRepository.findByUsername(usernameToInvite)
                 .orElseThrow(() -> new IllegalArgumentException("해당 아이디의 사용자를 찾을 수 없습니다."));
 
+        ensureNotInAnyTeam(target);
+
         TeamInvite invite = new TeamInvite();
         invite.setTeam(team);
         invite.setInvitedBy(leader);
@@ -81,6 +83,8 @@ public class TeamInvitationService {
         if (!"PENDING".equals(invite.getStatus())) {
             return;
         }
+
+        ensureNotInAnyTeam(me);
 
         invite.setStatus("ACCEPTED");
         invite.setRespondedAt(LocalDateTime.now());
@@ -114,6 +118,8 @@ public class TeamInvitationService {
         User me = currentUserService.getCurrentUser();
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+
+        ensureNotInAnyTeam(me);
 
         if (teamMemberRepository.existsByTeam_IdAndUser_Id(team.getId(), me.getId())) {
             throw new IllegalStateException("이미 팀에 소속되어 있습니다.");
@@ -157,6 +163,7 @@ public class TeamInvitationService {
         req.setRespondedAt(LocalDateTime.now());
 
         if (accept) {
+            ensureNotInAnyTeam(req.getApplicant());
             addMemberIfAbsent(req.getTeam(), req.getApplicant(), TeamMember.Role.PLAYER);
             notificationService.send(
                     req.getApplicant(),
@@ -171,6 +178,13 @@ public class TeamInvitationService {
                     req.getTeam().getName() + " 가입이 거절되었습니다.",
                     null
             );
+        }
+    }
+
+    private void ensureNotInAnyTeam(User user) {
+        boolean alreadyInTeam = teamMemberRepository.findFirstByUser_Id(user.getId()).isPresent();
+        if (alreadyInTeam) {
+            throw new IllegalStateException("이미 다른 팀에 소속되어 있습니다.");
         }
     }
 

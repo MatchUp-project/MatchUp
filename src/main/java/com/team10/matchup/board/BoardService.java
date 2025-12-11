@@ -165,10 +165,25 @@ public class BoardService {
     // ============================================================
     @Transactional(readOnly = true)
     public List<BoardResponse> getListByCategory(BoardCategory category) {
-        return boardRepository.findByCategoryAndDeletedFalseOrderByIdDesc(category)
+        return getListByCategory(category, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BoardResponse> getListByCategory(BoardCategory category, String region) {
+        List<BoardResponse> list = boardRepository.findByCategoryAndDeletedFalseOrderByIdDesc(category)
                 .stream()
                 .map(this::mapBoardToResponseV2)
                 .toList();
+
+        if (region != null && !region.isBlank()
+                && (category == BoardCategory.PLAYER || category == BoardCategory.TEAM)) {
+            String r = region.trim();
+            list = list.stream()
+                    .filter(b -> b.getRegion() != null && r.equalsIgnoreCase(b.getRegion()))
+                    .toList();
+        }
+
+        return list;
     }
 
 

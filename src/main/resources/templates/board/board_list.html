@@ -153,6 +153,45 @@
 
     </div>
 
+    <!-- 지역 필터: 팀/선수 게시판에서만 노출 -->
+    <div class="mb-3"
+         th:if="${category != null and (category.name() == 'PLAYER' or category.name() == 'TEAM')}">
+        <div class="d-flex flex-wrap gap-2">
+            <a th:href="@{/board/list(category=${category}, sort=${sort})}"
+               class="btn btn-sm"
+               th:classappend="${region == null or #strings.isEmpty(region)} ? 'btn-primary' : 'btn-outline-secondary'">
+                전체
+            </a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='SEOUL')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'SEOUL'} ? 'btn-primary' : 'btn-outline-secondary'">SEOUL</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='GYEONGGI')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'GYEONGGI'} ? 'btn-primary' : 'btn-outline-secondary'">GYEONGGI</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='INCHEON')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'INCHEON'} ? 'btn-primary' : 'btn-outline-secondary'">INCHEON</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='BUSAN')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'BUSAN'} ? 'btn-primary' : 'btn-outline-secondary'">BUSAN</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='DAEGU')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'DAEGU'} ? 'btn-primary' : 'btn-outline-secondary'">DAEGU</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='DAEJEON')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'DAEJEON'} ? 'btn-primary' : 'btn-outline-secondary'">DAEJEON</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='GWANGJU')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'GWANGJU'} ? 'btn-primary' : 'btn-outline-secondary'">GWANGJU</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='ULSAN')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'ULSAN'} ? 'btn-primary' : 'btn-outline-secondary'">ULSAN</a>
+            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='JEJU')}"
+               class="btn btn-sm"
+               th:classappend="${region != null and region == 'JEJU'} ? 'btn-primary' : 'btn-outline-secondary'">JEJU</a>
+        </div>
+    </div>
+
     <!-- 👍 안전한 JS 함수 -->
     <script>
         function changeSort(selectEl) {
@@ -226,6 +265,13 @@
 
                         <span th:if="${post.category?.name() == 'PLAYER'}"
                               th:text="|포지션: ${post.positionNeeded} / 나이: ${post.ageRange} / 실력: ${post.skillLevel}|"></span>
+                        <div th:if="${post.category?.name() == 'PLAYER' and post.authorTeamId != null}"
+                             class="small mt-1">
+                            <a th:href="@{/team/detail/{id}(id=${post.authorTeamId})}"
+                               class="text-decoration-none">
+                                작성자 팀: <span th:text="${post.authorTeamName}">team</span>
+                            </a>
+                        </div>
 
                         <span th:if="${post.category?.name() == 'TEAM'}"
                               th:text="|지역: ${post.region} / 포지션: ${post.preferredPosition} / 실력: ${post.skillLevel}|"></span>

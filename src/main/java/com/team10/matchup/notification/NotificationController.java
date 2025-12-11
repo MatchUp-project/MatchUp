@@ -46,5 +46,10 @@ public class NotificationController {
         notificationService.markRead(n);
         return "redirect:/notifications";
     }
-}
 
+    @PostMapping("/{notificationId}/delete")
+    public String delete(@PathVariable Long notificationId) {
+        notificationService.deleteForCurrentUser(notificationId);
+        return "redirect:/notifications";
+    }
+}

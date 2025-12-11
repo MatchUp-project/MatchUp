@@ -28,6 +28,7 @@ public class BoardPageController {
     public String boardList(
             @RequestParam(value = "category", required = false) BoardCategory category,
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
+            @RequestParam(value = "region", required = false) String region,
             Model model
     ) {
         List<BoardResponse> list;
@@ -37,13 +38,23 @@ public class BoardPageController {
             case "week"  -> list = boardService.getWeeklyPopular();
             case "month" -> list = boardService.getMonthlyPopular();
             default      -> list = (category != null)
-                    ? boardService.getListByCategory(category)
+                    ? boardService.getListByCategory(category, region)
                     : boardService.getAllBoards();
+        }
+
+        if (region != null && !region.isBlank()
+                && category != null
+                && (category == BoardCategory.PLAYER || category == BoardCategory.TEAM)) {
+            String r = region.trim();
+            list = list.stream()
+                    .filter(b -> b.getRegion() != null && r.equalsIgnoreCase(b.getRegion()))
+                    .toList();
         }
 
         model.addAttribute("boards", list);
         model.addAttribute("category", category);
         model.addAttribute("sort", sort);
+        model.addAttribute("region", region);
 
         String categoryName = (category == null)
                 ? "통합 게시판"
@@ -101,4 +112,3 @@ public class BoardPageController {
     }
 
 }
-

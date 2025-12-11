@@ -193,6 +193,12 @@
         <div>포지션: <span th:text="${board.positionNeeded}"></span></div>
         <div>나이대: <span th:text="${board.ageRange}"></span></div>
         <div>실력: <span th:text="${board.skillLevel}"></span></div>
+        <div th:if="${board.authorTeamId != null}" class="mt-2">
+            <a th:href="@{/team/detail/{id}(id=${board.authorTeamId})}"
+               class="btn btn-outline-secondary btn-sm">
+                작성자 팀 보기 (<span th:text="${board.authorTeamName}">team</span>)
+            </a>
+        </div>
     </div>
 
     <!-- TEAM 상세 -->

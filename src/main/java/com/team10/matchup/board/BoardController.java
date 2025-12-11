@@ -20,8 +20,9 @@ public class BoardController {
     }
 
     @GetMapping
-    public List<BoardResponse> list(@RequestParam BoardCategory category) {
-        return boardService.getListByCategory(category);
+    public List<BoardResponse> list(@RequestParam BoardCategory category,
+                                    @RequestParam(value = "region", required = false) String region) {
+        return boardService.getListByCategory(category, region);
     }
 
     @GetMapping("/{id}")

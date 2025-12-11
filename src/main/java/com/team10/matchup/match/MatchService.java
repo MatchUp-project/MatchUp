@@ -141,7 +141,7 @@ public class MatchService {
         notificationService.send(
                 leader,
                 NotificationType.MATCH_REQUEST.name(),
-                requester.getName() + " 님이 매치를 신청했습니다.",
+                (requesterTeam != null ? requesterTeam.getName() : requester.getName()) + " 팀이 매치를 신청했습니다.",
                 req
         );
     }
@@ -217,6 +217,16 @@ public class MatchService {
 
         // 5) 상대팀 세팅 (중요!!)
         post.setMatchedTeam(opponentTeam);
+
+        // 6) 신청자에게 알림: 수락 + 수락한 팀 정보
+        Team hostTeam = post.getTeam();
+        String hostTeamName = hostTeam != null ? hostTeam.getName() : "상대 팀";
+        notificationService.send(
+                req.getRequesterUser(),
+                NotificationType.MATCH_ACCEPTED.name(),
+                hostTeamName + " 팀이 매치 요청을 수락했습니다.",
+                req
+        );
     }
 
 
@@ -234,6 +244,15 @@ public class MatchService {
 
         req.setStatus("REJECTED");
         req.setRespondedAt(LocalDateTime.now());
+
+        Team hostTeam = req.getMatchPost().getTeam();
+        String hostTeamName = hostTeam != null ? hostTeam.getName() : "상대 팀";
+        notificationService.send(
+                req.getRequesterUser(),
+                NotificationType.MATCH_REJECTED.name(),
+                hostTeamName + " 팀이 매치 요청을 거절했습니다.",
+                req
+        );
     }
 
     @Transactional(readOnly = true)
@@ -257,19 +276,27 @@ public class MatchService {
 
         // 로그인한 유저의 팀 가져오기
         Team myTeam = currentUserService.getCurrentUserTeamOrNull();
-        if (myTeam == null) {
-            return null;   // 팀이 없는 사람은 아무것도 안 보이게
+        LocalDateTime now = LocalDateTime.now();
+
+        if (myTeam != null) {
+            // 내가 등록했거나(or matchedTeam) 내 팀이 참여하는 매치 중 가장 가까운 것
+            List<MatchPost> mine = matchPostRepository
+                    .findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                            myTeam, "MATCHED", now);
+
+            if (!mine.isEmpty()) return mine.get(0);
+
+            List<MatchPost> asOpponent = matchPostRepository
+                    .findByMatchedTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                            myTeam, "MATCHED", now);
+
+            if (!asOpponent.isEmpty()) return asOpponent.get(0);
         }
 
-        // 내 팀이 등록한 MATCHED 매치 중 가장 가까운 매치 찾기
-        List<MatchPost> list = matchPostRepository
-                .findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
-                        myTeam,
-                        "MATCHED",
-                        LocalDateTime.now()
-                );
-
-        return list.isEmpty() ? null : list.get(0);
+        // 팀이 없거나 내 팀 매치가 없으면 전체 중 가장 가까운 MATCHED 매치 반환
+        return matchPostRepository.findFirstByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                "MATCHED", now
+        );
     }
 
 

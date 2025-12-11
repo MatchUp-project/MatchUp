@@ -54,6 +54,7 @@ public class TeamMemberController {
         model.addAttribute("team", team);
         model.addAttribute("members", members);
         model.addAttribute("isLeader", myMember.getRole() == TeamMember.Role.LEADER);
+        model.addAttribute("canLeave", myMember.getRole() != TeamMember.Role.LEADER);
 
         return "team_members";
     }
@@ -103,6 +104,30 @@ public class TeamMemberController {
         try {
             teamMemberService.removeMember(loginUserId, memberId);
             rttr.addFlashAttribute("msg", "팀원이 제거되었습니다.");
+        } catch (RuntimeException e) {
+            rttr.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/team/members";
+    }
+
+    // 일반 멤버 탈퇴
+    @PostMapping("/members/leave")
+    public String leave(@AuthenticationPrincipal UserDetails userDetails,
+                        RedirectAttributes rttr) {
+
+        if (userDetails == null) {
+            rttr.addFlashAttribute("error", "로그인이 필요합니다.");
+            return "redirect:/team/members";
+        }
+
+        String username = userDetails.getUsername();
+        User loginUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 정보를 찾을 수 없습니다."));
+
+        try {
+            teamMemberService.leaveTeam(loginUser.getId());
+            rttr.addFlashAttribute("msg", "팀을 탈퇴했습니다.");
         } catch (RuntimeException e) {
             rttr.addFlashAttribute("error", e.getMessage());
         }

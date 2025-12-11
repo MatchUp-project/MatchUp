@@ -89,4 +89,16 @@ public class TeamMemberService {
 
         teamMemberRepository.delete(target);
     }
+
+    // 일반 멤버가 스스로 팀 탈퇴
+    public void leaveTeam(Long userId) {
+        TeamMember me = teamMemberRepository.findFirstByUser_Id(userId)
+                .orElseThrow(() -> new IllegalStateException("소속 팀이 없습니다."));
+
+        if (me.getRole() == TeamMember.Role.LEADER) {
+            throw new IllegalStateException("팀장은 탈퇴 전에 팀장을 위임해야 합니다.");
+        }
+
+        teamMemberRepository.delete(me);
+    }
 }

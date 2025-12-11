@@ -59,5 +59,17 @@ public class NotificationService {
         }
     }
 
+    public void deleteForCurrentUser(Long notificationId) {
+        User me = currentUserService.getCurrentUser();
+        Notification n = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+        if (!n.getReceiver().getId().equals(me.getId())) {
+            throw new IllegalStateException("내 알림만 삭제할 수 있습니다.");
+        }
+
+        notificationRepository.delete(n);
+    }
+
 
 }

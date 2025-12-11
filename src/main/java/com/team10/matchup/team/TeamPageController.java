@@ -42,6 +42,19 @@ public class TeamPageController {
         User currentUser = currentUserService.getCurrentUser();
         model.addAttribute("currentUser", currentUser);
 
+        boolean hasTeam = false;
+        boolean isMemberOfThisTeam = false;
+        if (currentUser != null) {
+            var myMemberOpt = teamMemberRepository.findFirstByUser_Id(currentUser.getId());
+            if (myMemberOpt.isPresent()) {
+                hasTeam = true;
+                isMemberOfThisTeam = myMemberOpt.get().getTeam().getId().equals(id);
+            }
+        }
+        model.addAttribute("hasTeam", hasTeam);
+        model.addAttribute("isMemberOfThisTeam", isMemberOfThisTeam);
+        model.addAttribute("canRequestJoin", currentUser != null && !hasTeam);
+
         // 2) 팀 멤버 목록
         List<TeamMember> members = teamMemberRepository.findByTeam_Id(id);
         model.addAttribute("members", members);
