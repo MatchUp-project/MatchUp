@@ -5,96 +5,363 @@
     <title>경기 기록 | Match-Up</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
-        .score-big {
-            font-size: 2.8rem;
-            font-weight: 600;
+        :root {
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --bg-card-soft: #07111f;
+
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+
+            --border-subtle: #111827;
         }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                    radial-gradient(circle at 0 0, rgba(163,255,18,0.08), transparent 55%),
+                    radial-gradient(circle at 100% 100%, rgba(34,197,94,0.15), transparent 55%),
+                    #0c1120;
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ===== 상단 유틸바 ===== */
+        .topbar {
+            background: var(--bg-panel);
+            border-bottom: 1px solid #050b24;
+            color: var(--text-main);
+        }
+
+        /* ===== 헤더 (MATCHUP) ===== */
+        header.main-header {
+            background: var(--bg-panel);
+            border-bottom: 1px solid #050b24;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+        }
+
+        header .navbar-brand {
+            color: var(--text-main);
+            font-weight: 900;
+            letter-spacing: 0.12em;
+        }
+
+        header .navbar-brand span {
+            color: var(--accent-green);
+        }
+
+        .main-nav-link {
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 6px 18px !important;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            background: #020617;
+            transition: .2s;
+        }
+
+        .main-nav-link:hover,
+        .dropdown.show > .main-nav-link {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+        }
+
+        /* ===== 페이지 Wrapper ===== */
+        .records-wrapper {
+            max-width: 1280px;
+            margin: 32px auto;
+            padding: 26px;
+            background: var(--bg-panel);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        }
+
+        .records-title { font-size: 26px; font-weight: 800; }
+        .records-subtitle { color: var(--text-muted); font-size: 13px; }
+
+        /* ===== 사이드 메뉴 ===== */
+        .team-side-nav {
+            background: var(--bg-card-soft);
+            border-radius: 20px;
+            border: 1px solid #020617;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .team-side-nav .list-group-item {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-bottom: 1px solid #0f1623;
+            padding: 14px 18px;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .team-side-nav .list-group-item.active {
+            background: linear-gradient(90deg, rgba(163,255,18,0.1), transparent);
+            color: var(--accent-green);
+            font-weight: 700;
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .team-side-nav .list-group-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+        }
+
+        /* ===== 경기 카드 ===== */
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            padding: 18px;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+        }
+
+        .score-big {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .btn-score {
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+            border-radius: 999px;
+            font-weight: 700;
+            transition: .25s;
+        }
+        .btn-score:hover {
+            background: var(--accent-green);
+            color: #020617;
+            box-shadow: 0 0 20px rgba(163,255,18,0.4);
+        }
+
+        .section-muted { color: var(--text-muted); font-size: 13px; }
     </style>
+
 </head>
 <body>
 
-<div class="container mt-4">
-    <h3 class="mb-4">경기 기록</h3>
+<!-- TOPBAR -->
+<!-- ================= 상단 유틸바 ================= -->
+<div class="topbar text-white small py-1">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
 
-    <!-- 팀 없음 -->
-    <div th:if="${noTeam}">
-        <div class="alert alert-warning">사용자가 속한 팀이 없습니다.</div>
+        <!-- 🔔 알림 드롭다운 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
+
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
     </div>
-
-    <!-- 팀 있을 때 -->
-    <div th:unless="${noTeam}">
-        <h5 class="mb-4">내 팀: <span th:text="${team.name}">팀 이름</span></h5>
-
-        <!-- 지난 경기들 (점수까지 입력 완료된 경기) -->
-        <h5 class="mb-3">지난 경기들</h5>
-        <div th:if="${#lists.isEmpty(records)}" class="text-muted mb-3">
-            저장된 경기 기록이 없습니다.
-        </div>
-
-        <div class="row g-3 mb-4" th:if="${!#lists.isEmpty(records)}">
-            <div class="col-12 col-md-4" th:each="rec : ${records}">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column justify-content-between text-center">
-                        <div>
-                            <div class="fw-semibold mb-2">
-                                <span th:text="${rec.team1.name}">XX</span>
-                                <span> vs </span>
-                                <span th:text="${rec.team2.name}">YY</span>
-                            </div>
-                            <div class="text-muted small"
-                                 th:text="${#temporals.format(rec.matchDate, 'yyyy-MM-dd HH:mm')}">
-                                2025-12-05 13:00
-                            </div>
-                        </div>
-                        <div class="score-big mt-3">
-                            <span th:text="${rec.team1Score}">3</span>
-                            <span class="mx-2">:</span>
-                            <span th:text="${rec.team2Score}">2</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 점수 입력이 필요한 경기들 (MATCHED인데 아직 기록 안 한 것들) -->
-        <h5 class="mb-3">점수 입력이 필요한 경기들</h5>
-        <div th:if="${#lists.isEmpty(matchedMatches)}" class="text-muted">
-            현재 점수 입력이 필요한 경기가 없습니다.
-        </div>
-
-        <div class="row g-3" th:if="${!#lists.isEmpty(matchedMatches)}">
-            <div class="col-12 col-md-4" th:each="m : ${matchedMatches}">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <div class="text-center">
-                            <div class="fw-semibold mb-2">
-                                <span th:text="${team.name}">재린FC</span>
-                                <span> vs </span>
-                                <!-- ✅ 여기만 수정: opponentNames 맵에서 상대 팀 이름 가져오기 -->
-                                <span th:text="${opponentNames[m.id]}">상대 팀</span>
-                            </div>
-                            <div class="text-muted small"
-                                 th:text="${#temporals.format(m.matchDatetime, 'yyyy-MM-dd HH:mm')}">
-                                2025-12-13 22:30
-                            </div>
-                        </div>
-                        <div class="mt-3 text-center">
-                            <!-- 점수 입력 페이지로 이동 -->
-                            <a th:href="@{/team/records/score(matchId=${m.id})}"
-                               class="btn btn-outline-primary">
-                                점수 추가하기
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div> <!-- /팀 있을 때 -->
 </div>
 
+
+<!-- HEADER -->
+<header class="main-header border-0 pt-3">
+    <div class="container pb-2">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 : MATCH + UP 라임색 -->
+            <a class="navbar-brand fw-bold fs-3 m-0" href="/">
+                MATCH<span style="color: var(--accent-green);">UP</span>
+            </a>
+        </div>
+
+        <nav class="mt-3">
+            <ul class="nav main-nav">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-people-fill me-1"></i> 팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- ⭐ 커뮤니티 (드롭다운 추가됨) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="communityMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="communityMenu">
+                        <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
+                    </ul>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/match/apply">
+                        <i class="bi bi-trophy-fill me-1"></i> 매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
+</header>
+
+<!-- MAIN -->
+<main>
+    <div class="records-wrapper">
+
+        <!-- 상단 제목 -->
+        <div class="mb-4">
+            <div class="records-title">경기 기록</div>
+            <div class="records-subtitle">최근 경기 결과와 점수 입력이 필요한 경기들을 관리할 수 있어요.</div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- SIDE NAV -->
+            <div class="col-lg-3">
+                <div class="team-side-nav list-group">
+
+                    <a href="/team/board" class="list-group-item list-group-item-action">팀 게시판</a>
+                    <a href="/team/members" class="list-group-item list-group-item-action">팀 멤버</a>
+                    <a href="/team/schedule" class="list-group-item list-group-item-action">일정표</a>
+
+                    <!-- 경기 기록은 현재 페이지 -->
+                    <a href="/team/records" class="list-group-item list-group-item-action active">경기 기록</a>
+
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="col-lg-9">
+
+                <!-- 지난 경기 -->
+                <div class="mb-5">
+                    <h6 class="fw-bold mb-2">지난 경기들</h6>
+
+                    <div th:if="${#lists.isEmpty(records)}" class="section-muted">저장된 경기 기록이 없습니다.</div>
+
+                    <div class="row g-3" th:if="${!#lists.isEmpty(records)}">
+                        <div class="col-md-4" th:each="rec : ${records}">
+                            <div class="game-card h-100 text-center">
+
+                                <div class="fw-semibold mb-1">
+                                    <span th:text="${rec.team1.name}"></span> vs
+                                    <span th:text="${rec.team2.name}"></span>
+                                </div>
+
+                                <div class="section-muted small mb-3"
+                                     th:text="${#temporals.format(rec.matchDate,'yyyy-MM-dd HH:mm')}"></div>
+
+                                <div class="score-big">
+                                    <span th:text="${rec.team1Score}"></span>
+                                    <span class="mx-2">:</span>
+                                    <span th:text="${rec.team2Score}"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 점수 입력 필요 -->
+                <div>
+                    <h6 class="fw-bold mb-2">점수 입력이 필요한 경기들</h6>
+
+                    <div th:if="${#lists.isEmpty(matchedMatches)}" class="section-muted">
+                        현재 점수 입력이 필요한 경기가 없습니다.
+                    </div>
+
+                    <div class="row g-3" th:if="${!#lists.isEmpty(matchedMatches)}">
+                        <div class="col-md-4" th:each="m : ${matchedMatches}">
+                            <div class="game-card h-100 text-center">
+
+                                <div class="fw-semibold mb-1">
+                                    <span th:text="${team.name}"></span> vs
+                                    <span th:text="${opponentNames[m.id]}"></span>
+                                </div>
+
+                                <div class="section-muted small mb-3"
+                                     th:text="${#temporals.format(m.matchDatetime,'yyyy-MM-dd HH:mm')}"></div>
+
+                                <a th:href="@{/team/records/score(matchId=${m.id})}"
+                                   class="btn btn-score px-3 py-1">
+                                    점수 추가하기
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer class="text-white text-center py-4 small">
+    © 2025 Match-Up
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

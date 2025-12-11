@@ -101,6 +101,4 @@ public class MatchController {
 
         return "match_upcoming";
     }
-
-
 }

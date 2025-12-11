@@ -15,4 +15,3 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findTop3ByOrderByCreatedAtDesc();
 
 }
-

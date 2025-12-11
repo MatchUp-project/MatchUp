@@ -6,196 +6,552 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/styles.css}">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- 프로젝트 공통 CSS -->
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+
     <style>
-        .match-card.matched {
-            opacity: 0.4;
+        :root {
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --bg-card-soft: #07111f;
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+            --accent-yellow: #facc15;
+            --accent-red: #fb2d4b;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-subtle: #111827;
+        }
+
+        * { box-sizing: border-box; }
+
+        body.home-body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.18) 0, transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(34,197,94,0.20) 0, transparent 55%),
+                #0c1120;
+        }
+
+        main.home-main {
+            flex: 1;
+            padding: 24px 0 40px;
+        }
+
+        a { text-decoration: none; }
+
+        /* ===== 상단 유틸바 ===== */
+        .topbar {
+            background: #050b24;
+            color: #e5e7eb;
+            border-bottom: 1px solid #050b24;
+            font-size: 13px;
+        }
+        .topbar a { font-size: 13px; }
+
+        /* ===== 헤더 / 네비게이션 ===== */
+        header.main-header {
+            background: #050b24;
+            border-bottom: 1px solid #050b24;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+        }
+
+        header.main-header .navbar-brand {
+            color: #f9fafb;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .main-nav {
+            border-top: none !important;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .main-nav .nav-item { margin-right: 0; }
+
+        .main-nav .main-nav-link {
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 6px 18px !important;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            background: #020617;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .main-nav .main-nav-link:hover,
+        .main-nav .main-nav-link:focus,
+        .main-nav .show > .main-nav-link {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.5);
+        }
+
+        .dropdown-menu {
+            background: #020617;
+            border-color: #111827;
+            font-size: 13px;
+        }
+
+        .dropdown-menu .dropdown-item { color: #e5e7eb; }
+        .dropdown-menu .dropdown-item:hover {
+            background: #111827;
+            color: var(--accent-green);
+        }
+
+        /* ===== 패널 ===== */
+        .dashboard-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .dashboard-panel {
+            background: var(--bg-panel);
+            border-radius: 32px;
+            padding: 22px 24px 26px;
+            border: 1px solid #020617;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ===== 카드 공통 ===== */
+        .dash-card {
+            border-radius: 22px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.9);
+            overflow: hidden;
+        }
+
+        .dash-card-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid #020617;
+            background: linear-gradient(135deg, #050b18, #020617);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .dash-card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dash-icon-pill {
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            background: #111827;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-green-soft);
+            font-size: 14px;
+        }
+
+        .dash-card-body {
+            padding: 12px 14px 10px;
+            font-size: 13px;
+        }
+
+        .dash-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #020617;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .dash-item:last-child { border-bottom: none; }
+
+        .dash-item-title { color: #e5e7eb; font-weight: 600; }
+        .dash-item-sub { font-size: 11px; color: var(--text-muted); }
+
+        .dash-empty {
+            padding: 18px 4px 6px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* 버튼 공통 */
+        .btn-outline-secondary {
+            --bs-btn-color: #e5e7eb;
+            --bs-btn-border-color: #4b5563;
+            --bs-btn-hover-bg: #111827;
+            --bs-btn-hover-border-color: #e5e7eb;
+            --bs-btn-active-bg: #111827;
+            --bs-btn-active-border-color: #e5e7eb;
+            border-radius: 999px;
+            font-size: 12px;
+            padding: 4px 12px;
+        }
+
+        .btn-outline-primary {
+            --bs-btn-color: var(--accent-green-soft);
+            --bs-btn-border-color: var(--accent-green-soft);
+            --bs-btn-hover-bg: var(--accent-green-soft);
+            --bs-btn-hover-border-color: var(--accent-green-soft);
+            --bs-btn-hover-color: #020617;
+            border-radius: 999px;
+            font-size: 13px;
+            padding: 6px 16px;
+        }
+
+        .badge-my-match {
+            background: #4b5563;
+            border-radius: 999px;
+            font-size: 11px;
+            padding: 4px 10px;
+        }
+
+        @media (max-width: 991.98px) {
+            .dashboard-panel { padding: 18px 14px 20px; }
         }
     </style>
 </head>
-<body>
+<body class="home-body">
 
-<div class="container mt-4">
-    <h3 class="mb-4">매치 신청</h3>
-
-    <!-- 팀이 없을 때 -->
-    <div th:if="${noTeam}">
-        <div class="alert alert-warning">
-            사용자가 속한 팀이 없습니다.
+<!-- ===== 상단 유틸바 ===== -->
+<div class="topbar text-white small py-1">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
+        <!-- 알림 드롭다운 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
         </div>
+
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
     </div>
+</div>
 
-    <!-- 팀이 있을 때 -->
-    <div th:unless="${noTeam}">
-
-        <!-- 내 팀 정보 -->
-        <div class="mb-3">
-            <h5>내 팀:
-                <span th:text="${team != null ? team.name : '팀 이름'}">팀 이름</span>
-            </h5>
+<!-- ===== 헤더 ===== -->
+<header class="main-header border-0 pt-3">
+    <div class="container pb-2">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 : MATCH + UP 라임색 -->
+            <a class="navbar-brand fw-bold fs-3 m-0" href="/">
+                MATCH<span style="color: var(--accent-green);">UP</span>
+            </a>
         </div>
 
-        <!-- 매치 등록 폼 -->
-        <div class="card mb-4">
-            <div class="card-header">새로운 매치 등록</div>
-            <div class="card-body">
-                <form th:action="@{/match/create}" method="post" th:object="${matchCreateForm}">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">팀 이름</label>
-                            <input type="text" class="form-control"
-                                   th:value="${team != null ? team.name : '팀 이름'}" readonly>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">인원 수</label>
-                            <input type="number" class="form-control"
-                                   th:field="*{playerCount}" min="1" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">경기장 위치</label>
-                            <input type="text" class="form-control"
-                                   th:field="*{location}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">날짜</label>
-                            <input type="date" class="form-control"
-                                   th:field="*{date}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">시간</label>
-                            <input type="time" class="form-control"
-                                   th:field="*{time}" required>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-end">
-                        <button type="submit" class="btn btn-primary">매치 등록</button>
-                    </div>
-                </form>
+        <nav class="mt-3">
+            <ul class="nav main-nav">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-people-fill me-1"></i> 팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- ⭐ 커뮤니티 (드롭다운 추가됨) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="communityMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="communityMenu">
+                        <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
+                    </ul>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/match/apply">
+                        <i class="bi bi-trophy-fill me-1"></i> 매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
+</header>
+
+<!-- ===== 메인 ===== -->
+<main class="home-main">
+    <div class="dashboard-wrapper">
+        <div class="dashboard-panel">
+
+            <div class="mb-3">
+                <div class="dashboard-title">매치 신청</div>
+                <div class="dashboard-subtitle">
+                    내 팀의 매치를 등록하고, 다른 팀과 매칭해 보세요.
+                </div>
             </div>
-        </div>
 
-        <!-- ===== 탭 버튼 (가능 / 불가능) ===== -->
-        <div class="btn-group mb-3" role="group">
-            <a th:href="@{/match/apply(filter='available')}"
-               class="btn"
-               th:classappend="${filter} == 'available' ? ' btn-primary' : ' btn-outline-primary'">
-                매치 신청 가능
-            </a>
-            <a th:href="@{/match/apply(filter='unavailable')}"
-               class="btn"
-               th:classappend="${filter} == 'unavailable' ? ' btn-primary' : ' btn-outline-primary'">
-                매치 신청 불가능
-            </a>
-        </div>
+            <!-- 팀이 없을 때 -->
+            <div th:if="${noTeam}" class="dash-card mb-3">
+                <div class="dash-card-header">
+                    <div class="dash-card-header-left">
+                        <div class="dash-icon-pill"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <span class="fw-semibold">팀이 없습니다</span>
+                    </div>
+                </div>
+                <div class="dash-card-body">
+                    <div class="text-danger fw-semibold mb-1">먼저 팀을 생성하거나 다른 팀에 가입해 주세요.</div>
+                    <div class="dash-item-sub">
+                        팀이 있어야 매치를 등록하고 상대 팀과 매칭할 수 있습니다.
+                    </div>
+                </div>
+            </div>
 
-        <!-- 제목 -->
-        <h5 class="mb-3"
-            th:text="${filter} == 'available' ? '매치 신청 가능 목록' : '매치 신청 불가능 목록'">
-            매치 신청 목록
-        </h5>
+            <!-- 팀이 있을 때 -->
+            <div th:unless="${noTeam}">
 
-        <!-- 비어 있을 때 메시지 -->
-        <div th:if="${#lists.isEmpty(matchPosts)}" class="text-muted mb-3">
-            <span th:text="${filter} == 'available'
-                           ? '현재 신청 가능한 매치가 없습니다.'
-                           : '현재 신청 불가능한 매치가 없습니다.'">
-                목록이 없습니다.
-            </span>
-        </div>
-
-        <!-- 매치 리스트 -->
-        <div class="row g-3" th:each="post : ${matchPosts}">
-            <div class="col-12">
-                <div class="card match-card"
-                     th:classappend="${post.status == 'MATCHED'} ? ' matched' : ''">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-
-                        <!-- 왼쪽: 매치 정보 -->
-                        <div>
-                            <div class="mb-1">
-                                <strong th:text="${post.team.name}">팀 이름</strong>
-                                <span class="text-muted ms-2">
-                                    인원수: <span th:text="${post.playerCount}">0</span>명
-                                </span>
+                <!-- 매치 등록 카드 -->
+                <div class="dash-card mb-3">
+                    <div class="dash-card-header">
+                        <div class="dash-card-header-left">
+                            <div class="dash-icon-pill"><i class="bi bi-plus-circle-fill"></i></div>
+                            <span class="fw-semibold">새로운 매치 등록</span>
+                        </div>
+                        <div class="dash-item-sub">
+                            내 팀 :
+                            <span th:text="${team != null ? team.name : '팀 이름'}">팀 이름</span>
+                        </div>
+                    </div>
+                    <div class="dash-card-body">
+                        <form th:action="@{/match/create}" method="post" th:object="${matchCreateForm}">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label text-white-50">팀 이름</label>
+                                    <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary"
+                                           th:value="${team != null ? team.name : '팀 이름'}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-white-50">인원 수</label>
+                                    <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary"
+                                           th:field="*{playerCount}" min="1" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-white-50">경기장 위치</label>
+                                    <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary"
+                                           th:field="*{location}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-white-50">날짜</label>
+                                    <input type="date" class="form-control form-control-sm bg-dark text-light border-secondary"
+                                           th:field="*{date}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-white-50">시간</label>
+                                    <input type="time" class="form-control form-control-sm bg-dark text-light border-secondary"
+                                           th:field="*{time}" required>
+                                </div>
                             </div>
-                            <div class="small text-muted">
-                                장소:
-                                <span th:text="${post.location}">장소</span><br>
-                                일시:
-                                <span th:text="${#temporals.format(post.matchDatetime, 'yyyy-MM-dd HH:mm')}">
-                                    2025-03-28 09:40
-                                </span>
+                            <div class="mt-3 text-end">
+                                <button type="submit" class="btn-lime-submit">
+                                    매치 등록
+                                </button>
+
                             </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 매치 목록 카드 -->
+                <div class="dash-card">
+                    <div class="dash-card-header">
+                        <div class="dash-card-header-left">
+                            <div class="dash-icon-pill"><i class="bi bi-calendar2-week"></i></div>
+                            <span class="fw-semibold"
+                                  th:text="${filter} == 'available' ? '매치 신청 가능 목록' : '매치 신청 불가능 목록'">
+                                매치 신청 목록
+                            </span>
                         </div>
 
-                        <!-- 오른쪽: filter 에 따라 다른 UI -->
-                        <div class="text-end" th:switch="${filter}">
+                        <div class="btn-group btn-group-sm">
+                            <a th:href="@{/match/apply(filter='available')}"
+                               class="btn btn-outline-secondary"
+                               th:classappend="${filter} == 'available' ? ' active' : ''">
+                                가능
+                            </a>
+                            <a th:href="@{/match/apply(filter='unavailable')}"
+                               class="btn btn-outline-secondary"
+                               th:classappend="${filter} == 'unavailable' ? ' active' : ''">
+                                불가능
+                            </a>
+                        </div>
+                    </div>
 
-                            <!-- ====== 매치 신청 가능 탭 ====== -->
-                            <div th:case="'available'">
-                                <form th:action="@{'/match/' + ${post.id} + '/request'}"
-                                      method="post">
-                                    <button type="submit" class="btn btn-outline-primary">
-                                        매치 신청
-                                    </button>
-                                </form>
+                    <div class="dash-card-body">
+
+                        <!-- 비어 있을 때 -->
+                        <div th:if="${#lists.isEmpty(matchPosts)}" class="dash-empty">
+                            <span th:text="${filter} == 'available'
+                                           ? '현재 신청 가능한 매치가 없습니다.'
+                                           : '현재 신청 불가능한 매치가 없습니다.'">
+                                목록이 없습니다.
+                            </span>
+                        </div>
+
+                        <!-- 매치 아이템들 -->
+                        <div th:each="post : ${matchPosts}" class="dash-item"
+                             th:classappend="${post.status == 'MATCHED'} ? ' opacity-50' : ''">
+
+                            <!-- 왼쪽 정보 -->
+                            <div>
+                                <div class="dash-item-title mb-1">
+                                    <span th:text="${post.team.name}">팀 이름</span>
+                                    <span class="dash-item-sub ms-2">
+                                        인원수:
+                                        <span th:text="${post.playerCount}">0</span>명
+                                    </span>
+                                </div>
+                                <div class="dash-item-sub">
+                                    장소 :
+                                    <span th:text="${post.location}">장소</span><br>
+                                    일시 :
+                                    <span th:text="${#temporals.format(post.matchDatetime, 'yyyy-MM-dd HH:mm')}">
+                                        2025-03-28 09:40
+                                    </span>
+                                </div>
                             </div>
 
-                            <!-- ====== 매치 신청 불가능 탭 ====== -->
-                            <div th:case="'unavailable'">
+                            <!-- 오른쪽 액션 / 상태 -->
+                            <div class="text-end" th:switch="${filter}">
 
-                                <!-- 이미 매치 완료 -->
-                                <div th:if="${post.status == 'MATCHED'}"
-                                     class="text-danger fw-semibold mb-2">
-                                    이미 매치가 완료됐습니다
-                                </div>
-
-                                <!-- 내가 신청한 매치: PENDING -->
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id != currentUser.id
-                                             and requestStatusMap[post.id] == 'PENDING'}"
-                                     class="text-primary fw-semibold mb-2">
-                                    매치 신청 완료됐습니다
-                                </div>
-
-                                <!-- 내가 신청한 매치: REJECTED -->
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id != currentUser.id
-                                             and requestStatusMap[post.id] == 'REJECTED'}"
-                                     class="text-danger fw-semibold mb-2">
-                                    매치 신청이 거절되었습니다
-                                </div>
-
-                                <!-- 내가 올린 매치(OPEN 상태) -->
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id == currentUser.id}">
-                                    <span class="badge bg-secondary mb-2 d-block">
-                                        내가 등록한 매치
-                                    </span>
-
-                                    <form th:action="@{'/match/' + ${post.id} + '/delete'}"
-                                          method="post"
-                                          onsubmit="return confirm('정말 이 매치를 삭제하시겠습니까?');">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            매치 삭제
+                                <!-- 신청 가능 탭 -->
+                                <div th:case="'available'">
+                                    <form th:action="@{'/match/' + ${post.id} + '/request'}"
+                                          method="post">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                                            매치 신청
                                         </button>
                                     </form>
                                 </div>
 
-                            </div><!-- /unavailable -->
+                                <!-- 신청 불가능 탭 -->
+                                <div th:case="'unavailable'">
 
-                        </div><!-- /text-end -->
+                                    <!-- 이미 매치 완료 -->
+                                    <div th:if="${post.status == 'MATCHED'}"
+                                         class="text-danger fw-semibold mb-2">
+                                        이미 매치가 완료됐습니다
+                                    </div>
 
-                    </div><!-- /card-body -->
-                </div>
-            </div>
-        </div><!-- /row -->
+                                    <!-- 내가 신청한 매치 : PENDING -->
+                                    <div th:if="${post.status == 'OPEN'
+                                                 and post.createdBy != null
+                                                 and post.createdBy.id != currentUser.id
+                                                 and requestStatusMap[post.id] == 'PENDING'}"
+                                         class="text-info fw-semibold mb-2">
+                                        매치 신청 완료됐습니다
+                                    </div>
 
-    </div><!-- /팀 있을 때 -->
-</div>
+                                    <!-- 내가 신청한 매치 : REJECTED -->
+                                    <div th:if="${post.status == 'OPEN'
+                                                 and post.createdBy != null
+                                                 and post.createdBy.id != currentUser.id
+                                                 and requestStatusMap[post.id] == 'REJECTED'}"
+                                         class="text-danger fw-semibold mb-2">
+                                        매치 신청이 거절되었습니다
+                                    </div>
+
+                                    <!-- 내가 올린 매치 (OPEN) -->
+                                    <div th:if="${post.status == 'OPEN'
+                                                 and post.createdBy != null
+                                                 and post.createdBy.id == currentUser.id}">
+                                        <div class="mb-2">
+                                            <span class="badge-my-match">내가 등록한 매치</span>
+                                        </div>
+                                        <form th:action="@{'/match/' + ${post.id} + '/delete'}"
+                                              method="post"
+                                              onsubmit="return confirm('정말 이 매치를 삭제하시겠습니까?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                매치 삭제
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- /each -->
+                    </div>
+                </div><!-- /dash-card (list) -->
+
+            </div><!-- /unless noTeam -->
+
+        </div>
+    </div>
+</main>
+
+<footer class="site-footer py-4 mt-3 bg-transparent border-0">
+    <div class="container small d-flex justify-content-between text-white-50">
+        <div>© 2025 Match-Up</div>
+        <div>문의: support@matchup.com</div>
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

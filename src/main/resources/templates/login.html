@@ -2,62 +2,265 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>로그인 | Match-up</title>
+    <title>Match-Up 로그인</title>
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f8f9fa;
+        :root {
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
         }
-        .login-card {
+
+        * { box-sizing: border-box; }
+
+        /* 🔆 배경 그라데이션 조금 더 밝게 */
+        body.auth-body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.25) 0, transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(34,197,94,0.26) 0, transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(15,23,42,0.8) 0, transparent 65%),
+                #050b1f; /* 기존보다 살짝 밝은 네이비 */
+        }
+
+        .auth-wrapper {
+            width: 100%;
             max-width: 420px;
-            margin: 80px auto;
+        }
+
+        .auth-card {
+            position: relative;
+            padding: 32px 30px 26px;
+            border-radius: 26px;
+            background: var(--bg-panel);
+            box-shadow: 0 22px 60px rgba(0,0,0,0.85);
+            border: 1px solid #020617;
+            text-align: center;
+        }
+
+        .auth-card::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -20px;
+            transform: translateX(-50%);
+            width: 64%;
+            height: 26px;
+            border-radius: 999px;
+            background: #020617;
+            filter: blur(6px);
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+        .auth-logo {
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            font-size: 20px;
+            margin-bottom: 18px;
+        }
+
+        .auth-logo span {
+            color: var(--accent-green);
+        }
+
+        .auth-alert {
+            font-size: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        .auth-form .input-wrapper {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .auth-form .form-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .auth-input-group {
+            display: flex;
+            align-items: center;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #020617;
+            border: 1px solid #111827;
+        }
+
+        .auth-input-icon {
+            width: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #050b18;
+            color: var(--accent-green-soft);
+        }
+
+        .auth-input-icon i {
+            font-size: 16px;
+        }
+
+        .auth-form .form-control {
+            border-radius: 0;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            padding: 9px 12px;
+            color: var(--text-main);
+        }
+
+        .auth-form .form-control:focus {
+            box-shadow: none;
+            outline: none;
+            background: #020617;
+        }
+
+        /* 👀 플레이스홀더 조금 더 잘 보이게 (너무 밝지 않게) */
+        .auth-form .form-control::placeholder {
+            color: rgba(156,163,175,0.95); /* 기존보다 밝지만 흰색까진 아님 */
+        }
+
+        /* LOGIN 버튼 */
+        .auth-btn-main {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 999px;
+            border: 1px solid var(--accent-green-soft);
+            padding: 10px 0;
+            font-size: 13px;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            text-transform: uppercase;
+            background:
+                radial-gradient(circle at 0 0, rgba(163,255,18,0.15), transparent 55%),
+                #050b18;
+            color: var(--text-main);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.8);
+            transition: background .18s ease, color .18s ease,
+                        box-shadow .18s ease, transform .1s ease;
+        }
+
+        /* 🟢 호버 시 완전 단색 라임 */
+        .auth-btn-main:hover {
+            background: var(--accent-green);
+            color: #020617;
+            border-color: var(--accent-green);
+            box-shadow: 0 12px 28px rgba(163,255,18,0.55);
+            transform: translateY(-1px);
+        }
+
+        .auth-btn-main:active {
+            transform: translateY(0);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.85);
+        }
+
+        .auth-footer {
+            margin-top: 18px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-footer a {
+            color: var(--text-main);
+            font-weight: 600;
+            text-decoration: none;
+            background: #020617;
+            padding: 5px 16px;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.75);
+        }
+
+        .auth-footer a:hover {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
         }
     </style>
 </head>
+<body class="auth-body">
 
-<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
 
-<div class="login-card">
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <!-- 로고 -->
+        <div class="auth-logo">MATCH<span>UP</span></div>
 
-            <h3 class="text-center mb-4 fw-bold text-primary">로그인</h3>
-
-            <!-- 오류 메시지 -->
-            <div th:if="${param.error}">
-                <div class="alert alert-danger py-2" th:text="${param.error}"></div>
-            </div>
-
-            <form th:action="@{/perform_login}" method="post">
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">아이디</label>
-                    <input class="form-control form-control-lg" type="text"
-                           name="username" required placeholder="아이디 입력">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">비밀번호</label>
-                    <input class="form-control form-control-lg" type="password"
-                           name="password" required placeholder="비밀번호 입력">
-                </div>
-
-                <button class="btn btn-primary btn-lg w-100 mt-2" type="submit">
-                    로그인
-                </button>
-
-            </form>
-
-            <div class="text-center mt-3">
-                <a href="/signup" class="text-decoration-none">회원가입 하러가기</a>
-            </div>
-
+        <!-- 로그인 실패 메시지 -->
+        <div th:if="${param.error}" class="auth-alert alert alert-danger">
+            아이디 또는 비밀번호가 올바르지 않습니다.
         </div>
+        <div th:if="${session.loginErrorMessage}" class="auth-alert alert alert-danger">
+            [[${session.loginErrorMessage}]]
+        </div>
+        <div th:if="${param.logout}" class="auth-alert alert alert-success">
+            정상적으로 로그아웃되었습니다.
+        </div>
+
+        <!-- 로그인 폼 -->
+        <form class="auth-form" th:action="@{/perform_login}" method="post">
+
+            <!-- 아이디 -->
+            <div class="input-wrapper">
+                <label for="username" class="form-label">Email ID / 아이디</label>
+                <div class="auth-input-group">
+                    <div class="auth-input-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="example@matchup.com" required>
+                </div>
+            </div>
+
+            <!-- 비밀번호 -->
+            <div class="input-wrapper">
+                <label for="password" class="form-label">Password</label>
+                <div class="auth-input-group">
+                    <div class="auth-input-icon">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="비밀번호를 입력하세요" required>
+                </div>
+            </div>
+
+            <!-- 로그인 버튼 -->
+            <button type="submit" class="auth-btn-main">LOGIN</button>
+        </form>
+
+        <!-- 회원가입 안내 -->
+        <div class="auth-footer">
+            <span>아직 Match-Up 계정이 없으신가요?</span>
+            <a th:href="@{/signup}">새 계정 만들기</a>
+        </div>
+
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

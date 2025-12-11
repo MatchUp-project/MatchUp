@@ -6,4 +6,3 @@ public enum MatchStatus {
     RECORDED,   // 경기 완료 후 기록됨
     CANCELED    // 취소
 }
-

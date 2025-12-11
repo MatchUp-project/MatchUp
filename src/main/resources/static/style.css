@@ -1,133 +1,188 @@
-/* 전역 */
-/* 전역 */
-body {
-    margin: 0;                  /* 🔥 이 줄 추가 – 위/좌우 기본 여백 제거 */
-    background-color: #f8f9fa;
+/* =============================
+   🌊 MATCH-UP OCEAN THEME CSS
+   전체 공통 스타일 리팩토링 파일
+   ============================= */
+
+:root {
+    /* Ocean Background */
+    --bg-body: #19485F;
+    --bg-panel: #153E53;
+    --bg-card: #113646;
+    --bg-card-soft: #0E2E3C;
+
+    /* Lime Accent */
+    --accent-green: #D9E0A4;
+    --accent-green-soft: #BFC79A;
+
+    /* Extra */
+    --accent-yellow: #facc15;
+    --accent-red: #fb2d4b;
+
+    --text-main: #f9fafb;
+    --text-muted: #cbd5e1;
+
+    --border-subtle: rgba(255,255,255,0.08);
 }
 
-
-/* 카테고리 탭 가로 스크롤 */
-.cat-tabs .nav-link { white-space: nowrap; }
-.cat-tabs .nav-link.active { background: #ff5a2f; }
-
-/* 히어로 섹션 */
-.hero
-{
-    position: relative;
-    display: flex;              /* 내부 정렬을 위해 flex 사용 */
-    justify-content: center;    /* 가로 가운데 정렬 */
-    align-items: center;        /* 세로 가운데 정렬 (옵션) */
-    aspect-ratio: 16 / 6;       /* 이미지 비율 유지 */
-    overflow: hidden;           /* 넘치는 이미지 잘라냄 */
+/* =============================
+   🔹 전체 페이지 배경
+   ============================= */
+body,
+body.home-body {
+    background:
+        radial-gradient(circle at 0 0, rgba(217,224,164,0.18) 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(217,224,164,0.20) 0, transparent 55%),
+        var(--bg-body);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text";
+    margin: 0;
 }
 
-.hero-img
-{
-    width:  100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+/* =============================
+   🔹 상단 유틸바 + 헤더
+   ============================= */
+.topbar,
+header.main-header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--bg-card);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
-.login-card
-{
-  position: absolute;
-  right: 0;
-  top: 40px;
-  width: 360px;
-}
-@media (max-width: 991.98px)
-{
-  .login-card
-  {
-    position: static;
-    width: 100%;
-    margin-top: 1rem;
-  }
+.topbar a,
+header.main-header .navbar-brand {
+    color: var(--text-main);
 }
 
-/* 썸네일 가독성 */
-.thumb img
-{ transition: transform .2s ease;
+.navbar-brand span {
+    color: var(--accent-green);
 }
 
-.thumb:hover img
-{
- transform: scale(1.02);
+/* =============================
+   🔹 네비게이션 메뉴
+   ============================= */
+.main-nav .main-nav-link {
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-soft);
+    color: var(--text-main);
+    padding: 6px 18px;
+    font-weight: 600;
+    border-radius: 999px;
 }
 
-/* 리스트 줄맞춤 */
-.list-group-item
-{
-    display: flex;
-    align-items: center;
-    gap: .5rem;
+.main-nav .main-nav-link:hover,
+.main-nav .main-nav-link:focus,
+.main-nav .show > .main-nav-link {
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 1px rgba(217,224,164,0.4);
 }
 
-/* 상단 메인 메뉴 스타일 */
-.main-nav {
-    gap: 0.5rem;
+/* 드롭다운 */
+.dropdown-menu {
+    background: var(--bg-card);
+    border-color: var(--bg-card-soft);
 }
 
-/* 메뉴 텍스트 모양 */
-.main-nav-link {
-    color: #343a40;
-    border-radius: 0.5rem 0.5rem 0 0;
-    padding-top: 0.6rem !important;
-    padding-bottom: 0.6rem !important;
+.dropdown-menu .dropdown-item {
+    color: var(--text-main);
 }
 
-.main-nav-link:hover,
-.main-nav-link:focus,
-.main-nav-link.active {
-    color: #0d6efd;
-    background-color: #f1f3f5;
+.dropdown-menu .dropdown-item:hover {
+    background: var(--bg-card-soft);
+    color: var(--accent-green);
 }
 
-/* 드롭다운 hover로 열리게 */
-.main-nav .dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0; /* 딜레이 없이 바로 붙어서 나오도록 */
+/* =============================
+   🔹 카드 / 패널
+   ============================= */
+.dashboard-panel {
+    background: var(--bg-panel);
+    border-radius: 32px;
+    padding: 22px 24px 26px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
-/* 드롭다운 모양 조금 정리 */
-.main-nav .dropdown-menu {
-    border-radius: 0.5rem;
-    border-color: #dee2e6;
-    min-width: 180px;
+.dash-card {
+    background: var(--bg-card);
+    border-radius: 22px;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-main);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.7);
 }
 
-
-/* 상단 메뉴 스타일 */
-.main-nav {
-    gap: 0.5rem;
+.dash-card-header {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-card-soft));
+    border-bottom: 1px solid var(--bg-card-soft);
+    padding: 10px 14px;
 }
 
-.main-nav-link {
-    color: #343a40;
-    border-radius: 0.5rem 0.5rem 0 0;
-    padding-top: 0.6rem !important;
-    padding-bottom: 0.6rem !important;
+/* 앞에 있을 매치 (Hero Section) */
+.upcoming-hero {
+    background:
+        radial-gradient(circle at 0 0, rgba(217,224,164,0.12) 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(217,224,164,0.15) 0, transparent 55%),
+        var(--bg-card);
 }
 
-.main-nav-link:hover,
-.main-nav-link:focus,
-.main-nav-link.active {
-    color: #0d6efd;
-    background-color: #f1f3f5;
+.hero-vs {
+    color: var(--accent-green);
 }
 
-/* Hover 시 드롭다운 자동 열림 */
-.main-nav .dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0;
+/* =============================
+   🔹 버튼
+   ============================= */
+.btn-outline-primary {
+    --bs-btn-color: var(--accent-green);
+    --bs-btn-border-color: var(--accent-green);
+    --bs-btn-hover-bg: var(--accent-green);
+    --bs-btn-hover-color: var(--bg-body);
 }
 
-.main-nav .dropdown-menu {
-    border-radius: 0.5rem;
-    border-color: #dee2e6;
-    min-width: 180px;
+.btn-edit {
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    background: transparent;
 }
 
+.btn-edit:hover {
+    background: var(--accent-green);
+    color: var(--bg-body);
+}
 
+.btn-primary,
+.btn-submit {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-green-soft));
+    border: none;
+    color: var(--bg-body);
+    font-weight: 700;
+    border-radius: 999px;
+}
 
+.btn-primary:hover,
+.btn-submit:hover {
+    filter: brightness(1.05);
+}
+
+/* =============================
+   🔹 입력창
+   ============================= */
+.form-control {
+    background: var(--bg-card-soft);
+    border: 1px solid #1e293b;
+    color: var(--text-main);
+}
+
+.form-control:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 1px var(--accent-green);
+}
+
+/* =============================
+   🔹 Footer
+   ============================= */
+.site-footer {
+    background: var(--bg-panel);
+    color: var(--text-muted);
+    border-top: 1px solid var(--bg-card);
+}
