@@ -140,11 +140,37 @@
             <!-- 👍 category 값을 data 속성으로 넣는다 -->
             <select class="form-select form-select-sm"
                     th:data-category="${category}"
+                    th:data-region="${region}"
                     onchange="changeSort(this)">
                 <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
                 <option value="today"  th:selected="${sort == 'today'}">오늘 인기글</option>
                 <option value="week"   th:selected="${sort == 'week'}">주간 인기글</option>
                 <option value="month"  th:selected="${sort == 'month'}">월간 인기글</option>
+            </select>
+
+            <!-- 지역 필터 (PLAYER/TEAM에서만 노출) -->
+            <select class="form-select form-select-sm"
+                    th:if="${category != null and (category.name() == 'PLAYER' or category.name() == 'TEAM')}"
+                    id="regionSelect"
+                    onchange="changeRegion(this)">
+                <option value="" th:selected="${region == null or #strings.isEmpty(region)}">전체 지역</option>
+                <option value="SEOUL" th:selected="${region == 'SEOUL'}">SEOUL</option>
+                <option value="GYEONGGI" th:selected="${region == 'GYEONGGI'}">GYEONGGI</option>
+                <option value="INCHEON" th:selected="${region == 'INCHEON'}">INCHEON</option>
+                <option value="BUSAN" th:selected="${region == 'BUSAN'}">BUSAN</option>
+                <option value="DAEGU" th:selected="${region == 'DAEGU'}">DAEGU</option>
+                <option value="DAEJEON" th:selected="${region == 'DAEJEON'}">DAEJEON</option>
+                <option value="GWANGJU" th:selected="${region == 'GWANGJU'}">GWANGJU</option>
+                <option value="ULSAN" th:selected="${region == 'ULSAN'}">ULSAN</option>
+                <option value="SEJONG" th:selected="${region == 'SEJONG'}">SEJONG</option>
+                <option value="GANGWON" th:selected="${region == 'GANGWON'}">GANGWON</option>
+                <option value="CHUNGBUK" th:selected="${region == 'CHUNGBUK'}">CHUNGBUK</option>
+                <option value="CHUNGNAM" th:selected="${region == 'CHUNGNAM'}">CHUNGNAM</option>
+                <option value="JEONBUK" th:selected="${region == 'JEONBUK'}">JEONBUK</option>
+                <option value="JEONNAM" th:selected="${region == 'JEONNAM'}">JEONNAM</option>
+                <option value="GYEONGBUK" th:selected="${region == 'GYEONGBUK'}">GYEONGBUK</option>
+                <option value="GYEONGNAM" th:selected="${region == 'GYEONGNAM'}">GYEONGNAM</option>
+                <option value="JEJU" th:selected="${region == 'JEJU'}">JEJU</option>
             </select>
 
             <a th:href="@{/board/write(category=${category})}"
@@ -153,57 +179,40 @@
 
     </div>
 
-    <!-- 지역 필터: 팀/선수 게시판에서만 노출 -->
-    <div class="mb-3"
-         th:if="${category != null and (category.name() == 'PLAYER' or category.name() == 'TEAM')}">
-        <div class="d-flex flex-wrap gap-2">
-            <a th:href="@{/board/list(category=${category}, sort=${sort})}"
-               class="btn btn-sm"
-               th:classappend="${region == null or #strings.isEmpty(region)} ? 'btn-primary' : 'btn-outline-secondary'">
-                전체
-            </a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='SEOUL')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'SEOUL'} ? 'btn-primary' : 'btn-outline-secondary'">SEOUL</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='GYEONGGI')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'GYEONGGI'} ? 'btn-primary' : 'btn-outline-secondary'">GYEONGGI</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='INCHEON')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'INCHEON'} ? 'btn-primary' : 'btn-outline-secondary'">INCHEON</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='BUSAN')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'BUSAN'} ? 'btn-primary' : 'btn-outline-secondary'">BUSAN</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='DAEGU')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'DAEGU'} ? 'btn-primary' : 'btn-outline-secondary'">DAEGU</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='DAEJEON')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'DAEJEON'} ? 'btn-primary' : 'btn-outline-secondary'">DAEJEON</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='GWANGJU')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'GWANGJU'} ? 'btn-primary' : 'btn-outline-secondary'">GWANGJU</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='ULSAN')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'ULSAN'} ? 'btn-primary' : 'btn-outline-secondary'">ULSAN</a>
-            <a th:href="@{/board/list(category=${category}, sort=${sort}, region='JEJU')}"
-               class="btn btn-sm"
-               th:classappend="${region != null and region == 'JEJU'} ? 'btn-primary' : 'btn-outline-secondary'">JEJU</a>
-        </div>
-    </div>
-
     <!-- 👍 안전한 JS 함수 -->
     <script>
         function changeSort(selectEl) {
             const category = selectEl.dataset.category || '';
             const sort = selectEl.value;
+            const region = selectEl.dataset.region || '';
 
             // category가 비면 전체 목록으로 이동
             if (!category) {
-                location.href = `/board/list?sort=${sort}`;
+                const q = region ? `?sort=${sort}&region=${encodeURIComponent(region)}` : `?sort=${sort}`;
+                location.href = `/board/list${q}`;
             } else {
-                location.href = `/board/list?category=${category}&sort=${sort}`;
+                const base = `/board/list?category=${category}&sort=${sort}`;
+                const q = region ? `${base}&region=${encodeURIComponent(region)}` : base;
+                location.href = q;
             }
+        }
+
+        function changeRegion(selectEl) {
+            const category = document.querySelector('[data-category]')?.dataset.category || '';
+            const sort = document.querySelector('[data-category]')?.value || 'latest';
+            const region = selectEl.value;
+
+            let url = '/board/list';
+            const params = [];
+            if (category) params.push(`category=${category}`);
+            if (sort) params.push(`sort=${sort}`);
+            if (region) params.push(`region=${encodeURIComponent(region)}`);
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            location.href = url;
         }
     </script>
 

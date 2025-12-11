@@ -23,6 +23,11 @@ public class TeamService {
         // 현재 로그인한 사용자 가져오기
         User user = userService.getCurrentUser();
 
+        // 이름 중복 체크 (대소문자 무시)
+        if (teamRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new IllegalArgumentException("이미 존재하는 팀 이름입니다.");
+        }
+
         // 팀 생성 + leaderId 저장
         Team team = new Team(
                 request.getName(),

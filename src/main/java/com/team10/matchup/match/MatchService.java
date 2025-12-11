@@ -278,6 +278,11 @@ public class MatchService {
         Team myTeam = currentUserService.getCurrentUserTeamOrNull();
         LocalDateTime now = LocalDateTime.now();
 
+        // 팀이 없으면 보여주지 않음
+        if (myTeam == null) {
+            return null;
+        }
+
         if (myTeam != null) {
             // 내가 등록했거나(or matchedTeam) 내 팀이 참여하는 매치 중 가장 가까운 것
             List<MatchPost> mine = matchPostRepository
