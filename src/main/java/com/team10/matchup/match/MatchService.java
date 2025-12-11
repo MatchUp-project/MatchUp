@@ -30,10 +30,14 @@ public class MatchService {
 
     /* ===================== 조회 ===================== */
 
-    // 전체 매치 글(최신순)
+    // 미래 시점의 매치 글(최신순)
     @Transactional(readOnly = true)
     public List<MatchPost> getAllMatchPosts() {
-        return matchPostRepository.findAllByOrderByCreatedAtDesc();
+        LocalDateTime now = LocalDateTime.now();
+        return matchPostRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .filter(post -> post.getMatchDatetime() != null && !post.getMatchDatetime().isBefore(now))
+                .toList();
     }
 
     // 내가 요청한 매치 ID 목록
@@ -68,13 +72,24 @@ public class MatchService {
 
         User user = currentUserService.getCurrentUser();
         Team team = currentUserService.getCurrentUserTeamOrNull();
+        if (team == null) {
+            throw new IllegalStateException("팀이 있어야 매치를 등록할 수 있습니다.");
+        }
+        if (date == null || time == null) {
+            throw new IllegalArgumentException("경기 일자와 시간을 모두 입력해주세요.");
+        }
+
+        LocalDateTime matchAt = LocalDateTime.of(date, time);
+        if (matchAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("과거 시점에는 매치를 등록할 수 없습니다.");
+        }
 
         MatchPost post = new MatchPost();
         post.setTeam(team);
         post.setCreatedBy(user);
         post.setPlayerCount(playerCount);
         post.setLocation(location);
-        post.setMatchDatetime(LocalDateTime.of(date, time));
+        post.setMatchDatetime(matchAt);
         post.setStatus("OPEN");
 
         matchPostRepository.save(post);
@@ -93,6 +108,13 @@ public class MatchService {
 
         MatchPost post = matchPostRepository.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("매치를 찾을 수 없습니다."));
+
+        if (!"OPEN".equals(post.getStatus())) {
+            throw new IllegalStateException("신청할 수 없는 매치 상태입니다.");
+        }
+        if (post.getMatchDatetime() == null || post.getMatchDatetime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 지난 매치에는 신청할 수 없습니다.");
+        }
 
         boolean exists = matchRequestRepository
                 .findByMatchPost_IdAndRequesterUser_Id(matchId, requester.getId())
@@ -172,10 +194,10 @@ public class MatchService {
 
             if (matchTime != null) {
                 if (hostTeam != null) {
-                    eventService.createMatchEvent(hostTeam, matchTime, place);
+                    eventService.createMatchEvent(hostTeam, opponentTeam, matchTime, place);
                 }
                 if (opponentTeam != null) {
-                    eventService.createMatchEvent(opponentTeam, matchTime, place);
+                    eventService.createMatchEvent(opponentTeam, hostTeam, matchTime, place);
                 }
             }
         }
@@ -211,36 +233,49 @@ public class MatchService {
 
     /* ===================== 메인화면용 조회 ===================== */
 
-    // 가장 가까운 예정 매치 1개(status=OPEN, 현재 시간 이후)
+    // 내 팀의 가장 가까운 매칭 확정 경기 1개(status=MATCHED, 현재 시간 이후)
     @Transactional(readOnly = true)
     public MatchPost getNearestUpcomingMatch() {
+        Team myTeam = currentUserService.getCurrentUserTeamOrNull();
+        if (myTeam == null) return null;
+
         LocalDateTime now = LocalDateTime.now();
 
-        return matchPostRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
-                .filter(post ->
-                        post.getMatchDatetime() != null &&
-                                "OPEN".equals(post.getStatus()) &&
-                                !post.getMatchDatetime().isBefore(now)
-                )
+        List<MatchPost> created = matchPostRepository
+                .findByTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        myTeam, "MATCHED", now
+                );
+
+        List<MatchPost> accepted = matchPostRepository
+                .findByMatchedTeamAndStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        myTeam, "MATCHED", now
+                );
+
+        created.addAll(accepted);
+
+        return created.stream()
+                .filter(m -> m.getMatchedTeam() != null) // 상대 팀 없는 OPEN 매치 제외
                 .sorted(Comparator.comparing(MatchPost::getMatchDatetime))
                 .findFirst()
                 .orElse(null);
     }
 
-    // 메인화면에 보여줄 매치 목록 (limit 개수만큼)
+    // 메인화면에 보여줄 "신청 가능" 매치 목록 (내가 올린 글/이미 요청한 글 제외)
     @Transactional(readOnly = true)
     public List<MatchPost> getAvailableMatchesForHome(int limit) {
+        User me = currentUserService.getCurrentUser();
+        Map<Long, String> myRequestMap = getMyRequestStatusMap();
+
         LocalDateTime now = LocalDateTime.now();
 
-        return matchPostRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
-                .filter(post ->
-                        post.getMatchDatetime() != null &&
-                                "OPEN".equals(post.getStatus()) &&
-                                !post.getMatchDatetime().isBefore(now)
-                )
-                .sorted(Comparator.comparing(MatchPost::getMatchDatetime))
+        return matchPostRepository
+                .findByStatusAndMatchDatetimeAfterOrderByMatchDatetimeAsc(
+                        "OPEN", now
+                ).stream()
+                .filter(post -> post.getMatchDatetime() != null)
+                .filter(post -> post.getCreatedBy() == null ||
+                        !post.getCreatedBy().getId().equals(me.getId())) // 내가 올린 글 제외
+                .filter(post -> !myRequestMap.containsKey(post.getId()))   // 이미 요청한 글 제외
                 .limit(limit)
                 .collect(Collectors.toList());
     }

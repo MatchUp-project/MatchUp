@@ -48,9 +48,72 @@ public class EventService {
         LocalDateTime start = startOf(firstDay);
         LocalDateTime end = endOf(lastDay);
 
-        return eventRepository.findByTeam_IdAndStartAtBetweenOrderByStartAtAsc(
-                team.getId(), start, end
+        List<Event> result = new ArrayList<>(
+                eventRepository.findByTeam_IdAndStartAtBetweenOrderByStartAtAsc(
+                        team.getId(), start, end
+                )
         );
+
+        // 경기 기록(MatchRecord) 기반 이벤트 추가
+        List<MatchRecord> records =
+                matchRecordRepository.findByTeam1OrTeam2AndMatchDateBetweenOrderByMatchDateAsc(
+                        team, team, start, end
+                );
+
+        for (MatchRecord rec : records) {
+            Team opponent = rec.getTeam1().getId().equals(team.getId())
+                    ? rec.getTeam2()
+                    : rec.getTeam1();
+
+            Event pseudo = new Event();
+            pseudo.setTeam(team);
+            pseudo.setTitle("[매치] vs " + opponent.getName());
+            pseudo.setStartAt(rec.getMatchDate());
+            pseudo.setPlace(rec.getPlace());
+            pseudo.setType(EventType.MATCH);
+
+            boolean exists = result.stream().anyMatch(e ->
+                    e.getType() == EventType.MATCH &&
+                            e.getStartAt() != null &&
+                            e.getStartAt().equals(pseudo.getStartAt()) &&
+                            e.getTitle().equals(pseudo.getTitle())
+            );
+            if (!exists) {
+                result.add(pseudo);
+            }
+        }
+
+        // MATCHED 상태지만 미기록된 매치(MatchPost) 추가
+        List<MatchPost> matchedPosts =
+                matchPostRepository.findByTeamOrMatchedTeamAndStatusAndMatchDatetimeBetweenOrderByMatchDatetimeAsc(
+                        team, team, "MATCHED", start, end
+                );
+
+        for (MatchPost post : matchedPosts) {
+            Team opponent = (post.getTeam() != null && post.getTeam().getId().equals(team.getId()))
+                    ? post.getMatchedTeam()
+                    : post.getTeam();
+
+            Event pseudo = new Event();
+            pseudo.setTeam(team);
+            pseudo.setTitle("[매치] vs " + (opponent != null ? opponent.getName() : "상대미정"));
+            pseudo.setStartAt(post.getMatchDatetime());
+            pseudo.setPlace(post.getLocation());
+            pseudo.setType(EventType.MATCH);
+
+            boolean exists = result.stream().anyMatch(e ->
+                    e.getType() == EventType.MATCH &&
+                            e.getStartAt() != null &&
+                            e.getStartAt().equals(pseudo.getStartAt()) &&
+                            e.getTitle().equals(pseudo.getTitle())
+            );
+            if (!exists) {
+                result.add(pseudo);
+            }
+        }
+
+        result.sort(Comparator.comparing(Event::getStartAt));
+        return result;
     }
 
     // 특정일 일정 조회 (개인 일정 + 경기 기록 + MATCHED 매치)
@@ -155,14 +218,16 @@ public class EventService {
 
     /* ===================== 매치 자동 등록 ===================== */
 
-    public void createMatchEvent(Team team, LocalDateTime matchDatetime, String place) {
+    public void createMatchEvent(Team team, Team opponent, LocalDateTime matchDatetime, String place) {
         if (team == null || matchDatetime == null) {
             return;
         }
 
+        String opponentName = opponent != null ? opponent.getName() : "상대미정";
+
         Event event = new Event();
         event.setTeam(team);
-        event.setTitle("매치 일정");
+        event.setTitle("[매치] vs " + opponentName);
         event.setStartAt(matchDatetime);
         event.setPlace(place);
         event.setType(EventType.MATCH);

@@ -168,11 +168,23 @@
             font-size: 14px;
             border-radius: 6px;
             padding: 2px 5px;
+            position: relative;
+            display: inline-block;
         }
 
         .calendar-day.has-event {
             background: rgba(163,255,18,0.07);
             border: 1px solid var(--accent-green);
+        }
+
+        .calendar-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-left: 6px;
+            box-shadow: 0 0 8px rgba(163,255,18,0.7);
         }
 
         /* ===== 오른쪽 일정 카드 ===== */
@@ -399,11 +411,16 @@
                                             )}"
                                                th:text="${currentDate.dayOfMonth}">
                                             </a>
+                                            <span th:if="${hasEventMap[currentDate]}" class="calendar-dot"></span>
                                         </div>
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-2 small text-muted">
+                            <span class="calendar-dot" style="vertical-align: middle;"></span>
+                            <span class="ms-1">일정이 있는 날</span>
                         </div>
                     </div>
 
