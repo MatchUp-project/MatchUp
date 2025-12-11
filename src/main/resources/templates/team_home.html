@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>전체 팀 목록 | MatchUp</title>
+    <title th:text="${team.name} + ' 팀 홈 | MatchUp'">팀 홈 | MatchUp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -29,14 +29,14 @@
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: var(--text-main);
+            color: var(--text-main); /* 모든 글자 흰색 */
             display: flex;
             flex-direction: column;
             background:
                     radial-gradient(circle at 0 0, rgba(163,255,18,0.18) 0, transparent 55%),
                     radial-gradient(circle at 100% 100%, rgba(34,197,94,0.20) 0, transparent 55%),
                     #0c1120;
-            padding: 0;
+            padding: 0; /* body padding 제거 */
         }
 
         /* ===== 상단 네비게이션 바 (이전 코드에서 가져옴) ===== */
@@ -69,6 +69,7 @@
             align-items: center;
             gap: 6px;
         }
+
         .main-nav .main-nav-link:hover,
         .main-nav .main-nav-link:focus,
         .main-nav .show > .main-nav-link {
@@ -84,86 +85,223 @@
         }
         .container-main {
             width: 100%;
-            max-width: 1000px; /* 팀 목록에 맞는 너비 조정 */
+            max-width: 1120px;
             background: var(--bg-panel); /* 어두운 배경 */
             border-radius: 32px;
-            padding: 30px;
+            padding: 26px 28px 24px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9);
             border: 1px solid #020617;
             margin: 0 auto;
         }
 
-        /* ===== 리스트 헤더 ===== */
-        .list-header {
+        /* ===== 상단 팀 정보 + 팀 목록으로 버튼 ===== */
+        .team-header {
+            padding: 0 0 18px 0;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-subtle); /* 어두운 경계선 */
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 25px;
-        }
-        .list-header h2 {
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .list-header p {
-            font-size: 14px;
-            color: var(--text-muted);
+            gap: 16px;
         }
 
-        /* 새 팀 생성 버튼 */
-        .btn-new-team {
+        .team-header-left h2 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .team-header-left p {
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: var(--text-main); /* 내용 글자도 흰색 */
+        }
+
+        .team-header-left small {
+            font-size: 12px;
+            color: var(--text-muted); /* 보조 글자도 밝은 색 */
+        }
+
+        /* [삭제됨] 팀 목록으로 버튼 (스타일은 남겨둠) */
+        .btn-main {
             border-radius: 999px;
             padding: 8px 18px;
             font-size: 13px;
-            font-weight: 600;
-            border: none;
+            font-weight: 500;
+            border: 1px solid var(--accent-green-soft);
+            background: transparent;
+            color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(34,197,94,0.3);
+            white-space: nowrap;
+            margin-top: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-main:hover {
             background: var(--accent-green);
             color: var(--bg-body);
-            box-shadow: 0 0 10px rgba(34,197,94,0.3);
-            transition: background-color 0.2s;
-        }
-        .btn-new-team:hover {
-            background: var(--accent-green-soft);
+            filter: none;
         }
 
-        /* ===== 팀 목록 테이블 ===== */
-        .team-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px; /* 행 간격 */
+        /* ===== 탭 ===== */
+        .nav-tabs {
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0;
         }
-        .team-table th {
+
+        .nav-tabs .nav-link {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 999px;
             color: var(--text-muted);
             font-size: 14px;
-            font-weight: 500;
-            padding-bottom: 10px;
-            text-align: left;
+            transition:
+                    background-color 0.12s ease,
+                    color 0.12s ease,
+                    box-shadow 0.15s ease;
         }
-        .team-table td {
-            background-color: var(--bg-card-soft);
-            padding: 15px 20px;
-            font-size: 15px;
-            color: var(--text-main);
-            border: 1px solid var(--border-subtle);
-        }
-        .team-table tbody tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
-        .team-table tbody tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
 
-        .team-table .detail-link {
-            font-size: 13px;
-            color: var(--accent-green);
-            text-decoration: none;
-            transition: color 0.2s;
+        .nav-tabs .nav-link:hover {
+            background-color: var(--bg-card);
+            color: var(--text-main);
         }
-        .team-table .detail-link:hover {
-            text-decoration: underline;
-            color: var(--accent-green-soft);
+
+        .nav-tabs .nav-link.active {
+            background-color: var(--accent-green);
+            color: var(--bg-body);
+            font-weight: 700;
+            box-shadow: 0 10px 22px rgba(34,197,94,0.45);
+        }
+
+        /* ===== 탭 내용 박스 ===== */
+        .tab-box {
+            margin-top: 16px;
+            background: var(--bg-card); /* 어두운 카드 배경 */
+            padding: 20px 22px 22px;
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 1px var(--border-subtle);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .tab-box h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .tab-box p {
+            margin-bottom: 6px;
+        }
+
+        .tab-box .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .tab-box .btn-outline-primary {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            background: transparent;
+            border-radius: 999px;
+            font-size: 13px;
+            padding: 6px 14px;
+            transition: all 0.2s;
+        }
+        .tab-box .btn-outline-primary:hover {
+            background: var(--accent-green);
+            color: var(--bg-body);
+        }
+
+        /* 리스트 그룹 (멤버, 일정, 기록) */
+        .list-group-item {
+            background-color: var(--bg-card-soft);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            margin-bottom: 8px;
+            border-radius: 12px !important;
+        }
+        .border.rounded {
+            border: 1px solid var(--border-subtle) !important;
+            background-color: var(--bg-card-soft);
+        }
+
+        .dropdown-menu {
+            background: #020617;
+            border-color: #111827;
+            font-size: 13px;
+        }
+
+        .dropdown-menu .dropdown-item {
+            color: #e5e7eb;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background: #111827;
+            color: var(--accent-green);
+        }
+
+        .topbar {
+            background: #050b24;             /* ✅ 내정보 있는 줄 네이비 */
+            color: #e5e7eb;
+            border-bottom: 1px solid #050b24;
+            font-size: 13px;
+        }
+
+        .topbar a {
+            font-size: 13px;
         }
     </style>
 </head>
 
 <body>
 
+<div class="topbar text-white small py-1">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
+
+        <!-- 🔔 알림 드롭다운 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
+
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
+
+<!-- ================= 헤더 ================= -->
 <header class="main-header border-0 pt-3">
     <div class="container pb-2">
         <div class="d-flex align-items-center justify-content-between gap-3">
@@ -224,43 +362,138 @@
 <main>
     <div class="container-main">
 
-        <div class="list-header">
-            <div>
-                <h2>전체 팀 목록</h2>
-                <p>주변 아마추어 팀을 둘러보고 함께 하세요.</p>
+        <div class="team-header">
+            <div class="team-header-left">
+                <h2 th:text="${team.name}">팀 이름</h2>
+                <p>
+                    <i class="bi bi-geo-alt-fill me-1 text-muted"></i>
+                    <b>지역:</b> <span th:text="${team.region}">지역</span>
+                </p>
+                <small>팀장 ID : <span th:text="${team.leaderId}">1</span></small>
             </div>
-            <a th:href="@{/team/create}" class="btn-new-team">
-                <i class="bi bi-plus-circle-fill me-1"></i> 새 팀 생성
-            </a>
+
         </div>
 
-        <div class="table-responsive">
-            <table class="team-table">
-                <thead>
-                <tr>
-                    <th style="width: 5%;">번호</th>
-                    <th style="width: 25%;">팀명</th>
-                    <th style="width: 50%;">팀 정보 (지역)</th>
-                    <th style="width: 20%;">상세</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="team, stat : ${teams}">
-                    <td th:text="${stat.count}">1</td>
-                    <td th:text="${team.name}">서울 타이거즈</td>
-                    <td>
-                        지역 : <span th:text="${team.region}">서울</span>
-                    </td>
-                    <td>
-                        <a th:href="@{'/team/detail/' + ${team.id}}" class="detail-link">
-                            상세 페이지로 이동
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link active" onclick="showTab('about')">팀 소개</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showTab('members')">멤버</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showTab('calendar')">일정</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showTab('record')">경기기록</a>
+            </li>
+        </ul>
 
+        <div class="tab-box">
+
+            <div id="about">
+                <h5><i class="bi bi-info-circle-fill me-1"></i> 팀 소개</h5>
+
+                <p th:if="${team.intro != null and !#strings.isEmpty(team.intro)}"
+                   th:text="${team.intro}">
+                    팀 소개 내용
+                </p>
+                <p th:if="${team.intro == null or #strings.isEmpty(team.intro)}" class="text-muted">
+                    아직 소개가 없습니다.
+                </p>
+
+                <div th:if="${currentUser != null and team.leaderId != null and currentUser.id == team.leaderId}">
+                    <a th:href="@{/team/{id}/edit-intro(id=${team.id})}"
+                       class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="bi bi-pencil-fill me-1"></i> 팀 소개 수정하기
+                    </a>
+                </div>
+            </div>
+
+            <div id="members" style="display:none;">
+                <h5><i class="bi bi-person-fill me-1"></i> 팀 멤버</h5>
+
+                <ul class="list-group mt-3" th:if="${members != null and !#lists.isEmpty(members)}">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="m : ${members}">
+                        <div>
+                            <b th:text="${m.user.name}">멤버 이름</b>
+                            <span class="text-muted small ms-2" th:if="${m.user.position != null and !#strings.isEmpty(m.user.position)}">
+                                (<span th:text="${m.user.position}">포지션</span>)
+                            </span>
+                            <span class="text-muted small ms-2" th:unless="${m.user.position != null and !#strings.isEmpty(m.user.position)}">
+                                (포지션 미설정)
+                            </span>
+                        </div>
+                        <span class="badge"
+                              th:classappend="${m.role == T(com.team10.matchup.team.TeamMember.Role).LEADER} ? 'bg-success text-dark fw-bold' : 'bg-secondary bg-opacity-25 text-white'">
+                            <span th:text="${m.role}">역할</span>
+                        </span>
+                    </li>
+                </ul>
+
+                <p class="text-muted" th:if="${members == null or #lists.isEmpty(members)}">
+                    등록된 팀원이 없습니다.
+                </p>
+            </div>
+
+            <div id="calendar" style="display:none;">
+                <h5><i class="bi bi-calendar-check-fill me-1"></i> 일정표</h5>
+
+                <div class="mt-3" th:if="${events != null and !#lists.isEmpty(events)}">
+                    <div class="border rounded p-3 mb-2" th:each="e : ${events}">
+                        <b th:text="${e.title}">일정명</b>
+                        <div class="text-muted small mt-1">
+                            <i class="bi bi-clock-fill me-1"></i>
+                            <span th:text="${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</span>
+                            <span class="mx-2">·</span>
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            <span th:text="${e.place}">장소</span>
+                            <span class="mx-2">·</span>
+                            <i class="bi bi-tag-fill me-1"></i>
+                            <span th:text="${e.type}">종류</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-muted" th:if="${events == null or #lists.isEmpty(events)}">
+                    등록된 일정이 없습니다.
+                </p>
+            </div>
+
+            <div id="record" style="display:none;">
+                <h5><i class="bi bi-trophy-fill me-1"></i> 경기 기록</h5>
+
+                <div class="mt-3" th:if="${records != null and !#lists.isEmpty(records)}">
+                    <div class="border rounded p-3 mb-2" th:each="r : ${records}">
+                        <b class="fs-6">
+                            <span th:text="${r.team1.name}">팀 A</span>
+                            <span class="text-muted mx-1">VS</span>
+                            <span th:text="${r.team2.name}">팀 B</span>
+                        </b>
+
+                        <div class="text-muted small mt-1">
+                            <i class="bi bi-bullseye me-1"></i>
+                            점수 :
+                            <span class="fw-bold text-main" th:text="${r.team1Score}">1</span> :
+                            <span class="fw-bold text-main" th:text="${r.team2Score}">0</span>
+                            <span class="mx-2">·</span>
+                            <i class="bi bi-calendar-event me-1"></i>
+                            날짜 :
+                            <span th:text="${#temporals.format(r.matchDate, 'yyyy-MM-dd')}">2025-01-01</span>
+                            <span class="mx-2">·</span>
+                            <i class="bi bi-pin-map-fill me-1"></i>
+                            장소 :
+                            <span th:text="${r.place}">장소</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-muted" th:if="${records == null or #lists.isEmpty(records)}">
+                    경기 기록이 없습니다.
+                </p>
+            </div>
+
+        </div>
     </div>
 </main>
 <footer class="site-footer py-4 mt-3">
@@ -271,6 +504,40 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showTab(tab) {
+        const tabs = ['about', 'members', 'calendar', 'record'];
+
+        tabs.forEach(t => {
+            const el = document.getElementById(t);
+            if (el) {
+                el.style.display = (t === tab) ? 'block' : 'none';
+            }
+        });
+
+        // 탭 버튼 active 처리
+        const links = document.querySelectorAll('.nav-tabs .nav-link');
+        links.forEach(btn => btn.classList.remove('active'));
+
+        const currentLink = document.querySelector(`.nav-tabs .nav-link[onclick*="${tab}"]`);
+        if (currentLink) {
+            currentLink.classList.add('active');
+        }
+    }
+
+    // 페이지 로드 시 첫 번째 탭 ('about')이 Active 되도록 처리
+    document.addEventListener('DOMContentLoaded', () => {
+        // Active 클래스가 없는 경우 'about' 탭을 활성화
+        const activeLink = document.querySelector('.nav-tabs .nav-link.active');
+        if (!activeLink) {
+             const defaultLink = document.querySelector('.nav-tabs .nav-link');
+             if (defaultLink) {
+                 defaultLink.classList.add('active');
+                 showTab('about');
+             }
+        }
+    });
+</script>
 
 </body>
 </html>

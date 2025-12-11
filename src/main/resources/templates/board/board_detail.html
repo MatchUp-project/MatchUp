@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <title th:text="${board.title} + ' | MATCHUP'"></title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -8,96 +11,145 @@
         :root {
             --accent-green: #a3ff12;
             --bg-top: #050b18;
-            --bg-body: #020617;
-            --text-muted: #94a3b8;
+            --bg-body: linear-gradient(180deg, #020617 0%, #0a1b14 100%);
+            --bg-card: #050b18;
         }
 
-        body { background: var(--bg-body); color: #fff; }
+        body {
+            background: var(--bg-body);
+            color: white;
+            min-height: 100vh;
+        }
 
+        /* ===== TOP BAR ===== */
         .topbar {
             background: var(--bg-top);
             border-bottom: 1px solid #1e293b;
+            padding: 6px 0;
         }
 
+        /* ===== HEADER ===== */
         .main-header {
             background: var(--bg-top);
-            padding-top: 10px;
-            padding-bottom: 10px;
             border-bottom: 1px solid #1e293b;
+            padding: 20px 0 10px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .navbar-brand {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
         }
 
         .main-nav .nav-link {
-            color: #fff;
+            color: white;
             font-weight: 600;
+            padding: 8px 15px;
         }
-
         .main-nav .nav-link:hover {
             color: var(--accent-green);
+        }
+
+        /* ===== PAGE CONTENT ===== */
+        .container-main {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .post-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .meta {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .content-box {
+            background: #0a0f1f;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+
+        /* ===== 댓글 ===== */
+        .comment-box {
+            background: #0a0f1f;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .comment-child {
+            margin-left: 30px;
+            border-left: 2px solid #334155;
+            padding-left: 15px;
         }
     </style>
 </head>
 
 <body>
 
-<header th:fragment="headerFragment">
+<!-- ===== TOP BAR ===== -->
+<div class="topbar text-white small">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
 
-    <!-- 🔔 상단 유틸바 -->
-    <div class="topbar text-white small py-1">
-        <div class="container d-flex justify-content-end align-items-center gap-3">
-
-            <!-- 알림 -->
-            <div class="dropdown position-relative">
-                <a class="text-white text-decoration-none dropdown-toggle"
-                   href="#" id="notiDropdown" data-bs-toggle="dropdown">
-                    <i class="bi bi-bell-fill"></i>
-
-                    <span th:if="${hasUnreadNotifications}"
-                          class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
-                    <li class="dropdown-header fw-semibold">최근 알림</li>
-
-                    <li th:if="${#lists.isEmpty(recentNotifications)}"
-                        class="dropdown-item text-muted">알림이 없습니다.</li>
-
-                    <li th:each="noti : ${recentNotifications}">
-                        <a class="dropdown-item" th:href="@{/notifications}">
-                            <span th:text="${noti.content}"></span><br>
-                            <small class="text-muted"
-                                   th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
-                        </a>
-                    </li>
-
-                    <li><hr class="dropdown-divider"></li>
-
-                    <li><a class="dropdown-item text-center fw-semibold"
-                           th:href="@{/notifications}">모든 알림 보기</a></li>
-                </ul>
-            </div>
-
-            <a href="/" class="link-light text-decoration-none">홈</a>
-            <a href="/profile" class="link-light text-decoration-none">내 정보</a>
-            <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
-
-        </div>
-    </div>
-
-    <!-- 🔥 메인 헤더 -->
-    <div class="main-header">
-        <div class="container d-flex align-items-center justify-content-between">
-            <a class="navbar-brand fw-bold fs-3 m-0 text-white" href="/">
-                MATCH<span style="color: var(--accent-green);">UP</span>
+        <!-- 알림 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle"></span>
             </a>
 
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">알림이 없습니다.</li>
+
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}"></span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt,'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-center fw-semibold" th:href="@{/notifications}">모든 알림 보기</a></li>
+            </ul>
+        </div>
+
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
+
+<!-- ===== HEADER (메인페이지 동일) ===== -->
+<header class="main-header">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between">
+            <a class="navbar-brand text-white" href="/">
+                MATCH<span style="color: var(--accent-green)">UP</span>
+            </a>
+        </div>
+
+        <nav class="mt-3">
             <ul class="nav main-nav">
 
                 <!-- 팀 메뉴 -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-people-fill me-1"></i> 팀
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
                         <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
                         <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
@@ -107,10 +159,10 @@
 
                 <!-- 커뮤니티 -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
                         <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
                         <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
@@ -125,10 +177,62 @@
                 </li>
 
             </ul>
+        </nav>
+    </div>
+</header>
+
+
+<!-- ===== 본문 ===== -->
+<div class="container-main">
+
+    <div class="post-title" th:text="${board.title}"></div>
+
+    <div class="meta mt-2">
+        <span th:text="'작성자: ' + ${board.authorName}"></span> ·
+        <span th:text="'조회수: ' + ${board.viewCount}"></span> ·
+        <span th:text="${#temporals.format(board.createdAt,'yyyy-MM-dd HH:mm')}"></span>
+    </div>
+
+    <div class="content-box" th:text="${board.content}"></div>
+
+    <div class="d-flex gap-2 mt-4">
+        <form th:action="@{/board/like/{id}(id=${board.id})}" method="post">
+            <button class="btn btn-outline-light"><i class="bi bi-hand-thumbs-up-fill"></i> 추천</button>
+        </form>
+
+        <a th:if="${board.mine}" th:href="@{/board/edit/{id}(id=${board.id})}"
+           class="btn btn-outline-light">수정</a>
+
+        <form th:if="${board.mine}"
+              th:action="@{/board/delete/{id}(id=${board.id})}"
+              method="post"
+              onsubmit="return confirm('삭제하시겠습니까?');">
+            <button class="btn btn-danger">삭제</button>
+        </form>
+    </div>
+
+    <h4 class="mt-5">댓글</h4>
+
+    <div th:each="c : ${board.comments}">
+        <div class="comment-box">
+            <b th:text="${c.authorName}"></b>
+            <span class="meta ms-2" th:text="${#temporals.format(c.createdAt,'MM/dd HH:mm')}"></span>
+            <div class="mt-2" th:text="${c.content}"></div>
+        </div>
+
+        <div th:each="child : ${c.children}" class="comment-box comment-child">
+            <b th:text="${child.authorName}"></b>
+            <span class="meta ms-2" th:text="${#temporals.format(child.createdAt,'MM/dd HH:mm')}"></span>
+            <div class="mt-2" th:text="${child.content}"></div>
         </div>
     </div>
 
-</header>
+    <form class="mt-4" th:action="@{/board/comment/{id}(id=${board.id})}" method="post">
+        <textarea name="content" class="form-control mb-2" rows="3" placeholder="댓글 입력..."></textarea>
+        <button class="btn btn-success">댓글 작성</button>
+    </form>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
