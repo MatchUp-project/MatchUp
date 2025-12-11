@@ -5,4 +5,3 @@ public enum MatchRequestStatus {
     ACCEPTED,   // 수락
     REJECTED    // 거절
 }
-
