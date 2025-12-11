@@ -23,16 +23,21 @@ public class BoardPlayerRecruit {
     @Column(name = "skill_level")
     private String skillLevel;
 
+    @Column(name = "region")
+    private String region;
+
     protected BoardPlayerRecruit() {}
 
     public BoardPlayerRecruit(Long boardId,
                               String positionNeeded,
                               String ageRange,
-                              String skillLevel) {
+                              String skillLevel,
+                              String region) {
         this.boardId = boardId;
         this.positionNeeded = positionNeeded;
         this.ageRange = ageRange;
         this.skillLevel = skillLevel;
+        this.region = region;
     }
 
     public Long getId() { return id; }
@@ -40,4 +45,5 @@ public class BoardPlayerRecruit {
     public String getPositionNeeded() { return positionNeeded; }
     public String getAgeRange() { return ageRange; }
     public String getSkillLevel() { return skillLevel; }
+    public String getRegion() { return region; }
 }

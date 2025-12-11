@@ -54,8 +54,16 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public List<TeamResponse> getAllTeams() {
-        return teamRepository.findAll()
-                .stream()
+        return getAllTeams(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeamResponse> getAllTeams(String region) {
+        List<Team> teams = (region == null || region.isBlank())
+                ? teamRepository.findAll()
+                : teamRepository.findByRegion(region);
+
+        return teams.stream()
                 .map(TeamResponse::new)
                 .toList();
     }

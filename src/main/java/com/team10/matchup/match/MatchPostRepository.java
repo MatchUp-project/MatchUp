@@ -21,6 +21,12 @@ public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
             String status, LocalDateTime now
     );
 
+    List<MatchPost> findAllByRegionOrderByCreatedAtDesc(String region);
+
+    List<MatchPost> findAllByStatusAndRegionOrderByMatchDatetimeAsc(String status, String region);
+
+    List<MatchPost> findAllByStatusAndMatchDatetimeBeforeAndMatchedTeamIsNull(String status, LocalDateTime before);
+
     List<MatchPost> findByStatusOrderByMatchDatetimeAsc(String status);
 
 
@@ -54,4 +60,3 @@ public interface MatchPostRepository extends JpaRepository<MatchPost, Long> {
 
 
 }
-

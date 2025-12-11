@@ -10,6 +10,46 @@
 <div class="container mt-4">
     <h3 class="mb-4">알림</h3>
 
+    <div th:if="${teamInvites != null and !#lists.isEmpty(teamInvites)}" class="mb-4">
+        <h5 class="mb-2">팀 초대</h5>
+        <div class="list-group">
+            <div class="list-group-item d-flex justify-content-between align-items-center" th:each="inv : ${teamInvites}">
+                <div>
+                    <div><span th:text="${inv.team.name}">팀</span> 팀 초대가 도착했습니다.</div>
+                    <small class="text-muted" th:text="${#temporals.format(inv.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
+                </div>
+                <div>
+                    <form th:action="@{'/team/invite/' + ${inv.id} + '/accept'}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">수락</button>
+                    </form>
+                    <form th:action="@{'/team/invite/' + ${inv.id} + '/reject'}" method="post" class="d-inline ms-1">
+                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${teamJoinRequests != null and !#lists.isEmpty(teamJoinRequests)}" class="mb-4">
+        <h5 class="mb-2">팀 가입 요청</h5>
+        <div class="list-group">
+            <div class="list-group-item d-flex justify-content-between align-items-center" th:each="req : ${teamJoinRequests}">
+                <div>
+                    <div><span th:text="${req.applicant.name}">신청자</span> 님이 가입을 신청했습니다.</div>
+                    <small class="text-muted" th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
+                </div>
+                <div>
+                    <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/accept'}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">승인</button>
+                    </form>
+                    <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/reject'}" method="post" class="d-inline ms-1">
+                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div th:if="${#lists.isEmpty(notifications)}" class="text-muted">
         알림이 없습니다.
     </div>
@@ -18,43 +58,27 @@
         <div class="list-group-item d-flex justify-content-between align-items-center">
             <div>
                 <div th:text="${n.content}">알림 내용</div>
-                <small class="text-muted"
-                       th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">
-                    2025-12-01 10:00
-                </small>
+                <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
             </div>
 
-            <!-- 매치 신청 알림인 경우 -->
             <div th:if="${n.type == 'MATCH_REQUEST'}">
-
-                <!-- 1) 아직 처리 안 된(PENDING) 신청이면 수락 / 거절 버튼 표시 -->
-                <div th:if="${n.relatedMatchRequest != null
-                 and n.relatedMatchRequest.status == 'PENDING'}">
-                    <form th:action="@{'/notifications/' + ${n.id} + '/accept'}"
-                          method="post" class="d-inline">
+                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'PENDING'}">
+                    <form th:action="@{'/notifications/' + ${n.id} + '/accept'}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-success">수락</button>
                     </form>
-                    <form th:action="@{'/notifications/' + ${n.id} + '/reject'}"
-                          method="post" class="d-inline ms-1">
+                    <form th:action="@{'/notifications/' + ${n.id} + '/reject'}" method="post" class="d-inline ms-1">
                         <button type="submit" class="btn btn-sm btn-danger">거절</button>
                     </form>
                 </div>
-
-                <!-- 2) 이미 수락된 신청이면 문구만 표시 -->
-                <div th:if="${n.relatedMatchRequest != null
-                 and n.relatedMatchRequest.status == 'ACCEPTED'}"
+                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'ACCEPTED'}"
                      class="text-success fw-semibold">
-                    수락되었습니다.
+                    매치가 수락되었습니다.
                 </div>
-
-                <!-- 3) 이미 거절된 신청이면 문구만 표시 -->
-                <div th:if="${n.relatedMatchRequest != null
-                 and n.relatedMatchRequest.status == 'REJECTED'}"
+                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'REJECTED'}"
                      class="text-danger fw-semibold">
-                    거절되었습니다.
+                    매치가 거절되었습니다.
                 </div>
             </div>
-
         </div>
     </div>
 </div>

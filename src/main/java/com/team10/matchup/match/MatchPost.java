@@ -38,6 +38,9 @@ public class MatchPost {
     @Column(nullable = false, length = 255)
     private String location;
 
+    @Column(length = 50)
+    private String region;
+
     // 경기 일시
     @Column(name = "match_datetime", nullable = false)
     private LocalDateTime matchDatetime;

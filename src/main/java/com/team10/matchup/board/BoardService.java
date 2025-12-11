@@ -35,6 +35,7 @@ public class BoardService {
     private final BoardCommentRepository boardCommentRepository;
     private final BoardCommentService boardCommentService;
     private final BoardLikeRepository boardLikeRepository;
+    private final com.team10.matchup.team.TeamMemberRepository teamMemberRepository;
 
     // ============================================================
     // 글 작성
@@ -62,7 +63,8 @@ public class BoardService {
                     saved.getId(),
                     request.getPositionNeeded(),
                     request.getAgeRange(),
-                    request.getSkillLevel()
+                    request.getSkillLevel(),
+                    request.getRegion()
             ));
         }
 
@@ -104,7 +106,8 @@ public class BoardService {
                     board, author.getName(),
                     recruit != null ? recruit.getPositionNeeded() : null,
                     recruit != null ? recruit.getAgeRange() : null,
-                    recruit != null ? recruit.getSkillLevel() : null
+                    recruit != null ? recruit.getSkillLevel() : null,
+                    recruit != null ? recruit.getRegion() : null
             );
         }
         else if (board.getCategory() == BoardCategory.TEAM) {
@@ -126,6 +129,9 @@ public class BoardService {
         if (current != null && Objects.equals(board.getUserId(), current.getId())) {
             res.setMine(true);
         }
+
+        teamMemberRepository.findFirstByUserId(board.getUserId())
+                .ifPresent(tm -> res.setAuthorTeam(tm.getTeam().getId(), tm.getTeam().getName()));
 
         // 댓글 트리
         List<BoardCommentResponse> commentTree = boardCommentService.getCommentTree(id);
@@ -161,7 +167,7 @@ public class BoardService {
     public List<BoardResponse> getListByCategory(BoardCategory category) {
         return boardRepository.findByCategoryAndDeletedFalseOrderByIdDesc(category)
                 .stream()
-                .map(this::mapBoardToResponse)
+                .map(this::mapBoardToResponseV2)
                 .toList();
     }
 
@@ -170,7 +176,7 @@ public class BoardService {
     public List<BoardResponse> getAllBoards() {
         return boardRepository.findByDeletedFalseOrderByIdDesc()
                 .stream()
-                .map(this::mapBoardToResponse)
+                .map(this::mapBoardToResponseV2)
                 .toList();
     }
 
@@ -232,6 +238,57 @@ public class BoardService {
         return res;
     }
 
+    /**
+     * Enhanced mapper with region for player posts and author team info.
+     */
+    public BoardResponse mapBoardToResponseV2(Board board) {
+
+        User user = userService.getUserById(board.getUserId());
+        User current = userService.getCurrentUser();
+
+        BoardResponse res;
+
+        if (board.getCategory() == BoardCategory.PLAYER) {
+            BoardPlayerRecruit extra = playerRecruitRepository.findByBoardId(board.getId()).orElse(null);
+            if (extra == null) {
+                res = new BoardResponse(board, user.getName());
+            } else {
+                res = BoardResponse.ofPlayer(
+                        board,
+                        user.getName(),
+                        extra.getPositionNeeded(),
+                        extra.getAgeRange(),
+                        extra.getSkillLevel(),
+                        extra.getRegion()
+                );
+            }
+        } else if (board.getCategory() == BoardCategory.TEAM) {
+            BoardTeamSearch extra = teamSearchRepository.findByBoardId(board.getId()).orElse(null);
+            if (extra == null) {
+                res = new BoardResponse(board, user.getName());
+            } else {
+                res = BoardResponse.ofTeam(
+                        board,
+                        user.getName(),
+                        extra.getRegion(),
+                        extra.getPreferredPosition(),
+                        extra.getSkillLevel()
+                );
+            }
+        } else {
+            res = new BoardResponse(board, user.getName());
+        }
+
+        teamMemberRepository.findFirstByUserId(board.getUserId())
+                .ifPresent(tm -> res.setAuthorTeam(tm.getTeam().getId(), tm.getTeam().getName()));
+
+        if (current != null) {
+            res.setMine(Objects.equals(board.getUserId(), current.getId()));
+        }
+
+        return res;
+    }
+
 
 
 
@@ -245,7 +302,7 @@ public class BoardService {
                 .map(row -> {
                     Long boardId = (Long) row[0];
                     return boardRepository.findById(boardId)
-                            .map(this::mapBoardToResponse)
+                            .map(this::mapBoardToResponseV2)
                             .orElse(null);
                 })
                 .toList();
@@ -264,7 +321,7 @@ public class BoardService {
                 .map(row -> {
                     Long boardId = (Long) row[0];
                     return boardRepository.findById(boardId)
-                            .map(this::mapBoardToResponse)
+                            .map(this::mapBoardToResponseV2)
                             .orElse(null);
                 })
                 .toList();
@@ -283,7 +340,7 @@ public class BoardService {
                 .map(row -> {
                     Long boardId = (Long) row[0];
                     return boardRepository.findById(boardId)
-                            .map(this::mapBoardToResponse)
+                            .map(this::mapBoardToResponseV2)
                             .orElse(null);
                 })
                 .toList();
@@ -298,7 +355,7 @@ public class BoardService {
                 )
                 .getContent()
                 .stream()
-                .map(this::mapBoardToResponse)
+                .map(this::mapBoardToResponseV2)
                 .toList();
     }
 

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-// 🔽 추가
 import java.util.Map;
 
 @Controller
@@ -20,10 +19,11 @@ public class MatchRecordController {
     private final MatchRecordService matchRecordService;
 
     /**
-     * 경기 기록 목록 페이지 (카드만 보여주는 곳)
+     * 경기 기록 목록 페이지 (카드 보여주는 곳)
      */
     @GetMapping
-    public String recordsPage(Model model) {
+    public String recordsPage(@RequestParam(value = "all", defaultValue = "false") boolean showAll,
+                              Model model) {
 
         Team team = matchRecordService.getCurrentTeamOrNull();
         if (team == null) {
@@ -31,10 +31,11 @@ public class MatchRecordController {
             return "match_record";
         }
 
-        List<MatchRecord> records = matchRecordService.getRecordsForCurrentTeam();
+        List<MatchRecord> records = showAll
+                ? matchRecordService.getRecordsForCurrentTeam()
+                : matchRecordService.getRecentRecordsForCurrentTeam(6);
         List<MatchPost> matchedMatches = matchRecordService.getMatchedPostsForCurrentTeam();
 
-        // ✅ matchId -> 상대 팀 이름
         Map<Long, String> opponentNames =
                 matchRecordService.getOpponentNamesForMatches(matchedMatches);
 
@@ -42,13 +43,15 @@ public class MatchRecordController {
         model.addAttribute("team", team);
         model.addAttribute("records", records);
         model.addAttribute("matchedMatches", matchedMatches);
-        model.addAttribute("opponentNames", opponentNames);  // 👈 여기 추가
+        model.addAttribute("opponentNames", opponentNames);
+        model.addAttribute("showAll", showAll);
+        model.addAttribute("stats", matchRecordService.calculateStatsForCurrentTeam());
 
-        return "match_record";   // 목록용 템플릿
+        return "match_record";
     }
 
     /**
-     * 점수 입력 페이지
+     * 스코어 입력 페이지
      */
     @GetMapping("/score")
     public String scoreForm(@RequestParam("matchId") Long matchId, Model model) {
@@ -65,11 +68,11 @@ public class MatchRecordController {
         model.addAttribute("team", team);
         model.addAttribute("recordForm", form);
 
-        return "match_record_score";   // 점수 입력용 템플릿
+        return "match_record_score";
     }
 
     /**
-     * 점수 저장
+     * 스코어 저장
      */
     @PostMapping("/score")
     public String saveScore(@ModelAttribute("recordForm") MatchRecordForm form,

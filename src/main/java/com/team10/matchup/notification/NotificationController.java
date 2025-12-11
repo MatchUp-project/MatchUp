@@ -4,7 +4,10 @@ import com.team10.matchup.match.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequiredArgsConstructor
@@ -13,16 +16,17 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final MatchService matchService;
+    private final com.team10.matchup.team.TeamInvitationService teamInvitationService;
 
-    // 알림 전체 목록 보기
     @GetMapping
     public String listNotifications(Model model) {
         model.addAttribute("notifications", notificationService.getAllForCurrentUser());
+        model.addAttribute("teamInvites", teamInvitationService.getMyPendingInvites());
+        model.addAttribute("teamJoinRequests", teamInvitationService.getPendingJoinRequestsForMyTeamAsLeader());
         notificationService.markAllReadForCurrentUser();
         return "notifications";
     }
 
-    // 매치 신청 수락
     @PostMapping("/{notificationId}/accept")
     public String accept(@PathVariable Long notificationId) {
         Notification n = notificationService.getById(notificationId);
@@ -33,7 +37,6 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
-    // 매치 신청 거절
     @PostMapping("/{notificationId}/reject")
     public String reject(@PathVariable Long notificationId) {
         Notification n = notificationService.getById(notificationId);
@@ -44,3 +47,4 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 }
+

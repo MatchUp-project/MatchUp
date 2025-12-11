@@ -45,6 +45,13 @@ public class MatchRecordService {
     }
 
     @Transactional(readOnly = true)
+    public List<MatchRecord> getRecentRecordsForCurrentTeam(int limit) {
+        List<MatchRecord> all = getRecordsForCurrentTeam();
+        if (all.size() <= limit) return all;
+        return all.subList(0, limit);
+    }
+
+    @Transactional(readOnly = true)
     public List<MatchPost> getMatchedPostsForCurrentTeam() {
         Team myTeam = getCurrentTeamOrNull();
         if (myTeam == null) return List.of();
@@ -177,5 +184,40 @@ public class MatchRecordService {
         }
 
         return null;
+    }
+
+    @Transactional(readOnly = true)
+    public MatchRecordStats calculateStatsForCurrentTeam() {
+        Team myTeam = getCurrentTeamOrNull();
+        if (myTeam == null) {
+            return new MatchRecordStats(0, 0, 0, 0, 0.0);
+        }
+        return calculateStats(getRecordsForCurrentTeam(), myTeam);
+    }
+
+    protected MatchRecordStats calculateStats(List<MatchRecord> records, Team myTeam) {
+        int wins = 0;
+        int losses = 0;
+        int draws = 0;
+
+        for (MatchRecord record : records) {
+            int myScore;
+            int oppScore;
+            if (record.getTeam1() != null && record.getTeam1().getId().equals(myTeam.getId())) {
+                myScore = record.getTeam1Score();
+                oppScore = record.getTeam2Score();
+            } else {
+                myScore = record.getTeam2Score();
+                oppScore = record.getTeam1Score();
+            }
+
+            if (myScore > oppScore) wins++;
+            else if (myScore < oppScore) losses++;
+            else draws++;
+        }
+
+        int total = records.size();
+        double winRate = total == 0 ? 0.0 : ((double) wins) / total;
+        return new MatchRecordStats(total, wins, losses, draws, winRate);
     }
 }

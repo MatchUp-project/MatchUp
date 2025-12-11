@@ -19,18 +19,18 @@ public class BoardResponse {
     private int viewCount;
     private LocalDateTime createdAt;
 
-    // ===== 카테고리별 추가 정보 =====
     private String positionNeeded;       // PLAYER 전용
     private String ageRange;             // PLAYER 전용
     private String skillLevel;           // PLAYER + TEAM 공통
 
-    private String region;               // TEAM 전용
+    private String region;               // TEAM + PLAYER 전용
     private String preferredPosition;    // TEAM 전용
 
-    // ===== 댓글 리스트 =====
+    private Long authorTeamId;
+    private String authorTeamName;
+
     private List<BoardCommentResponse> comments = new ArrayList<>();
 
-    // ===== 기본 생성자 =====
     public BoardResponse(Board board, String username) {
         this.id = board.getId();
         this.userId = board.getUserId();
@@ -42,20 +42,27 @@ public class BoardResponse {
         this.createdAt = board.getCreatedAt();
     }
 
-    // ===== PLAYER 생성자 =====
     public static BoardResponse ofPlayer(Board board, String username,
                                          String positionNeeded,
                                          String ageRange,
-                                         String skillLevel) {
+                                         String skillLevel,
+                                         String region) {
 
         BoardResponse res = new BoardResponse(board, username);
         res.positionNeeded = positionNeeded;
         res.ageRange = ageRange;
         res.skillLevel = skillLevel;
+        res.region = region;
         return res;
     }
 
-    // ===== TEAM 생성자 =====
+    public static BoardResponse ofPlayer(Board board, String username,
+                                         String positionNeeded,
+                                         String ageRange,
+                                         String skillLevel) {
+        return ofPlayer(board, username, positionNeeded, ageRange, skillLevel, null);
+    }
+
     public static BoardResponse ofTeam(Board board, String username,
                                        String region,
                                        String preferredPosition,
@@ -68,7 +75,6 @@ public class BoardResponse {
         return res;
     }
 
-    // ===== 댓글 Getter/Setter =====
     public List<BoardCommentResponse> getComments() {
         return comments;
     }
@@ -77,8 +83,6 @@ public class BoardResponse {
         this.comments = (comments != null ? comments : new ArrayList<>());
     }
 
-
-    // ===== 기본 Getter =====
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public String getUsername() { return username; }
@@ -95,9 +99,15 @@ public class BoardResponse {
     public String getRegion() { return region; }
     public String getPreferredPosition() { return preferredPosition; }
 
+    public Long getAuthorTeamId() { return authorTeamId; }
+    public String getAuthorTeamName() { return authorTeamName; }
+
     private boolean mine;
     public boolean isMine() { return mine; }
     public void setMine(boolean mine) { this.mine = mine; }
 
-
+    public void setAuthorTeam(Long teamId, String teamName) {
+        this.authorTeamId = teamId;
+        this.authorTeamName = teamName;
+    }
 }

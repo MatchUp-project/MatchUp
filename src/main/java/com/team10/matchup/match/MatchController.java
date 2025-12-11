@@ -23,6 +23,7 @@ public class MatchController {
     @GetMapping("/apply")
     public String matchApplyPage(
             @RequestParam(name = "filter", defaultValue = "available") String filter,
+            @RequestParam(name = "region", required = false) String region,
             Model model) {
 
         Team team = currentUserService.getCurrentUserTeamOrNull();
@@ -34,7 +35,7 @@ public class MatchController {
 
         User currentUser = currentUserService.getCurrentUser();
         Map<Long, String> requestStatusMap = matchService.getMyRequestStatusMap();
-        List<MatchPost> allPosts = matchService.getAllMatchPosts();
+        List<MatchPost> allPosts = matchService.getAllMatchPosts(region);
 
         // ✅ 서버에서 '가능/불가능' 필터링
         List<MatchPost> filteredPosts = allPosts.stream()
@@ -65,6 +66,7 @@ public class MatchController {
         model.addAttribute("matchPosts", filteredPosts);
         model.addAttribute("requestStatusMap", requestStatusMap);
         model.addAttribute("filter", filter);
+        model.addAttribute("region", region);
 
         return "match_apply";
     }
@@ -74,6 +76,7 @@ public class MatchController {
         matchService.createMatchPost(
                 form.getPlayerCount(),
                 form.getLocation(),
+                form.getRegion(),
                 form.getDate(),
                 form.getTime()
         );

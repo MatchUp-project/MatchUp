@@ -25,8 +25,8 @@ public class TeamController {
     }
 
     @GetMapping
-    public List<TeamResponse> getAllTeams() {
-        return teamService.getAllTeams();
+    public List<TeamResponse> getAllTeams(@RequestParam(value = "region", required = false) String region) {
+        return teamService.getAllTeams(region);
     }
 
     @PutMapping("/{id}")
@@ -40,4 +40,3 @@ public class TeamController {
         teamService.deleteTeam(id);
     }
 }
-

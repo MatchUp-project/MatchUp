@@ -12,6 +12,7 @@ public class MatchCreateForm {
 
     private int playerCount;
     private String location;
+    private String region;
     private LocalDate date;
     private LocalTime time;
 }

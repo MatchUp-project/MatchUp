@@ -44,7 +44,15 @@ public class ProfileController {
 
         currentUser.setName(name);
         currentUser.setEmail(email);
-        currentUser.setPosition(position);
+        if (position != null && !position.isBlank()) {
+            String normalized = position.toUpperCase();
+            if (!com.team10.matchup.common.PositionCategory.isValid(normalized)) {
+                throw new IllegalArgumentException("유효한 포지션(FW, MF, DF, GK)이 아닙니다.");
+            }
+            currentUser.setPosition(normalized);
+        } else {
+            currentUser.setPosition(null);
+        }
 
         userRepository.save(currentUser);
 

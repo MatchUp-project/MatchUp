@@ -38,7 +38,15 @@ public class MatchService {
     // 전체 매치 가져오기
     @Transactional(readOnly = true)
     public List<MatchPost> getAllMatchPosts() {
-        return matchPostRepository.findAllByOrderByCreatedAtDesc();
+        return getAllMatchPosts(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchPost> getAllMatchPosts(String region) {
+        if (region == null || region.isBlank()) {
+            return matchPostRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return matchPostRepository.findAllByRegionOrderByCreatedAtDesc(region);
     }
 
     // (예전) 내가 신청한 매치 ID 목록 – 안 써도 되지만 놔둬도 됨
@@ -68,7 +76,7 @@ public class MatchService {
 
     /* ===================== 매치 생성 ===================== */
 
-    public void createMatchPost(int playerCount, String location,
+    public void createMatchPost(int playerCount, String location, String region,
                                 LocalDate date, LocalTime time) {
 
         User user = currentUserService.getCurrentUser();
@@ -79,6 +87,7 @@ public class MatchService {
         post.setCreatedBy(user);
         post.setPlayerCount(playerCount);
         post.setLocation(location);
+        post.setRegion(region);
         post.setMatchDatetime(LocalDateTime.of(date, time));
         post.setStatus("OPEN");
 
