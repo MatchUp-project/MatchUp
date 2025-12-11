@@ -7,332 +7,350 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 프로젝트 공통 스타일 (있으면 유지) -->
-    <link rel="stylesheet" th:href="@{/style.css}"/>
 
     <style>
         :root {
-            --page-text-main: #111827;
-            --page-text-muted: #6b7280;
-            --page-card-bg: rgba(255, 255, 255, 0.96);
-            --page-border: rgba(226, 232, 240, 0.9);
+            --bg-body: #0c1120;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --bg-card-soft: #07111f;
+
+            --accent-green: #a3ff12;
+            --accent-green-soft: #22c55e;
+
+            --text-main: #f8fafc;
+            --text-muted: #9ca3af;
+
+            --border-subtle: #111827;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        /* ===== 메인/팀 목록 페이지와 같은 그라디언트 배경 ===== */
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: var(--page-text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 20px;
-            padding: 120px 16px 64px; /* 헤더 높이 고려 */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text";
             background:
-                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
-                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
-            position: relative;
-            overflow: hidden;
+                    radial-gradient(circle at 0 0, rgba(163,255,18,0.08) 0, transparent 55%),
+                    radial-gradient(circle at 100% 100%, rgba(34,197,94,0.15) 0, transparent 55%),
+                    #0c1120;
+            color: var(--text-main);
         }
 
-        body::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background:
-                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
-                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
-            opacity: 0.9;
-            z-index: -1;
-            filter: blur(4px);
+        /* ===== TOPBAR ===== */
+        .topbar {
+            background: var(--bg-panel);
+            border-bottom: 1px solid #050b24;
         }
 
-        /* ===== 가운데 카드 ===== */
-        .board-page {
-            width: 100%;
-            max-width: 1120px;
-            background: var(--page-card-bg);
-            border-radius: 28px;
-            padding: 24px 26px 22px;
-            box-shadow:
-                0 24px 65px rgba(15, 23, 42, 0.35),
-                0 0 0 1px rgba(148, 163, 184, 0.16);
-            backdrop-filter: blur(18px);
+        /* ===== HEADER ===== */
+        header.main-header {
+            background: var(--bg-panel);
+            border-bottom: 1px solid #050b24;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
         }
-
-        /* ===== 상단 타이틀 + 정렬/글쓰기 ===== */
-        .board-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-            color: var(--page-text-main);
+        header .navbar-brand {
+            color: var(--text-main);
+            font-weight: 900;
+            letter-spacing: 0.12em;
         }
+        header .navbar-brand span { color: var(--accent-green); }
 
-        .board-header-left {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .board-title-main {
-            font-size: 21px;
-            font-weight: 700;
-        }
-
-        .board-subtitle {
-            font-size: 13px;
-            color: var(--page-text-muted);
-        }
-
-        .board-header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-write {
-            border-radius: 999px;
-            padding: 8px 18px;
-            font-size: 13px;
+        .main-nav .main-nav-link {
+            color: #e5e7eb;
             font-weight: 600;
-            border: none;
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: #f9fafb;
-            box-shadow: 0 8px 18px rgba(22, 163, 74, 0.55);
-            height: 38px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            word-break: keep-all;
-            transition: all 0.15s ease;
-        }
-
-        .btn-write:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-            color: #f9fafb;
-        }
-
-        .btn-write:active {
-            transform: translateY(1px);
-        }
-
-        .board-sort {
-            font-size: 13px;
-            height: 38px;
+            font-size: 14px;
+            padding: 6px 18px !important;
             border-radius: 999px;
+            border: 1px solid #111827;
+            background: #020617;
+        }
+        .main-nav .main-nav-link:hover {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
         }
 
-        /* ===== 좌측 카테고리 + 우측 테이블 레이아웃 ===== */
-        .board-layout {
-            display: flex;
-            gap: 24px;
-            margin-top: 12px;
+        /* ===== WRAPPER ===== */
+        .board-wrapper {
+            max-width: 1280px;
+            margin: 40px auto;
+            background: var(--bg-panel);
+            padding: 24px 28px;
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
 
-        .board-sidebar {
-            width: 220px;
-        }
+        .board-title { font-size: 26px; font-weight: 800; }
+        .board-subtitle { font-size: 13px; color: var(--text-muted); }
 
-        .board-content {
-            flex: 1;
-        }
-
-        .board-sidebar .list-group {
-            border-radius: 18px;
+        /* ===== 사이드 메뉴 ===== */
+        .side-nav {
+            background: var(--bg-card-soft);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35);
+            border: 1px solid #020617;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.5);
         }
 
-        .board-sidebar .list-group-item {
-            background: rgba(255, 255, 255, 0.9);
+        .side-nav .list-group-item {
+            background: transparent;
+            color: var(--text-muted);
             border: none;
-            border-bottom: 1px solid rgba(209, 213, 219, 0.9);
+            border-bottom: 1px solid #0f1623;
+            padding: 14px 18px;
+            transition: 0.2s;
             font-size: 14px;
         }
 
-        .board-sidebar .list-group-item:last-child {
-            border-bottom: none;
+        .side-nav .list-group-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+
+        .side-nav .list-group-item.active {
+            background: linear-gradient(90deg, rgba(163,255,18,0.15), transparent);
+            color: var(--accent-green);
+            font-weight: 700;
+            border-left: 3px solid var(--accent-green);
         }
 
-        .board-sidebar .list-group-item.active {
-            background: rgba(37, 99, 235, 0.95);
-            color: #f9fafb;
+        /* ===== 정렬 셀렉트 ===== */
+        .sort-select {
+            background: #020617;
+            color: white;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 6px 12px;
+        }
+        .sort-select:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 6px rgba(163,255,18,0.5);
+        }
+
+        /* ===== 글쓰기 버튼 ===== */
+        .btn-write {
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+            border-radius: 999px;
+            padding: 6px 20px;
             font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-write:hover {
+            background: var(--accent-green);
+            color: #020617;
+            box-shadow: 0 0 20px rgba(163,255,18,0.4);
         }
 
-        /* ===== 게시판 테이블 (팀 목록 표 느낌) ===== */
-        .board-table-wrapper {
-            width: 100%;
+        /* ===== 게시글 테이블 ===== */
+        .board-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
             border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--page-border);
+            padding: 0;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.45);
         }
 
         table.board-table {
             width: 100%;
+            color: var(--text-main);
             border-collapse: collapse;
-            font-size: 14px;
-            color: #0f172a;
             table-layout: fixed;
+            font-size: 14px;
         }
 
         .board-table thead {
-            background: rgba(243, 244, 246, 0.96);
+            background: #0f1623;
+            color: var(--text-muted);
         }
 
-        .board-table thead th {
-            padding: 10px 18px;
-            font-size: 13px;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.9);
-        }
+        .board-table th { padding: 12px; border-bottom: 1px solid #1a2333; font-weight: 600; }
+        .board-table td { padding: 14px 12px; border-bottom: 1px solid #0f1623; }
 
-        .board-table tbody tr {
-            background: rgba(255, 255, 255, 0.96);
-        }
+        .board-table tbody tr:hover { background: rgba(255,255,255,0.04); }
 
-        .board-table tbody tr + tr {
-            border-top: 1px solid rgba(229, 231, 235, 0.9);
-        }
-
-        .board-table tbody tr:hover {
-            background: rgba(243, 244, 246, 0.98);
-        }
-
-        .board-table tbody td {
-            padding: 12px 18px;
-        }
-
-        /* 번호 / 추가 정보 / 작성자 / 작성일 폭 */
+        /* 번호/작성자/날짜 고정폭 */
         .board-table th:nth-child(1),
-        .board-table td:nth-child(1) { width: 80px; text-align: center; }
-
-        .board-table th:nth-child(3),
-        .board-table td:nth-child(3) { width: 260px; }
+        .board-table td:nth-child(1) { width: 70px; text-align: center; }
 
         .board-table th:nth-child(4),
-        .board-table td:nth-child(4) { width: 150px; text-align: center; }
-
+        .board-table td:nth-child(4),
         .board-table th:nth-child(5),
-        .board-table td:nth-child(5) { width: 120px; text-align: center; }
-
-        .board-table th:nth-child(2),
-        .board-table td:nth-child(2) { text-align: left; }
+        .board-table td:nth-child(5) { width: 140px; text-align: center; }
 
         /* 제목 말줄임 */
-        .table-title-ellipsis {
-            display: block;
-            width: 100%;
-            overflow: hidden;
+        .ellipsis {
             white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        /* 추가 정보 말줄임 */
-        .table-extra-col {
-            max-width: 260px;
             overflow: hidden;
-            white-space: nowrap;
             text-overflow: ellipsis;
         }
 
         /* 게시글 없음 */
-        .board-empty {
+        .empty-row {
             text-align: center;
-            padding: 32px 0;
-            color: rgba(31, 41, 55, 0.75);
-        }
-
-        /* 아래 도크 */
-        .page-dock {
-            width: 260px;
-            height: 24px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+            padding: 30px 0;
+            color: var(--text-muted);
         }
     </style>
 </head>
+
 <body>
 
-<!-- 메인페이지에서 쓰는 헤더 그대로 사용 -->
-<th:block th:replace="fragments/header :: header"></th:block>
+<!-- TOPBAR -->
+<!-- ================= 상단 유틸바 ================= -->
+<div class="topbar text-white small py-1">
+    <div class="container d-flex justify-content-end align-items-center gap-3">
 
-<div class="board-page">
+        <!-- 🔔 알림 드롭다운 -->
+        <div class="dropdown position-relative">
+            <a class="text-white text-decoration-none dropdown-toggle"
+               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill"></i>
+                <span th:if="${hasUnreadNotifications}"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </a>
 
-    <!-- 상단 헤더 -->
-    <div class="board-header">
-        <div class="board-header-left">
-            <div class="board-title-main"
-                 th:text="${categoryName != null ? categoryName : '통합 게시판'}">
-                통합 게시판
-            </div>
-            <div class="board-subtitle">
-                Match-Up 커뮤니티에서 팀과 선수들의 이야기를 나눠보세요.
-            </div>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
+                <li class="dropdown-header fw-semibold">최근 알림</li>
+
+                <li th:if="${#lists.isEmpty(recentNotifications)}"
+                    class="dropdown-item text-muted">
+                    알림이 없습니다.
+                </li>
+
+                <li th:each="noti : ${recentNotifications}">
+                    <a class="dropdown-item" th:href="@{/notifications}">
+                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-center fw-semibold"
+                       th:href="@{/notifications}">
+                        모든 알림 보기
+                    </a>
+                </li>
+            </ul>
         </div>
 
-        <div class="board-header-right">
+        <a href="/" class="link-light text-decoration-none">홈</a>
+        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
+        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
+    </div>
+</div>
 
-            <!-- 정렬 셀렉트 -->
-            <select class="form-select board-sort"
+
+<!-- HEADER -->
+<header class="main-header border-0 pt-3">
+    <div class="container pb-2">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 : MATCH + UP 라임색 -->
+            <a class="navbar-brand fw-bold fs-3 m-0" href="/">
+                MATCH<span style="color: var(--accent-green);">UP</span>
+            </a>
+        </div>
+
+        <nav class="mt-3">
+            <ul class="nav main-nav">
+
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-people-fill me-1"></i> 팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
+                </li>
+
+                <!-- ⭐ 커뮤니티 (드롭다운 추가됨) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="communityMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="communityMenu">
+                        <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
+                    </ul>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/match/apply">
+                        <i class="bi bi-trophy-fill me-1"></i> 매치 신청
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="board-wrapper">
+
+    <!-- 페이지 제목 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="board-title" th:text="${categoryName}">커뮤니티</div>
+            <div class="board-subtitle">다양한 정보를 공유하고 소통해보세요.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- 정렬 -->
+            <select class="sort-select"
                     th:data-category="${category}"
                     onchange="changeSort(this)">
                 <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
-                <option value="today"  th:selected="${sort == 'today'}">오늘 인기글</option>
-                <option value="week"   th:selected="${sort == 'week'}">주간 인기글</option>
-                <option value="month"  th:selected="${sort == 'month'}">월간 인기글</option>
+                <option value="today" th:selected="${sort == 'today'}">오늘 인기글</option>
+                <option value="week" th:selected="${sort == 'week'}">주간 인기글</option>
+                <option value="month" th:selected="${sort == 'month'}">월간 인기글</option>
             </select>
 
-            <!-- 글쓰기 버튼 -->
-            <a th:href="@{/board/write(category=${category})}"
-               class="btn btn-write">
-                글쓰기
-            </a>
+            <!-- 글쓰기 -->
+            <a th:href="@{/board/write(category=${category})}" class="btn-write">글쓰기</a>
         </div>
     </div>
 
-    <!-- 좌측 카테고리 + 우측 게시판 -->
-    <div class="board-layout">
-
-        <!-- 좌측 카테고리 -->
-        <aside class="board-sidebar">
-            <div class="list-group">
+    <div class="row g-4">
+        <!-- SIDE MENU -->
+        <div class="col-lg-3">
+            <div class="side-nav list-group">
                 <a th:href="@{/board/list(category='FREE')}"
                    class="list-group-item list-group-item-action"
                    th:classappend="${category?.name() == 'FREE'} ? ' active'">
                     자유게시판
                 </a>
-
                 <a th:href="@{/board/list(category='PLAYER')}"
                    class="list-group-item list-group-item-action"
                    th:classappend="${category?.name() == 'PLAYER'} ? ' active'">
                     선수모집
                 </a>
-
                 <a th:href="@{/board/list(category='TEAM')}"
                    class="list-group-item list-group-item-action"
                    th:classappend="${category?.name() == 'TEAM'} ? ' active'">
                     팀구함
                 </a>
             </div>
-        </aside>
+        </div>
 
-        <!-- 우측 테이블 -->
-        <section class="board-content">
-            <div class="board-table-wrapper">
+        <!-- 게시글 테이블 -->
+        <div class="col-lg-9">
+            <div class="board-card">
                 <table class="board-table">
                     <thead>
                     <tr>
@@ -348,60 +366,44 @@
                     <tr th:each="post, stat : ${boards}">
                         <td th:text="${stat.count}">1</td>
 
-                        <td>
+                        <td class="ellipsis">
                             <a th:href="@{/board/{id}(id=${post.id})}"
-                               th:text="${post.title}"
-                               class="text-decoration-none fw-semibold table-title-ellipsis">
-                                게시글 제목
-                            </a>
+                               th:text="${post.title}" class="text-decoration-none text-white fw-semibold ellipsis"></a>
                         </td>
 
-                        <td class="table-extra-col">
+                        <td class="text-muted ellipsis">
                             <span th:if="${post.category?.name() == 'FREE'}">-</span>
 
                             <span th:if="${post.category?.name() == 'PLAYER'}"
-                                  th:text="|포지션: ${post.positionNeeded} / 나이: ${post.ageRange} / 실력: ${post.skillLevel}|">
-                                포지션: -, 나이: -, 실력: -
-                            </span>
+                                  th:text="|포지션: ${post.positionNeeded} / 나이: ${post.ageRange} / 실력: ${post.skillLevel}|"></span>
 
                             <span th:if="${post.category?.name() == 'TEAM'}"
-                                  th:text="|지역: ${post.region} / 포지션: ${post.preferredPosition} / 실력: ${post.skillLevel}|">
-                                지역: -, 포지션: -, 실력: -
-                            </span>
+                                  th:text="|지역: ${post.region} / 포지션: ${post.preferredPosition} / 실력: ${post.skillLevel}|"></span>
                         </td>
 
-                        <td th:text="${post.username}">작성자</td>
-                        <td th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}">25-12-05</td>
+                        <td th:text="${post.username}"></td>
+                        <td th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}"></td>
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(boards)}">
-                        <td colspan="5" class="board-empty">
-                            등록된 게시글이 없습니다.
-                        </td>
+                        <td colspan="5" class="empty-row">등록된 게시글이 없습니다.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
 
-    </div><!-- /.board-layout -->
-</div><!-- /.board-page -->
-
-<!-- 아래 도크 -->
-<div class="page-dock"></div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     function changeSort(selectEl) {
         const category = selectEl.dataset.category || '';
         const sort = selectEl.value;
 
-        if (!category) {
-            location.href = `/board/list?sort=${sort}`;
-        } else {
-            location.href = `/board/list?category=${category}&sort=${sort}`;
-        }
+        if (!category) location.href = `/board/list?sort=${sort}`;
+        else location.href = `/board/list?category=${category}&sort=${sort}`;
     }
 </script>
 

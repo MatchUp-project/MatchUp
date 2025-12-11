@@ -2,291 +2,275 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${team.name} + ' | MatchUp'"></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>전체 팀 목록 | MatchUp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         :root {
-            --page-text-main: #111827;
-            --page-text-muted: #6b7280;
-            --page-border: rgba(226, 232, 240, 0.9);
+            /* 💙 다크 네이비 & 네온 라임 테마 변수 */
+            --bg-body: #020617;
+            --bg-panel: #050b24;
+            --bg-card: #050b18;
+            --bg-card-soft: #07111f;
+            --accent-green: #a3ff12; /* 네온 라임 */
+            --accent-green-soft: #22c55e;
+            --accent-red: #fb2d4b;
+            --text-main: #f9fafb; /* 메인 텍스트 색상 (흰색) */
+            --text-muted: #e5e7eb; /* 보조 텍스트 색상 */
+            --border-subtle: #111827;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        /* ===== 배경 (로그인/팀 목록이랑 동일 감성) ===== */
+        /* ===== 배경 및 기본 텍스트 색상 변경 ===== */
         body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-            color: var(--page-text-main);
+            color: var(--text-main);
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 60px 16px;
+            flex-direction: column;
             background:
-                radial-gradient(circle at 0% 0%, rgba(248, 187, 208, 0.9), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(129, 230, 217, 0.9), transparent 55%),
-                linear-gradient(120deg, #fde1e7 0%, #d2c4ff 45%, #bde5ff 100%);
-            position: relative;
-            overflow: hidden;
+                    radial-gradient(circle at 0 0, rgba(163,255,18,0.18) 0, transparent 55%),
+                    radial-gradient(circle at 100% 100%, rgba(34,197,94,0.20) 0, transparent 55%),
+                    #0c1120;
+            padding: 0;
         }
 
-        body::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background:
-                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
-                radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
-            opacity: 0.85;
-            z-index: -1;
-            filter: blur(4px);
+        /* ===== 상단 네비게이션 바 (이전 코드에서 가져옴) ===== */
+        header.main-header {
+            background: #050b24;
+            border-bottom: 1px solid #050b24;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            padding-top: 20px;
+        }
+        header.main-header .navbar-brand {
+            color: #f9fafb;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .main-nav {
+            border-top: none !important;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        .main-nav .main-nav-link {
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 6px 18px !important;
+            border-radius: 999px;
+            border: 1px solid #111827;
+            background: #020617;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .main-nav .main-nav-link:hover,
+        .main-nav .main-nav-link:focus,
+        .main-nav .show > .main-nav-link {
+            color: var(--accent-green);
+            border-color: var(--accent-green-soft);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.5);
         }
 
-        /* ===== 메인 카드 ===== */
-        .container {
+        /* ===== 메인 컨테이너 (카드) 스타일 변경 ===== */
+        main {
+            flex: 1;
+            padding: 40px 16px;
+        }
+        .container-main {
             width: 100%;
-            max-width: 1120px;
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 28px;
-            padding: 26px 28px 24px;
-            box-shadow:
-                0 24px 65px rgba(15, 23, 42, 0.35),
-                0 0 0 1px rgba(148, 163, 184, 0.16);
+            max-width: 1000px; /* 팀 목록에 맞는 너비 조정 */
+            background: var(--bg-panel); /* 어두운 배경 */
+            border-radius: 32px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            border: 1px solid #020617;
+            margin: 0 auto;
         }
 
-        /* ===== 상단 팀 정보 + 메인으로 버튼 ===== */
-        .team-header {
-            padding: 0 0 18px 0;
-            margin-bottom: 18px;
-            border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+        /* ===== 리스트 헤더 ===== */
+        .list-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 16px;
+            margin-bottom: 25px;
         }
-
-        .team-header-left h2 {
+        .list-header h2 {
             font-size: 26px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
-
-        .team-header-left p {
-            margin-bottom: 4px;
+        .list-header p {
             font-size: 14px;
+            color: var(--text-muted);
         }
 
-        .team-header-left small {
-            font-size: 12px;
-            color: var(--page-text-muted);
-        }
-
-        /* 메인으로 버튼 (검정 알약 버튼) */
-        .btn-main {
+        /* 새 팀 생성 버튼 */
+        .btn-new-team {
             border-radius: 999px;
             padding: 8px 18px;
             font-size: 13px;
-            font-weight: 500;
-            border: none;
-            background: #020617;
-            color: #f9fafb;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
-            white-space: nowrap;
-            margin-top: 4px;
-        }
-
-        .btn-main:hover {
-            background: #020617;
-            filter: brightness(1.05);
-        }
-
-        /* ===== 탭 ===== */
-        .nav-tabs {
-            border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-            margin-bottom: 0;
-        }
-
-        .nav-tabs .nav-link {
-            border: none;
-            padding: 8px 16px;
-            border-radius: 999px;
-            color: var(--page-text-muted);
-            font-size: 14px;
-            transition:
-                background-color 0.12s ease,
-                color 0.12s ease,
-                box-shadow 0.15s ease;
-        }
-
-        .nav-tabs .nav-link:hover {
-            background-color: rgba(243, 244, 246, 0.9);
-            color: #111827;
-        }
-
-        .nav-tabs .nav-link.active {
-            background-color: #111827;
-            color: #f9fafb;
-            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.45);
-        }
-
-        /* ===== 탭 내용 박스 ===== */
-        .tab-box {
-            margin-top: 16px;
-            background: rgba(249, 250, 251, 0.98);
-            padding: 20px 22px 22px;
-            border-radius: 20px;
-            box-shadow: inset 0 0 0 1px var(--page-border);
-            font-size: 14px;
-        }
-
-        .tab-box h5 {
-            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
+            border: none;
+            background: var(--accent-green);
+            color: var(--bg-body);
+            box-shadow: 0 0 10px rgba(34,197,94,0.3);
+            transition: background-color 0.2s;
+        }
+        .btn-new-team:hover {
+            background: var(--accent-green-soft);
         }
 
-        .tab-box p {
-            margin-bottom: 6px;
+        /* ===== 팀 목록 테이블 ===== */
+        .team-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px; /* 행 간격 */
         }
-
-        .tab-box .text-muted {
-            color: var(--page-text-muted) !important;
+        .team-table th {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            padding-bottom: 10px;
+            text-align: left;
         }
+        .team-table td {
+            background-color: var(--bg-card-soft);
+            padding: 15px 20px;
+            font-size: 15px;
+            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
+        }
+        .team-table tbody tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        .team-table tbody tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
 
-        .tab-box .btn {
-            border-radius: 999px;
+        .team-table .detail-link {
             font-size: 13px;
-            padding: 6px 14px;
+            color: var(--accent-green);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .team-table .detail-link:hover {
+            text-decoration: underline;
+            color: var(--accent-green-soft);
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-
-    <!-- 팀 정보 상단 + 메인으로 버튼 -->
-    <div class="team-header">
-        <div class="team-header-left">
-            <h2 th:text="${team.name}">팀 이름</h2>
-            <p><b>지역:</b> <span th:text="${team.region}"></span></p>
-            <p th:text="${team.intro}"></p>
-            <small>팀장 ID : <span th:text="${team.leaderId}"></span></small>
+<header class="main-header border-0 pt-3">
+    <div class="container pb-2">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <!-- 로고 : MATCH + UP 라임색 -->
+            <a class="navbar-brand fw-bold fs-3 m-0" href="/">
+                MATCH<span style="color: var(--accent-green);">UP</span>
+            </a>
         </div>
 
-        <a th:href="@{/}" class="btn btn-main">메인으로</a>
-    </div>
+        <nav class="mt-3">
+            <ul class="nav main-nav">
 
-    <!-- 탭 메뉴 -->
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-            <a class="nav-link active" onclick="showTab('about')">팀 소개</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('members')">멤버</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('calendar')">일정</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('record')">경기기록</a>
-        </li>
-    </ul>
-
-    <!-- 내용 영역 -->
-    <div class="tab-box">
-
-        <!-- 팀 소개 -->
-        <div id="about">
-            <h5>팀 소개</h5>
-            <p th:text="${team.intro} ?: '아직 소개가 없습니다.'"></p>
-
-            <div th:if="${currentUser.id == team.leaderId}">
-                <a th:href="@{/team/{id}/edit-intro(id=${team.id})}"
-                   class="btn btn-outline-primary btn-sm">팀 소개 수정하기</a>
-            </div>
-        </div>
-
-        <!-- 멤버 -->
-        <div id="members" style="display:none;">
-            <h5>팀 멤버</h5>
-
-            <ul class="list-group mt-3" th:if="${not #lists.isEmpty(members)}">
-                <li class="list-group-item" th:each="m : ${members}">
-                    <b th:text="${m.user.name}"></b>
-                    <span class="text-muted">(<span th:text="${m.role}"></span>)</span>
+                <!-- 팀 (드롭다운) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="teamMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-people-fill me-1"></i> 팀
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
+                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
+                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
+                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
+                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
+                    </ul>
                 </li>
+
+                <!-- ⭐ 커뮤니티 (드롭다운 추가됨) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="communityMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="communityMenu">
+                        <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
+                    </ul>
+                </li>
+
+                <!-- 매치 신청 -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold main-nav-link" href="/match/apply">
+                        <i class="bi bi-trophy-fill me-1"></i> 매치 신청
+                    </a>
+                </li>
+
             </ul>
+        </nav>
 
-            <p class="text-muted" th:if="${#lists.isEmpty(members)}">등록된 팀원이 없습니다.</p>
+    </div>
+</header>
+<main>
+    <div class="container-main">
+
+        <div class="list-header">
+            <div>
+                <h2>전체 팀 목록</h2>
+                <p>주변 아마추어 팀을 둘러보고 함께 하세요.</p>
+            </div>
+            <a th:href="@{/team/create}" class="btn-new-team">
+                <i class="bi bi-plus-circle-fill me-1"></i> 새 팀 생성
+            </a>
         </div>
 
-        <!-- 일정 -->
-        <div id="calendar" style="display:none;">
-            <h5>일정표</h5>
-
-            <div class="mt-3" th:if="${not #lists.isEmpty(events)}">
-                <div class="border rounded p-2 mb-2" th:each="e : ${events}">
-                    <b th:text="${e.title}">일정명</b>
-                    <div class="text-muted small">
-                        <span th:text="${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        · <span th:text="${e.place}"></span>
-                        · <span th:text="${e.type}"></span>
-                    </div>
-                </div>
-            </div>
-
-            <p class="text-muted" th:if="${#lists.isEmpty(events)}">등록된 일정이 없습니다.</p>
-        </div>
-
-        <!-- 경기 기록 -->
-        <div id="record" style="display:none;">
-            <h5>경기 기록</h5>
-
-            <div class="mt-3" th:if="${not #lists.isEmpty(records)}">
-
-                <div class="border rounded p-2 mb-2" th:each="r : ${records}">
-                    <b>
-                        <span th:text="${r.team1.name}"></span>
-                        VS
-                        <span th:text="${r.team2.name}"></span>
-                    </b>
-
-                    <div class="text-muted small">
-                        점수 :
-                        <span th:text="${r.team1Score}"></span> :
-                        <span th:text="${r.team2Score}"></span>
-                        · 날짜 :
-                        <span th:text="${#temporals.format(r.matchDate, 'yyyy-MM-dd')}"></span>
-                        · 장소 :
-                        <span th:text="${r.place}"></span>
-                    </div>
-                </div>
-
-            </div>
-
-            <p class="text-muted" th:if="${#lists.isEmpty(records)}">경기 기록이 없습니다.</p>
+        <div class="table-responsive">
+            <table class="team-table">
+                <thead>
+                <tr>
+                    <th style="width: 5%;">번호</th>
+                    <th style="width: 25%;">팀명</th>
+                    <th style="width: 50%;">팀 정보 (지역)</th>
+                    <th style="width: 20%;">상세</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="team, stat : ${teams}">
+                    <td th:text="${stat.count}">1</td>
+                    <td th:text="${team.name}">서울 타이거즈</td>
+                    <td>
+                        지역 : <span th:text="${team.region}">서울</span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/team/detail/' + ${team.id}}" class="detail-link">
+                            상세 페이지로 이동
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>
-</div>
+</main>
+<footer class="site-footer py-4 mt-3">
+    <div class="container small d-flex justify-content-between text-muted">
+        <div>© 2025 Match-Up</div>
+        <div>문의: support@matchup.com</div>
+    </div>
+</footer>
 
-<!-- JS -->
-<script>
-    function showTab(tab) {
-        const tabs = ['about', 'members', 'calendar', 'record'];
-
-        tabs.forEach(t => {
-            document.getElementById(t).style.display = (t === tab) ? 'block' : 'none';
-        });
-
-        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

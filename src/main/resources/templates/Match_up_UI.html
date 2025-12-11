@@ -403,11 +403,20 @@
                     </ul>
                 </li>
 
-                <!-- 커뮤니티 -->
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold main-nav-link" href="/board/list?category=FREE">
+                <!-- ⭐ 커뮤니티 (드롭다운 추가됨) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link fw-semibold main-nav-link dropdown-toggle"
+                       href="#" id="communityMenu"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
                         <i class="bi bi-chat-dots-fill me-1"></i> 커뮤니티
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="communityMenu">
+                        <li><a class="dropdown-item" href="/board/list?category=FREE">자유게시판</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=PLAYER">선수모집</a></li>
+                        <li><a class="dropdown-item" href="/board/list?category=TEAM">팀구함</a></li>
+                    </ul>
                 </li>
 
                 <!-- 매치 신청 -->
@@ -419,6 +428,7 @@
 
             </ul>
         </nav>
+
     </div>
 </header>
 
