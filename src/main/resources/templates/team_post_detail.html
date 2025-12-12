@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container" style="max-width: 900px;">
+        <div class="card-box">
+            <div class="card-header">
+                <div>
+                    <div class="text-muted small">팀 게시판</div>
+                    <h4 class="fw-bold m-0" th:text="${post.title}">제목</h4>
+                    <div class="text-muted small mt-1">
+                        <span th:text="${post.author.name}">작성자</span> ·
+                        <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-09-02</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 border-bottom" th:text="${post.content}">내용</div>
+
+            <div class="p-3 text-end">
+                <form th:if="${currentUserId != null and post.author.id == currentUserId}"
+                      th:action="@{|/team/board/${post.id}/delete|}" method="post" class="d-inline">
+                    <button class="btn btn-danger btn-sm" type="submit">삭제</button>
+                </form>
+                <a href="/team/board" class="btn btn-outline-secondary btn-sm">목록으로</a>
+            </div>
+        </div>
+
+        <div class="card-box mt-3">
+            <div class="card-header">
+                <span>댓글</span>
+            </div>
+            <div class="pt-3">
+                <form th:action="@{|/team/board/${post.id}/comments|}" method="post" class="mb-3">
+                    <div class="mb-3">
+                        <textarea class="form-control" name="content" rows="3" placeholder="댓글을 입력해주세요" required></textarea>
+                    </div>
+                    <input type="hidden" name="parentId" value="">
+                    <button type="submit" class="btn btn-primary btn-sm">등록</button>
+                </form>
+
+                <div th:if="${#lists.isEmpty(comments)}" class="text-muted small">등록된 댓글이 없습니다.</div>
+                <div th:if="${!#lists.isEmpty(comments)}">
+                    <div th:each="c : ${comments}">
+                        <div class="list-group mb-2">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div class="fw-semibold" th:text="${c.authorName}">작성자</div>
+                                    <div class="text-muted small" th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">시간</div>
+                                </div>
+                                <div class="mt-1" th:text="${c.content}">내용</div>
+                                <button class="btn btn-link btn-sm p-0 mt-2 reply-btn" type="button" th:data-id="${c.id}">답글</button>
+                            </div>
+                            <div class="list-group-item ms-4" th:each="child : ${c.children}">
+                                <div class="d-flex justify-content-between">
+                                    <div class="fw-semibold" th:text="${child.authorName}">작성자</div>
+                                    <div class="text-muted small" th:text="${#temporals.format(child.createdAt, 'yyyy-MM-dd HH:mm')}">시간</div>
+                                </div>
+                                <div class="mt-1" th:text="${child.content}">내용</div>
+                                <button class="btn btn-link btn-sm p-0 mt-2 reply-btn" type="button" th:data-id="${child.id}">답글</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('reply-btn')) {
+                const parentId = e.target.getAttribute('data-id');
+                const form = document.querySelector('form[method="post"]');
+                if (form) {
+                    form.querySelector('input[name="parentId"]').value = parentId;
+                    form.querySelector('textarea[name="content"]').focus();
+                }
+            }
+        });
+    </script>
+</div>
+</html>

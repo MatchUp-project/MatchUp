@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <style>
+        .match-card { border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; background: #fff; }
+    </style>
+
+    <div class="container-fluid px-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">매치</div>
+                <h4 class="fw-bold m-0">예정된 매치 전체보기</h4>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(matches)}" class="empty-state">
+            예정된 매치가 없습니다.
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+            <div th:each="m : ${matches}" class="match-card">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center">
+                        <div class="fw-bold fs-5">
+                            <span th:text="${m.team.name}">팀1</span>
+                            &nbsp;VS&nbsp;
+                            <span th:if="${m.matchedTeam != null}"
+                                  th:text="${m.matchedTeam.name}">팀2</span>
+                            <span th:if="${m.matchedTeam == null}" class="text-muted">상대 미정</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div><b>날짜</b> : <span th:text="${#temporals.format(m.matchDatetime, 'yyyy-MM-dd')}"></span></div>
+                        <div><b>시간</b> : <span th:text="${#temporals.format(m.matchDatetime, 'HH:mm')}"></span></div>
+                        <div><b>장소</b> : <span th:text="${m.location}"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

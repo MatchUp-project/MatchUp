@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container" style="max-width: 720px;">
+        <div class="card-box">
+            <div class="card-header">
+                <div>
+                    <div class="text-muted small">프로필</div>
+                    <h4 class="fw-bold m-0">내 정보</h4>
+                </div>
+                <a href="/profile/edit" class="btn btn-primary btn-sm">프로필 수정</a>
+            </div>
+
+            <ul class="list-group list-group-flush mt-2">
+                <li class="list-group-item py-3">
+                    <strong>아이디</strong>
+                    <span class="ms-2" th:text="${user.username}">username</span>
+                </li>
+                <li class="list-group-item py-3">
+                    <strong>이름</strong>
+                    <span class="ms-2" th:text="${user.name}">name</span>
+                </li>
+                <li class="list-group-item py-3">
+                    <strong>이메일</strong>
+                    <span class="ms-2" th:text="${user.email}">email</span>
+                </li>
+                <li class="list-group-item py-3">
+                    <strong>포지션</strong>
+                    <span class="ms-2" th:text="${user.position}">position</span>
+                </li>
+                <li class="list-group-item py-3">
+                    <strong>생년월일</strong>
+                    <span class="ms-2" th:text="${user.birth}">birth</span>
+                </li>
+                <li class="list-group-item py-3">
+                    <strong>가입일</strong>
+                    <span class="ms-2" th:text="${user.createdAt}">created</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</html>

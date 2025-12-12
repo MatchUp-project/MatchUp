@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container" style="max-width: 820px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">커뮤니티</div>
+                <h4 class="fw-bold m-0">게시글 작성</h4>
+            </div>
+            <a href="/board" class="btn btn-outline-secondary btn-sm">목록</a>
+        </div>
+
+        <div class="card-box">
+            <form id="boardForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">카테고리</label>
+                        <select class="form-select" name="category" id="category">
+                            <option value="FREE">자유 게시판</option>
+                            <option value="PLAYER">선수 모집</option>
+                            <option value="TEAM">팀 구함</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-end d-flex align-items-end justify-content-end">
+                        <button type="submit" class="btn btn-primary me-2">작성</button>
+                        <a href="/board" class="btn btn-outline-secondary">취소</a>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-semibold">제목</label>
+                    <input type="text" class="form-control" name="title" required>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-semibold">내용</label>
+                    <textarea class="form-control" rows="8" name="content" required></textarea>
+                </div>
+
+                <div id="playerFields" class="d-none mt-3 p-3 rounded bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">포지션</label>
+                            <select name="positionNeeded" class="form-select">
+                                <option value="FW">FW</option><option value="MF">MF</option>
+                                <option value="DF">DF</option><option value="GK">GK</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">지역</label>
+                            <select name="region" class="form-select">
+                                <option value="">지역 선택</option>
+                                <option>SEOUL</option><option>GYEONGGI</option><option>INCHEON</option>
+                                <option>BUSAN</option><option>DAEGU</option><option>DAEJEON</option>
+                                <option>GWANGJU</option><option>ULSAN</option><option>SEJONG</option>
+                                <option>GANGWON</option><option>CHUNGBUK</option><option>CHUNGNAM</option>
+                                <option>JEONBUK</option><option>JEONNAM</option><option>GYEONGBUK</option>
+                                <option>GYEONGNAM</option><option>JEJU</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">나이대</label>
+                            <input type="text" class="form-control" name="ageRange" placeholder="예: 20~30">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">실력</label>
+                            <select name="skillLevel" class="form-select">
+                                <option value="초급">초급</option><option value="중급">중급</option><option value="상급">상급</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="teamFields" class="d-none mt-3 p-3 rounded bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">지역</label>
+                            <select class="form-select" name="region">
+                                <option value="">지역 선택</option>
+                                <option>SEOUL</option><option>GYEONGGI</option><option>INCHEON</option>
+                                <option>BUSAN</option><option>DAEGU</option><option>DAEJEON</option>
+                                <option>GWANGJU</option><option>ULSAN</option><option>SEJONG</option>
+                                <option>GANGWON</option><option>CHUNGBUK</option><option>CHUNGNAM</option>
+                                <option>JEONBUK</option><option>JEONNAM</option><option>GYEONGBUK</option>
+                                <option>GYEONGNAM</option><option>JEJU</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">선호 포지션</label>
+                            <select name="preferredPosition" class="form-select">
+                                <option value="FW">FW</option><option value="MF">MF</option>
+                                <option value="DF">DF</option><option value="GK">GK</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">실력</label>
+                            <select name="skillLevel" class="form-select">
+                                <option value="초급">초급</option><option value="중급">중급</option><option value="상급">상급</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const categorySelect = document.getElementById('category');
+        const playerFields = document.getElementById('playerFields');
+        const teamFields = document.getElementById('teamFields');
+
+        function toggleFields() {
+            const value = categorySelect.value;
+            playerFields.classList.add('d-none');
+            teamFields.classList.add('d-none');
+            if (value === 'PLAYER') playerFields.classList.remove('d-none');
+            if (value === 'TEAM') teamFields.classList.remove('d-none');
+        }
+        categorySelect.addEventListener('change', toggleFields);
+        toggleFields();
+
+        const form = document.getElementById('boardForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(form).entries());
+            fetch('/api/board', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.text())
+                .then(id => {
+                    alert('작성 완료!');
+                    location.href = '/board/' + id;
+                });
+        });
+    </script>
+</div>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sport Match - Login</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { display: flex; min-height: 100vh; }
+        .left-panel {
+            background: #e6342a;
+            width: 45%;
+            border-radius: 0 40px 40px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .left-panel img { width: 160px; }
+        .right-panel {
+            width: 55%;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .login-box { width: 380px; display: flex; flex-direction: column; }
+        .login-title { font-size: 26px; font-weight: bold; margin-bottom: 25px; color: #222; }
+        label { font-size: 14px; color: #555; }
+        .input-field {
+            width: 100%; margin-top: 6px; margin-bottom: 20px;
+            padding: 13px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
+        }
+        .forgot { font-size: 13px; color: #e6342a; text-decoration: none; margin-bottom: 20px; display: inline-block; }
+        .login-btn {
+            width: 100%; padding: 13px; background: #e6342a; color: white;
+            border-radius: 8px; border: none; cursor: pointer; margin-top: 10px; font-size: 15px;
+        }
+        .signup-text { margin-top: 25px; text-align: center; font-size: 13px; color: #666; }
+        .signup-text a { color: #e6342a; text-decoration: none; font-weight: bold; }
+        .footer {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            font-size: 12px; color: #aaa;
+        }
+        .error-box { margin-bottom: 12px; color: #e6342a; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="left-panel"></div>
+
+    <div class="right-panel">
+        <div class="login-box">
+
+            <div class="login-title">LOG IN</div>
+
+            <!-- 오류 메시지 -->
+            <div class="error-box" th:if="${param.error}" th:text="${param.error}"></div>
+
+            <form th:action="@{/perform_login}" method="post">
+                <label>아이디</label>
+                <input type="text" class="input-field" name="username" required placeholder="아이디를 입력하세요">
+
+                <label>비밀번호</label>
+                <input type="password" class="input-field" name="password" required placeholder="비밀번호를 입력하세요">
+
+                <button class="login-btn" type="submit">Continue</button>
+            </form>
+
+            <div class="signup-text">
+                New to SportMatch?
+                <a href="/signup">Sign up here</a>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Terms & Conditions  Privacy Policy
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

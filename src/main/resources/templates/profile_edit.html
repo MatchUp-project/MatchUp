@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container" style="max-width: 720px;">
+        <div class="card-box">
+            <div class="card-header">
+                <div>
+                    <div class="text-muted small">프로필</div>
+                    <h4 class="fw-bold m-0">프로필 수정</h4>
+                </div>
+            </div>
+
+            <div class="pt-3">
+                <form th:object="${user}" th:action="@{/profile/edit}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">이름</label>
+                        <input class="form-control form-control-lg" th:field="*{name}" placeholder="이름">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">이메일</label>
+                        <input class="form-control form-control-lg" th:field="*{email}" placeholder="이메일">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">포지션</label>
+                        <select class="form-select form-select-lg" th:field="*{position}">
+                            <option value="">선택안함</option>
+                            <option value="FW">FW</option>
+                            <option value="MF">MF</option>
+                            <option value="DF">DF</option>
+                            <option value="GK">GK</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">생년월일</label>
+                        <input class="form-control form-control-lg" type="date" th:field="*{birth}">
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100 mt-2" type="submit">저장</button>
+                    <a href="/profile" class="btn btn-secondary btn-lg w-100 mt-3">취소</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

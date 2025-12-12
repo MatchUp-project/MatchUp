@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container" style="max-width: 720px;">
+        <div class="card-box">
+            <div class="card-header">
+                <div>
+                    <div class="text-muted small">팀</div>
+                    <h4 class="fw-bold m-0" th:text="'팀 소개 수정 - ' + ${team.name}">팀 소개 수정</h4>
+                </div>
+            </div>
+
+            <div class="pt-3">
+                <form th:action="@{/team/{id}/edit-intro(id=${team.id})}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">팀 소개</label>
+                        <textarea name="intro" class="form-control" rows="8"
+                                  th:text="${team.intro}"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary">저장</button>
+                    <a th:href="@{/team/detail/{id}(id=${team.id})}" class="btn btn-secondary">취소</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

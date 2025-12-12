@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container-fluid px-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">팀</div>
+                <h4 class="fw-bold m-0">팀 목록</h4>
+            </div>
+            <a href="/team/create" class="btn btn-primary">+ 팀 생성</a>
+        </div>
+
+        <form class="row g-2 mb-3" method="get" th:action="@{/team_list}">
+            <div class="col-auto">
+                <select class="form-select" name="region">
+                    <option value="" th:selected="${param.region == null or param.region[0] == ''}">전체 지역</option>
+                    <option value="SEOUL" th:selected="${param.region != null and param.region[0] == 'SEOUL'}">서울</option>
+                    <option value="GYEONGGI" th:selected="${param.region != null and param.region[0] == 'GYEONGGI'}">경기</option>
+                    <option value="INCHEON" th:selected="${param.region != null and param.region[0] == 'INCHEON'}">인천</option>
+                    <option value="BUSAN" th:selected="${param.region != null and param.region[0] == 'BUSAN'}">부산</option>
+                    <option value="DAEGU" th:selected="${param.region != null and param.region[0] == 'DAEGU'}">대구</option>
+                    <option value="DAEJEON" th:selected="${param.region != null and param.region[0] == 'DAEJEON'}">대전</option>
+                    <option value="GWANGJU" th:selected="${param.region != null and param.region[0] == 'GWANGJU'}">광주</option>
+                    <option value="ULSAN" th:selected="${param.region != null and param.region[0] == 'ULSAN'}">울산</option>
+                    <option value="SEJONG" th:selected="${param.region != null and param.region[0] == 'SEJONG'}">세종</option>
+                    <option value="GANGWON" th:selected="${param.region != null and param.region[0] == 'GANGWON'}">강원</option>
+                    <option value="CHUNGBUK" th:selected="${param.region != null and param.region[0] == 'CHUNGBUK'}">충북</option>
+                    <option value="CHUNGNAM" th:selected="${param.region != null and param.region[0] == 'CHUNGNAM'}">충남</option>
+                    <option value="JEONBUK" th:selected="${param.region != null and param.region[0] == 'JEONBUK'}">전북</option>
+                    <option value="JEONNAM" th:selected="${param.region != null and param.region[0] == 'JEONNAM'}">전남</option>
+                    <option value="GYEONGBUK" th:selected="${param.region != null and param.region[0] == 'GYEONGBUK'}">경북</option>
+                    <option value="GYEONGNAM" th:selected="${param.region != null and param.region[0] == 'GYEONGNAM'}">경남</option>
+                    <option value="JEJU" th:selected="${param.region != null and param.region[0] == 'JEJU'}">제주</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary" type="submit">적용</button>
+            </div>
+        </form>
+
+        <div class="row g-3">
+            <div class="col-md-3" th:each="team : ${teams}">
+                <div class="card h-100 p-3 shadow-sm">
+                    <h5 th:text="${team.name}">Team name</h5>
+                    <p class="text-muted mb-3" th:text="${team.region}">Region</p>
+                    <a th:href="@{/team/detail/{id}(id=${team.id})}" class="btn btn-outline-primary btn-sm">보기</a>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(teams)}" class="text-muted px-3">등록된 팀이 없습니다.</div>
+        </div>
+    </div>
+</div>
+</html>
