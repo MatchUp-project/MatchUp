@@ -1,175 +1,135 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${team.name} + ' | MatchUp'"></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
     <style>
-        body { background-color: #f5f6f8; }
-        .container { max-width: 1000px; margin-top: 40px; }
-        .team-header {
-            background-color: white; padding: 30px; border-radius: 15px;
-            margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .tab-box { background-color: white; padding: 30px; border-radius: 15px; }
-        .nav-link { cursor: pointer; }
+        .tab-box { background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     </style>
-</head>
-<body>
 
-<div class="container">
-
-    <!-- 팀 정보 상단 -->
-    <div class="team-header">
-        <h2 th:text="${team.name}">팀 이름</h2>
-        <p><b>지역:</b> <span th:text="${team.region}"></span></p>
-        <p th:text="${team.intro}"></p>
-        <small>팀장 ID : <span th:text="${team.leaderId}"></span></small>
-
-        <div class="mt-3" th:if="${canRequestJoin}">
-            <form th:action="@{'/team/invite/join/' + ${team.id}}" id="joinForm" method="post">
-                <button type="submit" class="btn btn-primary btn-sm">팀 가입 신청</button>
-            </form>
-            <div class="small text-muted mt-2" id="joinMsg"></div>
-        </div>
-        <div class="mt-2 text-muted small"
-             th:if="${hasTeam and !isMemberOfThisTeam}">
-            이미 다른 팀에 소속되어 있어 가입 신청을 보낼 수 없습니다.
-        </div>
-    </div>
-
-    <!-- 탭 메뉴 -->
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-            <a class="nav-link active" onclick="showTab('about')">팀 소개</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('members')">멤버</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('calendar')">일정</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" onclick="showTab('record')">경기기록</a>
-        </li>
-    </ul>
-
-
-    <!-- 내용 영역 -->
-    <div class="tab-box">
-
-        <!-- 팀 소개 -->
-        <div id="about">
-            <h5>팀 소개</h5>
-            <p th:text="${team.intro} ?: '아직 소개가 없습니다.'"></p>
-
-            <div th:if="${currentUser.id == team.leaderId}">
-                <a th:href="@{/team/{id}/edit-intro(id=${team.id})}"
-                   class="btn btn-outline-primary btn-sm">팀 소개 수정하기</a>
+    <div class="container" style="max-width: 1000px;">
+        <div class="card-box">
+            <div class="card-header">
+                <div>
+                    <div class="text-muted small">팀 홈</div>
+                    <h4 class="fw-bold m-0" th:text="${team.name}">팀 이름</h4>
+                </div>
+                <div class="text-muted small">
+                    지역 <span th:text="${team.region}">지역</span><br>
+                    팀장 ID: <span th:text="${team.leaderId}"></span>
+                </div>
+            </div>
+            <div class="p-3">
+                <p th:text="${team.intro}"></p>
+                <div class="mt-3" th:if="${canRequestJoin}">
+                    <form th:action="@{'/team/invite/join/' + ${team.id}}" id="joinForm" method="post">
+                        <button type="submit" class="btn btn-primary btn-sm">팀 가입 신청</button>
+                    </form>
+                    <div class="small text-muted mt-2" id="joinMsg"></div>
+                </div>
+                <div class="mt-2 text-muted small"
+                     th:if="${hasTeam and !isMemberOfThisTeam}">
+                    다른 팀에 소속되어 있어 가입 신청을 보낼 수 없습니다.
+                </div>
             </div>
         </div>
 
-        <!-- 멤버 -->
-        <div id="members" style="display:none;">
-            <h5>팀 멤버</h5>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab(event,'about')">팀 소개</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="showTab(event,'members')">멤버</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="showTab(event,'calendar')">일정</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="showTab(event,'record')">경기기록</a></li>
+        </ul>
 
-            <ul class="list-group mt-3" th:if="${not #lists.isEmpty(members)}">
-                <li class="list-group-item" th:each="m : ${members}">
-                    <b th:text="${m.user.name}"></b>
-                    <span class="text-muted">(<span th:text="${m.role}"></span>)</span>
-                </li>
-            </ul>
-
-            <p class="text-muted" th:if="${#lists.isEmpty(members)}">등록된 팀원이 없습니다.</p>
-        </div>
-
-        <!-- 일정 -->
-        <div id="calendar" style="display:none;">
-            <h5>일정표</h5>
-
-            <div class="mt-3" th:if="${not #lists.isEmpty(events)}">
-                <div class="border rounded p-2 mb-2" th:each="e : ${events}">
-                    <b th:text="${e.title}">일정명</b>
-                    <div class="text-muted small">
-                        <span th:text="${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        · <span th:text="${e.place}"></span>
-                        · <span th:text="${e.type}"></span>
-                    </div>
+        <div class="tab-box">
+            <div id="about">
+                <h5>팀 소개</h5>
+                <p th:text="${team.intro} ?: '아직 소개가 없습니다.'"></p>
+                <div th:if="${currentUser.id == team.leaderId}">
+                    <a th:href="@{/team/{id}/edit-intro(id=${team.id})}"
+                       class="btn btn-outline-primary btn-sm">팀 소개 수정하기</a>
                 </div>
             </div>
 
-            <p class="text-muted" th:if="${#lists.isEmpty(events)}">등록된 일정이 없습니다.</p>
-        </div>
-
-        <!-- 경기 기록 -->
-        <div id="record" style="display:none;">
-            <h5>경기 기록</h5>
-
-            <div class="mt-3" th:if="${not #lists.isEmpty(records)}">
-
-                <div class="border rounded p-2 mb-2" th:each="r : ${records}">
-                    <b>
-                        <span th:text="${r.team1.name}"></span>
-                        VS
-                        <span th:text="${r.team2.name}"></span>
-                    </b>
-
-                    <div class="text-muted small">
-                        점수 :
-                        <span th:text="${r.team1Score}"></span> :
-                        <span th:text="${r.team2Score}"></span>
-                        · 날짜 :
-                        <span th:text="${#temporals.format(r.matchDate, 'yyyy-MM-dd')}"></span>
-                        · 장소 :
-                        <span th:text="${r.place}"></span>
-                    </div>
-                </div>
-
+            <div id="members" style="display:none;">
+                <h5>팀 멤버</h5>
+                <ul class="list-group mt-3" th:if="${not #lists.isEmpty(members)}">
+                    <li class="list-group-item" th:each="m : ${members}">
+                        <b th:text="${m.user.name}"></b>
+                        <span class="text-muted">(<span th:text="${m.role}"></span>)</span>
+                    </li>
+                </ul>
+                <p class="text-muted" th:if="${#lists.isEmpty(members)}">등록된 팀원이 없습니다.</p>
             </div>
 
-            <p class="text-muted" th:if="${#lists.isEmpty(records)}">경기 기록이 없습니다.</p>
-        </div>
+            <div id="calendar" style="display:none;">
+                <h5>일정표</h5>
+                <div class="mt-3" th:if="${not #lists.isEmpty(events)}">
+                    <div class="border rounded p-2 mb-2" th:each="e : ${events}">
+                        <b th:text="${e.title}">일정명</b>
+                        <div class="text-muted small">
+                            <span th:text="${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')}"></span>
+                            · <span th:text="${e.place}"></span>
+                            · <span th:text="${e.type}"></span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted" th:if="${#lists.isEmpty(events)}">등록된 일정이 없습니다.</p>
+            </div>
 
+            <div id="record" style="display:none;">
+                <h5>경기 기록</h5>
+                <div class="mt-3" th:if="${not #lists.isEmpty(records)}">
+                    <div class="border rounded p-2 mb-2" th:each="r : ${records}">
+                        <b>
+                            <span th:text="${r.team1.name}"></span>
+                            VS
+                            <span th:text="${r.team2.name}"></span>
+                        </b>
+                        <div class="text-muted small">
+                            점수 :
+                            <span th:text="${r.team1Score}"></span> :
+                            <span th:text="${r.team2Score}"></span>
+                            · 날짜 :
+                            <span th:text="${#temporals.format(r.matchDate, 'yyyy-MM-dd')}"></span>
+                            · 장소 :
+                            <span th:text="${r.place}"></span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted" th:if="${#lists.isEmpty(records)}">경기 기록이 없습니다.</p>
+            </div>
+        </div>
     </div>
 
-    <!-- JS -->
     <script>
-        function showTab(tab) {
+        function showTab(ev, tab) {
             const tabs = ['about', 'members', 'calendar', 'record'];
-
             tabs.forEach(t => {
-                document.getElementById(t).style.display = (t === tab) ? 'block' : 'none';
+                const el = document.getElementById(t);
+                if (el) el.style.display = (t === tab) ? 'block' : 'none';
             });
-
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (ev) ev.currentTarget.classList.add('active');
         }
-    </script>
-
-    <script>
         const joinForm = document.getElementById('joinForm');
         if (joinForm) {
             const joinMsg = document.getElementById('joinMsg');
             joinForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (joinMsg) joinMsg.textContent = '';
-
                 fetch(joinForm.getAttribute('action'), { method: 'POST' })
                     .then(res => {
                         if (res.ok) {
-                            if (joinMsg) joinMsg.textContent = '가입 요청을 보냈습니다. 팀장이 수락/거절 시 알림으로 안내됩니다.';
+                            if (joinMsg) joinMsg.textContent = '가입 신청이 접수되었습니다. 결과는 알림으로 안내됩니다.';
                         } else {
-                            if (joinMsg) joinMsg.textContent = '가입 요청을 보낼 수 없습니다.';
+                            if (joinMsg) joinMsg.textContent = '가입 신청을 보낼 수 없습니다.';
                         }
                     })
                     .catch(() => {
-                        if (joinMsg) joinMsg.textContent = '가입 요청 중 오류가 발생했습니다.';
+                        if (joinMsg) joinMsg.textContent = '가입 신청 중 오류가 발생했습니다.';
                     });
             });
         }
     </script>
-
-
-</body>
+</div>
 </html>

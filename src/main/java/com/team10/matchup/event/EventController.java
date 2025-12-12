@@ -47,16 +47,12 @@ public class EventController {
             yearMonth = YearMonth.of(year, month);
         }
 
-        // 선택된 날짜 (오른쪽 일정 리스트용)
-        if (date == null) {
-            date = LocalDate.now();
-        }
-
         // 한 달 전체 일정
         var monthlyEvents = eventService.getEventsForMonth(team, yearMonth);
 
-        // 날짜별로 “일정이 있다/없다”만 보는 맵
+        // 날짜별로 “일정이 있다/없다”만 보는 맵 (startAt 없는 일정은 제외)
         Map<LocalDate, Boolean> hasEventMap = monthlyEvents.stream()
+                .filter(e -> e.getStartAt() != null)
                 .collect(Collectors.toMap(
                         e -> e.getStartAt().toLocalDate(),
                         e -> true,
@@ -64,7 +60,10 @@ public class EventController {
                 ));
 
         // 선택된 날짜의 일정 목록
-        var eventsOnSelectedDate = eventService.getEventsForDate(team, date);
+        List<Event> eventsOnSelectedDate = List.of();
+        if (date != null) {
+            eventsOnSelectedDate = eventService.getEventsForDate(team, date);
+        }
 
         model.addAttribute("team", team);
         model.addAttribute("yearMonth", yearMonth);
@@ -78,7 +77,9 @@ public class EventController {
 
         // 폼 기본값 (날짜는 선택된 날짜)
         EventCreateForm form = new EventCreateForm();
-        form.setDate(date);
+        if (date != null) {
+            form.setDate(date);
+        }
         model.addAttribute("eventForm", form);
 
         return "event";   // templates/event.html

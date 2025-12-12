@@ -1,205 +1,196 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Match Apply | Match-Up</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/styles.css}">
-    <style>.match-card.matched { opacity: 0.5; }</style>
-</head>
-<body>
-<div class="container mt-4">
-    <h3 class="mb-4">Match Apply</h3>
-
-    <div th:if="${noTeam}">
-        <div class="alert alert-warning">No team assigned.</div>
-    </div>
-
-    <div th:unless="${noTeam}">
-        <div class="mb-3">
-            <h5>My Team:
-                <span th:text="${team != null ? team.name : 'Team name'}">Team name</span>
-            </h5>
-        </div>
-
-        <!-- Create match -->
-        <div class="card mb-4">
-            <div class="card-header">Create Match</div>
-            <div class="card-body">
-                <form th:action="@{/match/create}" method="post" th:object="${matchCreateForm}">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Team</label>
-                            <input type="text" class="form-control"
-                                   th:value="${team != null ? team.name : 'Team name'}" readonly>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Players</label>
-                            <input type="number" class="form-control" th:field="*{playerCount}" min="1" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Location</label>
-                            <input type="text" class="form-control" th:field="*{location}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Region</label>
-                            <select class="form-select" th:field="*{region}" required>
-                                <option value="">Select region</option>
-                                <option value="SEOUL">SEOUL</option>
-                                <option value="GYEONGGI">GYEONGGI</option>
-                                <option value="INCHEON">INCHEON</option>
-                                <option value="BUSAN">BUSAN</option>
-                                <option value="DAEGU">DAEGU</option>
-                                <option value="DAEJEON">DAEJEON</option>
-                                <option value="GWANGJU">GWANGJU</option>
-                                <option value="ULSAN">ULSAN</option>
-                                <option value="SEJONG">SEJONG</option>
-                                <option value="GANGWON">GANGWON</option>
-                                <option value="CHUNGBUK">CHUNGBUK</option>
-                                <option value="CHUNGNAM">CHUNGNAM</option>
-                                <option value="JEONBUK">JEONBUK</option>
-                                <option value="JEONNAM">JEONNAM</option>
-                                <option value="GYEONGBUK">GYEONGBUK</option>
-                                <option value="GYEONGNAM">GYEONGNAM</option>
-                                <option value="JEJU">JEJU</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" class="form-control" th:field="*{date}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Time</label>
-                            <input type="time" class="form-control" th:field="*{time}" required>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-end">
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Filter -->
-        <div class="btn-group mb-3" role="group">
-            <a th:href="@{/match/apply(filter='available', region=${region})}"
-               class="btn"
-               th:classappend="${filter} == 'available' ? ' btn-primary' : ' btn-outline-primary'">
-                Available
-            </a>
-            <a th:href="@{/match/apply(filter='unavailable', region=${region})}"
-               class="btn"
-               th:classappend="${filter} == 'unavailable' ? ' btn-primary' : ' btn-outline-primary'">
-                Unavailable
-            </a>
-        </div>
-
-        <form class="row g-2 mb-3" method="get" th:action="@{/match/apply}">
-            <input type="hidden" name="filter" th:value="${filter}">
-            <div class="col-auto">
-                <select class="form-select" name="region">
-                    <option value="" th:selected="${region == null or region == ''}">All regions</option>
-                    <option value="SEOUL" th:selected="${region != null and region == 'SEOUL'}">SEOUL</option>
-                    <option value="GYEONGGI" th:selected="${region != null and region == 'GYEONGGI'}">GYEONGGI</option>
-                    <option value="INCHEON" th:selected="${region != null and region == 'INCHEON'}">INCHEON</option>
-                    <option value="BUSAN" th:selected="${region != null and region == 'BUSAN'}">BUSAN</option>
-                    <option value="DAEGU" th:selected="${region != null and region == 'DAEGU'}">DAEGU</option>
-                    <option value="DAEJEON" th:selected="${region != null and region == 'DAEJEON'}">DAEJEON</option>
-                    <option value="GWANGJU" th:selected="${region != null and region == 'GWANGJU'}">GWANGJU</option>
-                    <option value="ULSAN" th:selected="${region != null and region == 'ULSAN'}">ULSAN</option>
-                    <option value="SEJONG" th:selected="${region != null and region == 'SEJONG'}">SEJONG</option>
-                    <option value="GANGWON" th:selected="${region != null and region == 'GANGWON'}">GANGWON</option>
-                    <option value="CHUNGBUK" th:selected="${region != null and region == 'CHUNGBUK'}">CHUNGBUK</option>
-                    <option value="CHUNGNAM" th:selected="${region != null and region == 'CHUNGNAM'}">CHUNGNAM</option>
-                    <option value="JEONBUK" th:selected="${region != null and region == 'JEONBUK'}">JEONBUK</option>
-                    <option value="JEONNAM" th:selected="${region != null and region == 'JEONNAM'}">JEONNAM</option>
-                    <option value="GYEONGBUK" th:selected="${region != null and region == 'GYEONGBUK'}">GYEONGBUK</option>
-                    <option value="GYEONGNAM" th:selected="${region != null and region == 'GYEONGNAM'}">GYEONGNAM</option>
-                    <option value="JEJU" th:selected="${region != null and region == 'JEJU'}">JEJU</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-outline-secondary" type="submit">Filter</button>
-            </div>
-        </form>
-
-        <h5 class="mb-3"
-            th:text="${filter} == 'available' ? 'Available matches' : 'Unavailable matches'">
-            Match list
-        </h5>
-
-        <div th:if="${#lists.isEmpty(matchPosts)}" class="text-muted mb-3">
-            <span th:text="${filter} == 'available'
-                           ? 'No available matches.'
-                           : 'No unavailable matches.'">
-                No matches.
-            </span>
-        </div>
-
-        <div class="row g-3" th:each="post : ${matchPosts}">
-            <div class="col-12">
-                <div class="card match-card" th:classappend="${post.status == 'MATCHED'} ? ' matched' : ''">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="mb-1">
-                                <strong th:text="${post.team.name}">Team</strong>
-                                <span class="text-muted ms-2">Players <span th:text="${post.playerCount}">0</span></span>
-                            </div>
-                            <div class="small text-muted">
-                                Place: <span th:text="${post.location}">place</span><br>
-                                Region: <span th:text="${post.region}">region</span><br>
-                                When:
-                                <span th:text="${#temporals.format(post.matchDatetime, 'yyyy-MM-dd HH:mm')}">
-                                    2025-03-28 09:40
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="text-end" th:switch="${filter}">
-                            <div th:case="'available'">
-                                <form th:action="@{'/match/' + ${post.id} + '/request'}" method="post">
-                                    <button type="submit" class="btn btn-outline-primary">Request</button>
-                                </form>
-                            </div>
-                            <div th:case="'unavailable'">
-                                <div th:if="${post.status == 'MATCHED'}" class="text-danger fw-semibold mb-2">
-                                    Already matched
-                                </div>
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id != currentUser.id
-                                             and requestStatusMap[post.id] == 'PENDING'}"
-                                     class="text-primary fw-semibold mb-2">
-                                    Request pending
-                                </div>
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id != currentUser.id
-                                             and requestStatusMap[post.id] == 'REJECTED'}"
-                                     class="text-danger fw-semibold mb-2">
-                                    Request rejected
-                                </div>
-                                <div th:if="${post.status == 'OPEN'
-                                             and post.createdBy != null
-                                             and post.createdBy.id == currentUser.id}">
-                                    <span class="badge bg-secondary mb-2 d-block">My match</span>
-                                    <form th:action="@{'/match/' + ${post.id} + '/delete'}"
-                                          method="post"
-                                          onsubmit="return confirm('Delete this match?');">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container-fluid px-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">매치</div>
+                <h4 class="fw-bold m-0">매치 신청</h4>
+                <div class="text-muted small" th:unless="${noTeam}">
+                    내 팀: <span th:text="${team != null ? team.name : '팀 없음'}">팀</span>
                 </div>
             </div>
         </div>
 
+        <div th:if="${noTeam}">
+            <div class="empty-state my-4">No team assigned.</div>
+        </div>
+
+        <div th:unless="${noTeam}" class="d-flex flex-column gap-4">
+            <!-- 매치 생성 -->
+            <div class="card-box">
+                <div class="card-header">매치 생성</div>
+                <div class="pt-2">
+                    <form th:action="@{/match/create}" method="post" th:object="${matchCreateForm}">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Team</label>
+                                <input type="text" class="form-control"
+                                       th:value="${team != null ? team.name : 'Team name'}" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Players</label>
+                                <input type="number" class="form-control" th:field="*{playerCount}" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Location</label>
+                                <input type="text" class="form-control" th:field="*{location}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Region</label>
+                                <select class="form-select" th:field="*{region}" required>
+                                <option value="">지역 선택</option>
+                                    <option value="SEOUL">서울</option>
+                                    <option value="GYEONGGI">경기</option>
+                                    <option value="INCHEON">인천</option>
+                                    <option value="BUSAN">부산</option>
+                                    <option value="DAEGU">대구</option>
+                                    <option value="DAEJEON">대전</option>
+                                    <option value="GWANGJU">광주</option>
+                                    <option value="ULSAN">울산</option>
+                                    <option value="SEJONG">세종</option>
+                                    <option value="GANGWON">강원</option>
+                                    <option value="CHUNGBUK">충북</option>
+                                    <option value="CHUNGNAM">충남</option>
+                                    <option value="JEONBUK">전북</option>
+                                    <option value="JEONNAM">전남</option>
+                                    <option value="GYEONGBUK">경북</option>
+                                    <option value="GYEONGNAM">경남</option>
+                                    <option value="JEJU">제주</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" th:field="*{date}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Time</label>
+                                <input type="time" class="form-control" th:field="*{time}" required>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-end">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 필터 -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="btn-group" role="group">
+                    <a th:href="@{/match/apply(filter='available', region=${region})}"
+                       class="btn"
+                       th:classappend="${filter} == 'available' ? ' btn-primary' : ' btn-outline-primary'">
+                        신청 가능
+                    </a>
+                    <a th:href="@{/match/apply(filter='unavailable', region=${region})}"
+                       class="btn"
+                       th:classappend="${filter} == 'unavailable' ? ' btn-primary' : ' btn-outline-primary'">
+                        신청 불가
+                    </a>
+                </div>
+
+                <form class="row g-2 align-items-center" method="get" th:action="@{/match/apply}">
+                    <input type="hidden" name="filter" th:value="${filter}">
+                    <div class="col-auto">
+                        <select class="form-select" name="region">
+                            <option value="" th:selected="${region == null or region == ''}">전체 지역</option>
+                            <option value="SEOUL" th:selected="${region != null and region == 'SEOUL'}">서울</option>
+                            <option value="GYEONGGI" th:selected="${region != null and region == 'GYEONGGI'}">경기</option>
+                            <option value="INCHEON" th:selected="${region != null and region == 'INCHEON'}">인천</option>
+                            <option value="BUSAN" th:selected="${region != null and region == 'BUSAN'}">부산</option>
+                            <option value="DAEGU" th:selected="${region != null and region == 'DAEGU'}">대구</option>
+                            <option value="DAEJEON" th:selected="${region != null and region == 'DAEJEON'}">대전</option>
+                            <option value="GWANGJU" th:selected="${region != null and region == 'GWANGJU'}">광주</option>
+                            <option value="ULSAN" th:selected="${region != null and region == 'ULSAN'}">울산</option>
+                            <option value="SEJONG" th:selected="${region != null and region == 'SEJONG'}">세종</option>
+                            <option value="GANGWON" th:selected="${region != null and region == 'GANGWON'}">강원</option>
+                            <option value="CHUNGBUK" th:selected="${region != null and region == 'CHUNGBUK'}">충북</option>
+                            <option value="CHUNGNAM" th:selected="${region != null and region == 'CHUNGNAM'}">충남</option>
+                            <option value="JEONBUK" th:selected="${region != null and region == 'JEONBUK'}">전북</option>
+                            <option value="JEONNAM" th:selected="${region != null and region == 'JEONNAM'}">전남</option>
+                            <option value="GYEONGBUK" th:selected="${region != null and region == 'GYEONGBUK'}">경북</option>
+                            <option value="GYEONGNAM" th:selected="${region != null and region == 'GYEONGNAM'}">경남</option>
+                            <option value="JEJU" th:selected="${region != null and region == 'JEJU'}">제주</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-secondary" type="submit">적용</button>
+                    </div>
+                </form>
+            </div>
+
+            <div>
+                <h5 class="mb-2"
+                    th:text="${filter} == 'available' ? '신청 가능한 매치' : '신청 불가 매치'">Match list</h5>
+                <div th:if="${#lists.isEmpty(matchPosts)}" class="text-muted mb-2">
+                    <span th:text="${filter} == 'available'
+                                   ? '신청 가능한 매치가 없습니다.'
+                                   : '신청 불가 매치가 없습니다.'">
+                        No matches.
+                    </span>
+                </div>
+
+                <div class="row g-3" th:each="post : ${matchPosts}">
+                    <div class="col-12">
+                        <div class="card-box match-card" th:classappend="${post.status == 'MATCHED'} ? ' matched' : ''">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold mb-1">
+                                        <span th:text="${post.team.name}">Team</span>
+                                        <span class="text-muted ms-2">Players <span th:text="${post.playerCount}">0</span></span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        장소: <span th:text="${post.location}">place</span><br>
+                                        지역: <span th:text="${post.region}">region</span><br>
+                                        일정: <span th:text="${#temporals.format(post.matchDatetime, 'yyyy-MM-dd HH:mm')}">2025-03-28 09:40</span>
+                                    </div>
+                                </div>
+
+                                <div class="text-end" th:switch="${filter}">
+                                    <div th:case="'available'">
+                                        <form th:action="@{'/match/' + ${post.id} + '/request'}" method="post">
+                                            <button type="submit" class="btn btn-outline-primary">신청</button>
+                                        </form>
+                                    </div>
+                                    <div th:case="'unavailable'">
+                                        <div th:if="${post.status == 'MATCHED'}" class="text-danger fw-semibold mb-2">
+                                            이미 매칭 완료
+                                        </div>
+                                        <div th:if="${post.status == 'OPEN'
+                                                     and post.createdBy != null
+                                                     and post.createdBy.id != currentUser.id
+                                                     and requestStatusMap[post.id] == 'PENDING'}"
+                                             class="text-primary fw-semibold mb-2">
+                                            신청 대기 중
+                                        </div>
+                                        <div th:if="${post.status == 'OPEN'
+                                                     and post.createdBy != null
+                                                     and post.createdBy.id != currentUser.id
+                                                     and requestStatusMap[post.id] == 'REJECTED'}"
+                                             class="text-danger fw-semibold mb-2">
+                                            신청 거절됨
+                                        </div>
+                                        <div th:if="${post.status == 'OPEN'
+                                                     and post.createdBy != null
+                                                     and post.createdBy.id == currentUser.id}">
+                                            <span class="badge bg-secondary mb-2 d-block">내가 만든 매치</span>
+                                            <form th:action="@{'/match/' + ${post.id} + '/delete'}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Delete this match?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 </html>

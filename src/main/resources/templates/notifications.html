@@ -1,95 +1,101 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>알림 | Match-Up</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-
-<div class="container mt-4">
-    <h3 class="mb-4">알림</h3>
-
-    <div th:if="${teamInvites != null and !#lists.isEmpty(teamInvites)}" class="mb-4">
-        <h5 class="mb-2">팀 초대</h5>
-        <div class="list-group">
-            <div class="list-group-item d-flex justify-content-between align-items-center" th:each="inv : ${teamInvites}">
-                <div>
-                    <div><span th:text="${inv.team.name}">팀</span> 팀 초대가 도착했습니다.</div>
-                    <small class="text-muted" th:text="${#temporals.format(inv.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
-                </div>
-                <div>
-                    <form th:action="@{'/team/invite/' + ${inv.id} + '/accept'}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-success">수락</button>
-                    </form>
-                    <form th:action="@{'/team/invite/' + ${inv.id} + '/reject'}" method="post" class="d-inline ms-1">
-                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
-                    </form>
-                </div>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
+    <div class="container-fluid px-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">알림</div>
+                <h4 class="fw-bold m-0">알림함</h4>
             </div>
         </div>
-    </div>
 
-    <div th:if="${teamJoinRequests != null and !#lists.isEmpty(teamJoinRequests)}" class="mb-4">
-        <h5 class="mb-2">팀 가입 요청</h5>
-        <div class="list-group">
-            <div class="list-group-item d-flex justify-content-between align-items-center" th:each="req : ${teamJoinRequests}">
-                <div>
-                    <div><span th:text="${req.applicant.name}">신청자</span> 님이 가입을 신청했습니다.</div>
-                    <small class="text-muted" th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
-                </div>
-                <div>
-                    <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/accept'}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-success">승인</button>
-                    </form>
-                    <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/reject'}" method="post" class="d-inline ms-1">
-                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
-                    </form>
+        <div class="d-flex flex-column gap-4">
+            <div th:if="${teamInvites != null and !#lists.isEmpty(teamInvites)}" class="card-box">
+                <div class="card-header">팀 초대</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                         th:each="inv : ${teamInvites}">
+                        <div>
+                            <div><span th:text="${inv.team.name}">팀</span> 팀 초대가 도착했습니다.</div>
+                            <small class="text-muted" th:text="${#temporals.format(inv.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
+                        </div>
+                        <div>
+                            <form th:action="@{'/team/invite/' + ${inv.id} + '/accept'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">수락</button>
+                            </form>
+                            <form th:action="@{'/team/invite/' + ${inv.id} + '/reject'}" method="post" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div th:if="${#lists.isEmpty(notifications)}" class="text-muted">
-        알림이 없습니다.
-    </div>
-
-    <div class="list-group" th:each="n : ${notifications}">
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-            <div class="me-3">
-                <div th:text="${n.content}">알림 내용</div>
-                <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
-            </div>
-
-            <div class="d-flex align-items-center gap-2">
-                <div th:if="${n.type == 'MATCH_REQUEST'}">
-                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'PENDING'}">
-                        <form th:action="@{'/notifications/' + ${n.id} + '/accept'}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">수락</button>
-                        </form>
-                        <form th:action="@{'/notifications/' + ${n.id} + '/reject'}" method="post" class="d-inline ms-1">
-                            <button type="submit" class="btn btn-sm btn-danger">거절</button>
-                        </form>
-                    </div>
-                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'ACCEPTED'}"
-                         class="text-success fw-semibold">
-                        매치가 수락되었습니다.
-                    </div>
-                    <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'REJECTED'}"
-                         class="text-danger fw-semibold">
-                        매치가 거절되었습니다.
+            <div th:if="${teamJoinRequests != null and !#lists.isEmpty(teamJoinRequests)}" class="card-box">
+                <div class="card-header">팀 가입 신청</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                         th:each="req : ${teamJoinRequests}">
+                        <div>
+                            <div><span th:text="${req.applicant.name}">신청자</span> 님이 가입을 신청했습니다.</div>
+                            <small class="text-muted" th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
+                        </div>
+                        <div>
+                            <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/accept'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">수락</button>
+                            </form>
+                            <form th:action="@{'/team/invite/join/request/' + ${req.id} + '/reject'}" method="post" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 삭제(X) 버튼 -->
-                <form th:action="@{'/notifications/' + ${n.id} + '/delete'}" method="post" class="ms-2">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="삭제">×</button>
-                </form>
+            <div class="card-box">
+                <div class="card-header">일반 알림</div>
+
+                <div th:if="${#lists.isEmpty(notifications)}" class="text-muted p-2">
+                    알림이 없습니다.
+                </div>
+
+                <div class="list-group list-group-flush" th:each="n : ${notifications}">
+                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                         th:classappend="${n.read} ? 'text-muted'">
+                        <div class="me-3">
+                            <div th:text="${n.content}">알림 내용</div>
+                            <small class="text-muted" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">시간</small>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:if="${n.type == 'MATCH_REQUEST'}">
+                                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'PENDING'}">
+                                    <form th:action="@{'/notifications/' + ${n.id} + '/accept'}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">수락</button>
+                                    </form>
+                                    <form th:action="@{'/notifications/' + ${n.id} + '/reject'}" method="post" class="d-inline ms-1">
+                                        <button type="submit" class="btn btn-sm btn-danger">거절</button>
+                                    </form>
+                                </div>
+                                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'ACCEPTED'}"
+                                     class="text-success fw-semibold">
+                                    매치가 수락되었습니다.
+                                </div>
+                                <div th:if="${n.relatedMatchRequest != null and n.relatedMatchRequest.status == 'REJECTED'}"
+                                     class="text-danger fw-semibold">
+                                    매치가 거절되었습니다.
+                                </div>
+                            </div>
+
+                            <form th:action="@{'/notifications/' + ${n.id} + '/delete'}" method="post" class="ms-2">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="삭제">×</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 </html>

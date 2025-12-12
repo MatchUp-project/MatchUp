@@ -1,338 +1,240 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Match-Up</title>
-
-    <!-- Bootstrap -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sport Match Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons (🔔) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="styles.css"/>
-
     <style>
-        .home-title-ellipsis {
-            display: inline-block;
-            max-width: 75%;  /* 🔥 제목이 넓어지는 것 방지 */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: middle;
+        body { margin: 0; font-family: 'Arial', sans-serif; background: #f3f3f3; }
+        .sidebar { width: 240px; height: 100vh; background: #000; padding: 25px 15px; border-radius: 25px; box-sizing: border-box; position: fixed; top: 0; left: 0; overflow-y: auto; }
+        .sidebar-logo { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 35px; letter-spacing: 1px; text-align: left; padding-left: 5px; }
+        .sidebar-box { width: 100%; background: #111; padding: 18px 18px 15px; border-radius: 18px; margin-bottom: 25px; box-sizing: border-box; }
+        .sidebar-title { color: #fff; font-size: 17px; font-weight: bold; margin-bottom: 12px; }
+        .submenu { display: flex; flex-direction: column; gap: 8px; }
+        .submenu a { display: block; font-size: 15px; color: #8ab4ff; text-decoration: none; padding: 4px 0; }
+        .submenu a:hover { color: #cfe0ff; }
+        .main { margin-left: 260px; padding: 30px 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .header-left p { margin: 0; color: #777; font-size: 13px; }
+        .header-left h2 { margin-top: 5px; margin-bottom: 0; }
+        .header-right { display: flex; align-items: center; gap: 20px; font-size: 17px; }
+        .banner { background: white; border-radius: 16px; padding: 30px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        .banner-text p { color: #666; margin: 8px 0 15px; }
+        .welcome-btn { background: #e6342a; color: white; padding: 12px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 15px; text-decoration: none; display: inline-block; }
+        .section-title { margin-top: 35px; margin-bottom: 10px; font-size: 20px; font-weight: bold; }
+        .profile-container { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: center; }
+        .profile-card { background: white; padding: 20px; border-radius: 16px; }
+        .profile-card .username { font-size: 18px; font-weight: bold; }
+        .profile-card small { color: #777; }
+        .team-info-card { background: #faeded; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; gap: 25px; }
+        .team-info-box { width: 33%; }
+        .info-label { color: #777; font-size: 14px; }
+        .info-value { margin-top: 4px; font-size: 18px; font-weight: bold; }
+        .match-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; }
+        .card-box { background: white; padding: 20px; border-radius: 16px; margin-bottom: 25px; border: 1px solid #e3e3e3; }
+        .card-header { display: flex; justify-content: space-between; font-size: 17px; font-weight: bold; margin-bottom: 15px; align-items: center; }
+        .mini-btn { padding: 7px 12px; border: 1px solid #bbb; border-radius: 8px; background: #fafafa; cursor: pointer; font-size: 13px; text-decoration: none; color: #111; }
+        .upcoming-match { display: flex; align-items: center; gap: 30px; }
+        .team-side { text-align: center; }
+        .team-img { width: 72px; height: 72px; background: #ddd; border-radius: 50%; line-height: 72px; text-align: center; margin-bottom: 8px; color: #777; font-size: 13px; }
+        .team-name { font-size: 15px; text-decoration: none; color: #111; }
+        .team-name:hover { color: #444; }
+        .board-item a { color: #111; text-decoration: none; }
+        .board-item a:hover { color: #444; }
+        .team-item a { color: #111; text-decoration: none; }
+        .team-item a:hover { color: #444; }
+        .board-item, .team-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #efefef; }
+        .board-item:last-child, .team-item:last-child { border-bottom: none; }
+        .date { color: #888; font-size: 13px; }
+        .vs { font-size: 32px; font-weight: bold; }
+        .match-info { margin-left: auto; text-align: left; color: #444; font-size: 14px; }
+        .detail-btn { margin-top: 10px; padding: 7px 16px; border-radius: 8px; border: 1px solid #6aa0ff; background: white; color: #0063ff; cursor: pointer; text-decoration: none; display: inline-block; }
+        .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        @media (max-width: 1100px) {
+            .profile-container { grid-template-columns: 1fr; }
+            .match-row { grid-template-columns: 1fr; }
+            .grid-two { grid-template-columns: 1fr; }
+            .sidebar { position: static; width: 100%; border-radius: 0; height: auto; display: flex; flex-wrap: wrap; gap: 10px; }
+            .main { margin-left: 0; padding: 20px; }
         }
     </style>
-
 </head>
 <body>
-
-<!-- ====================== -->
-<!-- 🔝 상단 유틸바 (여기에 종 추가됨!) -->
-<!-- ====================== -->
+<!-- 상단 유틸바 -->
 <div class="bg-dark text-white small py-1">
     <div class="container d-flex justify-content-end align-items-center gap-3">
-
-        <!-- 🔔 알림 드롭다운 -->
         <div class="dropdown">
-            <a class="text-white text-decoration-none dropdown-toggle"
-               href="#" id="notiDropdown" data-bs-toggle="dropdown">
+            <a class="text-white text-decoration-none dropdown-toggle" href="#" id="notiDropdown" data-bs-toggle="dropdown">
                 <i class="bi bi-bell-fill"></i>
-
-                <!-- 빨간 점 -->
                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
             </a>
-
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
-
                 <li class="dropdown-header fw-semibold">최근 알림</li>
-
-                <li th:if="${#lists.isEmpty(recentNotifications)}"
-                    class="dropdown-item text-muted">
-                    알림이 없습니다.
-                </li>
-
+                <li th:if="${#lists.isEmpty(recentNotifications)}" class="dropdown-item text-muted">알림이 없습니다.</li>
                 <li th:each="noti : ${recentNotifications}">
                     <a class="dropdown-item" th:href="@{/notifications}">
                         <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
-                        <small class="text-muted"
-                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
+                        <small class="text-muted" th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
                     </a>
                 </li>
-
                 <li><hr class="dropdown-divider"></li>
-
-                <li>
-                    <a class="dropdown-item text-center fw-semibold"
-                       th:href="@{/notifications}">
-                        모든 알림 보기
-                    </a>
-                </li>
+                <li><a class="dropdown-item text-center fw-semibold" th:href="@{/notifications}">모든 알림 보기</a></li>
             </ul>
         </div>
-
-
-        <!-- 기존 메뉴 -->
         <a href="/" class="link-light text-decoration-none">홈</a>
         <a href="/profile" class="link-light text-decoration-none">내 정보</a>
         <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
     </div>
 </div>
 
-<!-- ===== 헤더 + 검색 + 상단 메뉴 ===== -->
-<header class="border-bottom">
-    <div class="container py-3">
-
-        <!-- 1줄 : 로고 -->
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
-        </div>
-
-        <!-- 2줄 : 상단 메뉴 -->
-        <nav class="mt-3">
-            <ul class="nav main-nav border-top pt-2">
-
-                <!-- 팀 (드롭다운) -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
-                       href="#" id="teamMenu"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                        팀
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
-                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
-                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
-                        <li><a class="dropdown-item" href="/team/schedule">일정표</a></li>
-                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
-                    </ul>
-                </li>
-
-                <!-- 커뮤니티 -->
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board/list?category=FREE">
-                        커뮤니티
-                    </a>
-                </li>
-
-                <!-- 매치 신청 -->
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">
-                        매치 신청
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<!-- ====================================== -->
-<!-- (이 아래부터 너가 준 기존 화면 그대로) -->
-<!-- ====================================== -->
-
-<!-- ===== 앞으로 있을 매치 ===== -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row g-4">
-
-            <!-- 앞으로 있을 매치 -->
-            <div class="col-lg-8">
-                <div class="card h-100 match-card">
-                    <div class="card-header d-flex justify-content-between">
-                        <span class="fw-bold">앞으로 있을 매치</span>
-                        <a href="/match/upcoming" class="btn btn-sm btn-outline-secondary">전체보기</a>
-                    </div>
-
-                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-4"
-                         th:if="${nearestMatch != null}">
-
-                        <!-- 왼쪽 팀 -->
-                        <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
-                            <div class="fw-bold">
-                                <a th:href="@{/team/detail/{id}(id=${nearestMatch.team.id})}"
-                                   th:text="${nearestMatch.team.name}"></a>
-                            </div>
-                        </div>
-
-                        <div class="fw-bold display-6">VS</div>
-
-                        <!-- 오른쪽 팀 -->
-                        <div class="text-center">
-                            <img src="https://placehold.co/72x72" class="rounded-circle mb-2">
-                            <div th:if="${nearestMatch.matchedTeam != null}">
-                                <a th:href="@{/team/detail/{id}(id=${nearestMatch.matchedTeam.id})}"
-                                   th:text="${nearestMatch.matchedTeam.name}">
-                                </a>
-                            </div>
-
-                            <div th:if="${nearestMatch.matchedTeam == null}">
-                                <span class="text-muted">상대팀 미정</span>
-                            </div>
-
-                        </div>
-
-                        <!-- 날짜/시간/장소 -->
-                        <div class="text-muted">
-                            <div>장소 : <span th:text="${nearestMatch.location}"></span></div>
-                            <div>날짜 : <span th:text="${#temporals.format(nearestMatch.matchDatetime, 'yyyy-MM-dd')}"></span></div>
-                            <div>시간 : <span th:text="${#temporals.format(nearestMatch.matchDatetime, 'HH:mm')}"></span></div>
-                        </div>
-
-                        <a th:href="@{/match/detail/{id}(id=${nearestMatch.id})}"
-                           class="btn btn-outline-primary">매치 상세</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 신청 가능 매치 -->
-            <div class="col-lg-4">
-                <div class="card h-100 match-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">신청 가능 매치</span>
-                        <a href="/match/apply" class="btn btn-sm btn-outline-secondary">바로가기</a>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            th:each="m : ${availableMatches}">
-                            <a th:href="@{/match/detail/{id}(id=${m.id})}"
-                               th:text="${m.location + ' - ' + m.team.name}"
-                               class="text-decoration-none text-primary"></a>
-
-                            <span class="text-muted small"
-                                  th:text="${#temporals.format(m.matchDatetime, 'yy-MM-dd')}"></span>
-                        </li>
-
-                        <li class="list-group-item text-muted text-center py-3"
-                            th:if="${#lists.isEmpty(availableMatches)}">
-                            신청 가능한 매치가 없습니다.
-                        </li>
-
-                    </ul>
-
-
-                </div>
-            </div>
-
+<div class="sidebar">
+    <a th:href="@{/}" class="sidebar-logo text-decoration-none">MATCH-UP</a>
+    <div class="sidebar-box">
+        <div class="sidebar-title">팀</div>
+        <div class="submenu">
+            <a th:href="@{/team/board}">팀 게시판</a>
+            <a th:href="@{/team/members}">팀 멤버</a>
+            <a th:href="@{/team/schedule}">일정표</a>
+            <a th:href="@{/team/records}">경기 기록</a>
         </div>
     </div>
-</section>
-
-<!-- ===== 통합 게시판 / 팀 목록 ===== -->
-<section class="py-4">
-    <div class="container">
-        <div class="row g-4">
-
-            <!-- 통합 게시판 -->
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">통합 게시판</span>
-                        <a href="/board/list?category=FREE" class="btn btn-sm btn-outline-secondary">바로가기</a>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-
-                        <!-- 🔥 최신 글 3개 반복 출력 -->
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            th:each="post : ${recentFree}">
-                            <a th:href="@{/board/{id}(id=${post.id})}"
-                               th:text="${post.title}"
-                               class="text-decoration-none text-primary home-title-ellipsis"></a>
-
-                            <span class="text-muted small"
-                                  th:text="${#temporals.format(post.createdAt, 'yy-MM-dd')}"></span>
-                        </li>
-
-
-
-                        <!-- 게시글이 없을 경우 -->
-                        <li class="list-group-item text-muted text-center py-3"
-                            th:if="${#lists.isEmpty(recentFree)}">
-                            등록된 게시글이 없습니다.
-                        </li>
-
-                    </ul>
-                </div>
-            </div>
-
-
-
-            <!-- 전체 팀 목록 -->
-            <div class="col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">전체 팀 목록</span>
-                        <a href="/team_list" class="btn btn-sm btn-outline-secondary">바로가기</a>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                            th:each="t : ${teams}">
-
-                            <!-- 팀 상세보기 링크 -->
-                            <a th:href="@{/team/detail/{id}(id=${t.id})}"
-                               th:text="${t.name}"
-                               class="text-decoration-none"></a>
-
-                            <!-- 생성일 표시 -->
-                            <span class="text-muted small"
-                                  th:text="${#temporals.format(t.createdAt, 'yy-MM-dd')}"></span>
-
-                        </li>
-
-                        <!-- 팀이 없을 때 -->
-                        <li class="list-group-item text-muted text-center py-3"
-                            th:if="${#lists.isEmpty(teams)}">
-                            등록된 팀이 없습니다.
-                        </li>
-
-                    </ul>
-
-                </div>
-            </div>
-
+    <div class="sidebar-box">
+        <div class="sidebar-title">커뮤니티</div>
+        <div class="submenu">
+            <a th:href="@{/board/list(category='FREE')}">자유 게시판</a>
+            <a th:href="@{/board/list(category='PLAYER')}">선수 구함</a>
+            <a th:href="@{/board/list(category='TEAM')}">팀 구함</a>
         </div>
     </div>
-</section>
+    <div class="sidebar-box">
+        <div class="sidebar-title">매치 신청</div>
+        <div class="submenu">
+            <a th:href="@{/match/apply}">신청 가능한 매치</a>
+            <a th:href="@{/match/upcoming}">앞으로 있을 매치</a>
+        </div>
+    </div>
+    <div class="sidebar-box">
+        <div class="sidebar-title">전체 팀</div>
+        <div class="submenu">
+            <a th:href="@{/team_list}">팀 목록 보기</a>
+        </div>
+    </div>
+</div>
 
-<!-- ===== 경기장 ===== -->
-<section class="py-5">
-    <div class="container">
-        <h5 class="fw-bold mb-3">⚽ 우리 경기장</h5>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="border p-3">
-                    <h6>청주종합경기장</h6>
-                    <small>충북 청주시 흥덕구</small>
+<div class="main">
+    <div class="header">
+        <div class="header-left">
+            <p th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">2025-12-12</p>
+            <h2 th:text="${#authentication?.name ?: 'Welcome'}">Welcome</h2>
+        </div>
+    </div>
+
+    <div class="banner">
+        <div class="banner-text">
+            <h3>Welcome to SportMatch</h3>
+            <p>Discover your athletic potential with our advanced talent identification.</p>
+        </div>
+        <div style="width:230px;height:140px;border-radius:12px;background:linear-gradient(135deg,#ff7b5a,#e6342a);"></div>
+    </div>
+
+    <div class="section-title">Profile</div>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="username" th:text="${#authentication?.name ?: 'Guest'}">Guest</div>
+            <small>Last login: <span th:text="${#dates.format(#dates.createNow(),'yyyy-MM-dd HH:mm')}">-</span></small>
+        </div>
+        <div class="team-info-card">
+            <div class="team-info-box">
+                <div class="info-label">팀 이름</div>
+                <div class="info-value" th:text="${nearestMatch != null ? nearestMatch.team?.name : '미지정'}">미지정</div>
+            </div>
+            <div class="team-info-box">
+                <div class="info-label">예정된 매치</div>
+                <div class="info-value" th:text="${nearestMatch != null ? 1 : 0}">0 경기</div>
+            </div>
+            <div class="team-info-box">
+                <div class="info-label">팀 승률</div>
+                <div class="info-value"
+                     th:text="${matchStats != null ? #numbers.formatDecimal(matchStats.winRate * 100, 0, 1) + '%' : '-'}">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="match-row">
+        <div class="card-box">
+            <div class="card-header">
+                <span>앞으로 있을 매치</span>
+                <a th:href="@{/match/upcoming}" class="mini-btn">전체보기</a>
+            </div>
+            <div th:if="${nearestMatch == null}" class="card-content">예정된 매치가 없습니다.</div>
+            <div class="upcoming-match" th:if="${nearestMatch != null}">
+                <div class="team-side">
+                    <div class="team-img">72×72</div>
+                    <a th:href="@{/team/detail/{id}(id=${nearestMatch.team.id})}" th:text="${nearestMatch.team.name}" class="team-name">팀</a>
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-side">
+                    <div class="team-img">72×72</div>
+                    <a th:if="${nearestMatch.matchedTeam != null}"
+                       th:href="@{/team/detail/{id}(id=${nearestMatch.matchedTeam.id})}"
+                       th:text="${nearestMatch.matchedTeam.name}"
+                       class="team-name">상대팀</a>
+                    <span th:if="${nearestMatch.matchedTeam == null}" class="team-name">상대팀 미정</span>
+                </div>
+                <div class="match-info">
+                    <div>장소 : <span th:text="${nearestMatch.location}">-</span></div>
+                    <div>날짜 : <span th:text="${#temporals.format(nearestMatch.matchDatetime,'yyyy-MM-dd')}">-</span></div>
+                    <div>시간 : <span th:text="${#temporals.format(nearestMatch.matchDatetime,'HH:mm')}">-</span></div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="border p-3">
-                    <h6>용인축구센터</h6>
-                    <small>경기도 용인시</small>
+        </div>
+
+        <div class="card-box">
+            <div class="card-header">
+                <span>신청 가능한 매치</span>
+                <a th:href="@{/match/apply}" class="mini-btn">바로가기</a>
+            </div>
+            <div th:if="${#lists.isEmpty(availableMatches)}" class="card-content">신청 가능한 매치가 없습니다.</div>
+            <div th:if="${!#lists.isEmpty(availableMatches)}">
+                <div class="board-item" th:each="m : ${availableMatches}">
+                    <a th:href="@{/match/apply}" th:text="${m.location + ' - ' + m.team.name}">매치</a>
+                    <span class="date" th:text="${#temporals.format(m.matchDatetime,'yy-MM-dd')}">-</span>
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<!-- ===== 푸터 ===== -->
-<footer class="bg-dark text-white py-4">
-    <div class="container small d-flex justify-content-between">
-        <div>© 2025 Match-Up</div>
-        <div class="text-white-50">
-            문의: support@matchup.com
+    <div class="grid-two">
+        <div class="card-box">
+            <div class="card-header">
+                <span>통합 게시판</span>
+                <a th:href="@{/board/list}" class="mini-btn">바로가기</a>
+            </div>
+            <div th:if="${#lists.isEmpty(recentFree)}" class="card-content">게시글이 없습니다.</div>
+            <div th:if="${!#lists.isEmpty(recentFree)}">
+                <div class="board-item" th:each="post : ${recentFree}">
+                    <a th:href="@{/board/{id}(id=${post.id})}" th:text="${post.title}">게시글</a>
+                    <span class="date" th:text="${#temporals.format(post.createdAt,'yy-MM-dd')}">-</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-box">
+            <div class="card-header">
+                <span>전체 팀 목록</span>
+                <a th:href="@{/team_list}" class="mini-btn">바로가기</a>
+            </div>
+            <div th:if="${#lists.isEmpty(teams)}" class="card-content">등록된 팀이 없습니다.</div>
+            <div th:if="${!#lists.isEmpty(teams)}">
+                <div class="team-item" th:each="t : ${teams}">
+                    <a th:href="@{/team/detail/{id}(id=${t.id})}" th:text="${t.name}">팀명</a>
+                    <span class="date" th:text="${#temporals.format(t.createdAt,'yy-MM-dd')}">-</span>
+                </div>
+            </div>
         </div>
     </div>
-</footer>
-
-
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

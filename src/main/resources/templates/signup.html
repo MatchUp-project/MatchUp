@@ -1,77 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>회원가입 | Match-up</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sport Match - Sign Up</title>
     <style>
-        body { background: #f8f9fa; }
-        .signup-card {
-            max-width: 460px;
-            margin: 70px auto;
+        body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { display: flex; height: 100vh; }
+        .left-panel {
+            background: #e6342a;
+            width: 45%;
+            border-radius: 0 40px 40px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        .left-panel img { width: 160px; }
+        .right-panel {
+            width: 55%;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .signup-box { width: 380px; display: flex; flex-direction: column; }
+        .signup-title { font-size: 26px; font-weight: bold; margin-bottom: 25px; color: #222; }
+        label { font-size: 14px; color: #555; margin-bottom: 6px; display: block; }
+        .input-container { position: relative; margin-bottom: 20px; }
+        .input-field {
+            width: 100%; padding: 13px; padding-right: 40px;
+            border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;
+        }
+        .icon-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #777; cursor: pointer; font-size: 18px; }
+        .signup-btn {
+            width: 100%; padding: 13px; background: #e6342a; color: white; font-size: 16px;
+            border-radius: 8px; border: none; cursor: pointer; margin-top: 10px;
+        }
+        .login-text { margin-top: 25px; text-align: center; font-size: 13px; color: #666; }
+        .login-text a { color: #e6342a; text-decoration: none; font-weight: bold; }
+        .error-box { margin-bottom: 16px; color: #e6342a; font-size: 13px; }
     </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="signup-card">
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+    <div class="left-panel"></div>
 
-            <h3 class="text-center mb-4 fw-bold text-primary">회원가입</h3>
+    <div class="right-panel">
+        <div class="signup-box">
+
+            <div class="signup-title">SIGN UP</div>
 
             <!-- 오류 메시지 -->
-            <div th:if="${errorMessage}">
-                <div class="alert alert-danger py-2" th:text="${errorMessage}"></div>
-            </div>
+            <div class="error-box" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
             <form action="/signup" method="post">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">아이디</label>
-                    <input class="form-control form-control-lg" type="text"
-                           name="username" required placeholder="아이디 입력">
+                <!-- 아이디 -->
+                <label>아이디</label>
+                <div class="input-container">
+                    <input type="text" class="input-field" name="username" placeholder="아이디를 입력하세요" required>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">비밀번호</label>
-                    <input class="form-control form-control-lg" type="password"
-                           name="password" required placeholder="비밀번호">
+                <!-- 비밀번호 -->
+                <label>비밀번호</label>
+                <div class="input-container">
+                    <input type="password" class="input-field" name="password" placeholder="비밀번호" required>
+                    <span class="icon-eye">&#128065;</span>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">비밀번호 확인</label>
-                    <input class="form-control form-control-lg" type="password"
-                           name="passwordConfirm" required placeholder="비밀번호 확인">
+                <!-- 비밀번호 확인 -->
+                <label>비밀번호 확인</label>
+                <div class="input-container">
+                    <input type="password" class="input-field" name="passwordConfirm" placeholder="비밀번호 확인" required>
+                    <span class="icon-eye">&#128065;</span>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">이름</label>
-                    <input class="form-control form-control-lg" type="text"
-                           name="name" required placeholder="이름 입력">
+                <!-- 닉네임/이름 -->
+                <label>닉네임</label>
+                <div class="input-container">
+                    <input type="text" class="input-field" name="name" placeholder="닉네임을 입력하세요" required>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">이메일</label>
-                    <input class="form-control form-control-lg" type="email"
-                           name="email" required placeholder="이메일 입력">
+                <!-- 이메일 -->
+                <label>이메일</label>
+                <div class="input-container">
+                    <input type="email" class="input-field" name="email" placeholder="example@email.com" required>
                 </div>
 
-                <button class="btn btn-primary btn-lg w-100 mt-2" type="submit">
-                    회원가입
-                </button>
+                <button class="signup-btn" type="submit">Continue</button>
             </form>
 
-            <div class="text-center mt-3">
-                <a href="/login" class="text-decoration-none">이미 계정이 있으신가요?</a>
+            <div class="login-text">
+                Already have an account?
+                <a href="/login">Login here</a>
             </div>
 
         </div>
     </div>
-</div>
 
+</div>
 </body>
 </html>

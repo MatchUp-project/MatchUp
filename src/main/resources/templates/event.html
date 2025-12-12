@@ -1,331 +1,173 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Match-Up | 일정표</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons (🔔) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/styles.css}"/>
-
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::content})">
+<div th:fragment="content">
     <style>
         .calendar-table td, .calendar-table th {
             width: 14.28%;
-            height: 80px;
+            height: 68px;
             vertical-align: top;
         }
-
-        .calendar-day {
-            padding: 4px;
-            border-radius: 8px;
+        .calendar-day { padding: 6px; border-radius: 8px; position: relative; }
+        .calendar-day.has-event { font-weight: 700; border: 1px solid #e6342a; background: #fff6f3; }
+        .calendar-day .event-marker {
+            position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+            width: 8px; height: 8px; background: #e6342a; border-radius: 50%;
         }
-
-        .calendar-day.has-event {
-            font-weight: 600;
-            border: 1px solid #ff5a2f;
-        }
-
-        .calendar-day.has-event a::after {
-            content: '•';
-            font-size: 12px;
-            margin-left: 4px;
-        }
-
-        .event-badge {
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 999px;
-        }
+        .event-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 999px; }
     </style>
-</head>
-<body>
 
-<!-- ====================== 상단 유틸바 ====================== -->
-<div class="bg-dark text-white small py-1">
-    <div class="container d-flex justify-content-end align-items-center gap-3">
-
-        <!-- 🔔 알림 드롭다운 -->
-        <div class="dropdown position-relative">
-            <a class="text-white text-decoration-none dropdown-toggle"
-               href="#" id="notiDropdown" data-bs-toggle="dropdown">
-                <i class="bi bi-bell-fill"></i>
-                <span th:if="${hasUnreadNotifications}"
-                      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                </span>
-            </a>
-
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notiDropdown">
-                <li class="dropdown-header fw-semibold">최근 알림</li>
-
-                <li th:if="${#lists.isEmpty(recentNotifications)}"
-                    class="dropdown-item text-muted">
-                    알림이 없습니다.
-                </li>
-
-                <li th:each="noti : ${recentNotifications}">
-                    <a class="dropdown-item" th:href="@{/notifications}">
-                        <span th:text="${noti.content}">매치 신청이 도착했습니다.</span><br>
-                        <small class="text-muted"
-                               th:text="${#temporals.format(noti.createdAt, 'MM-dd HH:mm')}"></small>
-                    </a>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item text-center fw-semibold"
-                       th:href="@{/notifications}">
-                        모든 알림 보기
-                    </a>
-                </li>
-            </ul>
+    <div class="container-fluid px-0" style="max-width: 1100px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <div class="text-muted small">팀</div>
+                <h4 class="fw-bold m-0">팀 일정표</h4>
+            </div>
         </div>
 
-        <a href="/" class="link-light text-decoration-none">홈</a>
-        <a href="/profile" class="link-light text-decoration-none">내 정보</a>
-        <a href="/logout" class="link-light text-decoration-none">로그아웃</a>
-    </div>
-</div>
+        <div th:if="${noTeam}" class="empty-state">소속된 팀이 없습니다.</div>
 
-<!-- ====================== 헤더 + 상단 메뉴 ====================== -->
-<header class="border-bottom">
-    <div class="container py-3">
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <a class="navbar-brand fw-bold fs-3 text-primary m-0" href="/">Match-Up</a>
-        </div>
-
-        <nav class="mt-3">
-            <ul class="nav main-nav border-top pt-2">
-                <li class="nav-item dropdown">
-                    <a class="nav-link px-4 fw-semibold main-nav-link dropdown-toggle"
-                       href="#" id="teamMenu"
-                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        팀
+        <div th:unless="${noTeam}" class="card-box">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0" th:text="${team.name} + ' 일정표'">팀 일정표</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a class="btn btn-sm btn-outline-secondary"
+                       th:href="@{/team/schedule(
+                            year=${yearMonth.minusMonths(1).year},
+                            month=${yearMonth.minusMonths(1).monthValue},
+                            date=${selectedDate}
+                       )}">
+                        이전달
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="teamMenu">
-                        <li><a class="dropdown-item" th:href="@{/team/detail/{id}(id=${team.id})}">팀 홈</a></li>
-                        <li><a class="dropdown-item" href="/team/board">팀 게시판</a></li>
-                        <li><a class="dropdown-item active" href="/team/schedule">일정표</a></li>
-                        <li><a class="dropdown-item" href="/team/members">팀 멤버</a></li>
-                        <li><a class="dropdown-item" href="/team/records">경기 기록</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/board">커뮤니티</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-4 fw-semibold main-nav-link" href="/match/apply">매치 신청</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<!-- ======================= 본문 ======================= -->
-<main class="py-4">
-    <div class="container">
-        <div class="row g-4">
-
-            <!-- 왼쪽 사이드 -->
-            <aside class="col-lg-3 d-none d-lg-block" th:if="${not noTeam}">
-                <div class="card">
-                    <div class="card-header fw-bold">팀 메뉴</div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <a class="text-decoration-none"
-                               th:href="@{/team/detail/{id}(id=${team.id})}">
-                                팀 홈
-                            </a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="/team/board" class="text-decoration-none">팀 게시판</a>
-                        </li>
-                        <li class="list-group-item active">
-                            <span class="fw-semibold text-primary">일정표</span>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="/team/members" class="text-decoration-none">팀 멤버</a>
-                        </li>
-                        <li class="list-group-item">
-                            <a href="/team/records" class="text-decoration-none">경기 기록</a>
-                        </li>
-                    </ul>
+                    <span class="mx-2 fw-semibold"
+                          th:text="${yearMonth.year} + '년 ' + ${yearMonth.monthValue} + '월'">
+                        2025년 12월
+                    </span>
+                    <a class="btn btn-sm btn-outline-secondary"
+                       th:href="@{/team/schedule(
+                            year=${yearMonth.plusMonths(1).year},
+                            month=${yearMonth.plusMonths(1).monthValue},
+                            date=${selectedDate}
+                       )}">
+                        다음달
+                    </a>
                 </div>
-            </aside>
+            </div>
 
-            <!-- 오른쪽 콘텐츠 -->
-            <section class="col-lg-9 col-12">
-
-                <!-- 팀 없음 -->
-                <div th:if="${noTeam}">
-                    <div class="alert alert-warning">
-                        사용자가 속한 팀이 없습니다.
-                    </div>
+            <div class="row">
+                <div class="col-lg-7 mb-4">
+                    <table class="table table-bordered calendar-table text-center">
+                        <thead>
+                        <tr class="table-light">
+                            <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="week : ${calendarWeeks}">
+                            <td th:each="currentDate : ${week}">
+                                <div th:if="${currentDate != null}"
+                                     th:class="${(hasEventMap != null and hasEventMap.containsKey(currentDate) and hasEventMap[currentDate]) ? 'calendar-day has-event' : 'calendar-day'}">
+                                    <a th:href="@{/team/schedule(
+                                            year=${yearMonth.year},
+                                            month=${yearMonth.monthValue},
+                                            date=${currentDate}
+                                        )}"
+                                       th:text="${currentDate.dayOfMonth}">1</a>
+                                    <span th:if="${hasEventMap != null and hasEventMap.containsKey(currentDate) and hasEventMap[currentDate]}" class="event-marker"></span>
+                                </div>
+                                <div th:if="${currentDate == null}" class="calendar-day"></div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- 팀 있음 -->
-                <div th:if="${not noTeam}">
+                <div class="col-lg-5">
+                    <div class="card-box" th:with="selectedEvents=${events != null ? events : T(java.util.Collections).emptyList()}">
+                        <h6 th:if="${selectedDate != null}"
+                            th:text="${selectedDate} + ' 일정'">선택 날짜 일정</h6>
+                        <h6 th:if="${selectedDate == null}">날짜를 선택해 주세요</h6>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="m-0" th:text="${team.name} + ' 일정표'">팀 일정표</h3>
-
-                        <div>
-                            <a class="btn btn-sm btn-outline-secondary"
-                               th:href="@{/team/schedule(
-                                    year=${yearMonth.minusMonths(1).year},
-                                    month=${yearMonth.minusMonths(1).monthValue},
-                                    date=${selectedDate}
-                               )}">
-                                ◀ 이전달
-                            </a>
-                            <span class="mx-2"
-                                  th:text="${yearMonth.year} + '년 ' + ${yearMonth.monthValue} + '월'">
-                                2025년 12월
-                            </span>
-                            <a class="btn btn-sm btn-outline-secondary"
-                               th:href="@{/team/schedule(
-                                    year=${yearMonth.plusMonths(1).year},
-                                    month=${yearMonth.plusMonths(1).monthValue},
-                                    date=${selectedDate}
-                               )}">
-                                다음달 ▶
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- 달력 -->
-                        <div class="col-lg-7 mb-4">
-                            <table class="table table-bordered calendar-table text-center">
-                                <thead>
-                                <tr class="table-light">
-                                    <th>월</th>
-                                    <th>화</th>
-                                    <th>수</th>
-                                    <th>목</th>
-                                    <th>금</th>
-                                    <th>토</th>
-                                    <th>일</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <!-- 6주 분량 셀 생성 (calendarWeeks 사용) -->
-                                <tr th:each="week : ${calendarWeeks}">
-                                    <td th:each="currentDate : ${week}">
-                                        <!-- 이번 달 날짜 -->
-                                        <div th:if="${currentDate != null}"
-                                             th:class="'calendar-day ' + (${hasEventMap[currentDate]} ? 'has-event' : '')">
-                                            <a th:href="@{/team/schedule(
-                                                    year=${yearMonth.year},
-                                                    month=${yearMonth.monthValue},
-                                                    date=${currentDate}
-                                                )}"
-                                               th:text="${currentDate.dayOfMonth}">
-                                                1
-                                            </a>
-                                        </div>
-                                        <!-- 앞/뒤 다른 달일 때는 빈 칸 -->
-                                        <div th:if="${currentDate == null}" class="calendar-day"></div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                        <div th:if="${selectedDate == null}" class="text-muted mb-3">
+                            날짜를 클릭하면 해당 일정이 오른쪽에 표시됩니다.
                         </div>
 
-                        <!-- 오른쪽: 선택 날짜 일정 / 추가 -->
-                        <div class="col-lg-5">
-                            <h5 th:text="${selectedDate} + ' 일정'">선택 날짜 일정</h5>
+                        <div th:if="${selectedDate != null and #lists.isEmpty(selectedEvents)}"
+                             class="text-muted mb-3">
+                            등록된 일정이 없습니다.
+                        </div>
 
-                            <div th:if="${#lists.isEmpty(events)}" class="text-muted mb-3">
-                                등록된 일정이 없습니다.
-                            </div>
-
-                            <!-- 여기 events 리스트에 같은 날 매치 여러 개 다 들어오면 전부 카드로 뜸 -->
-                            <div th:each="event : ${events}" class="card mb-2">
+                        <div th:if="${selectedDate != null and !#lists.isEmpty(selectedEvents)}">
+                            <div th:each="event : ${selectedEvents}" class="card mb-2">
                                 <div class="card-body py-2">
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <strong th:text="${event.title}">제목</strong>
                                             <div class="small text-muted">
-                                                <!-- 🔹 시작시간만 표시 -->
-                                                <span th:text="${#temporals.format(event.startAt, 'HH:mm')}">19:00</span>
+                                                <span th:if="${event.startAt != null}"
+                                                      th:text="${#temporals.format(event.startAt, 'HH:mm')}">19:00</span>
+                                                <span th:if="${event.startAt == null and event.startTime != null}"
+                                                      th:text="${event.startTime}">--:--</span>
                                                 <span th:if="${event.place != null}">
                                                     · <span th:text="${event.place}">장소</span>
                                                 </span>
                                             </div>
                                         </div>
                                         <span class="event-badge bg-secondary-subtle"
-                                              th:text="${event.type}">ETC</span>
+                                              th:text="${event.type}">TYPE</span>
                                     </div>
                                 </div>
                             </div>
-
-                            <hr class="my-3"/>
-
-                            <h6>개인 일정 추가</h6>
-                            <form th:action="@{/team/schedule/new}" method="post"
-                                  th:object="${eventForm}">
-                                <div class="mb-2">
-                                    <label class="form-label small">제목</label>
-                                    <input type="text" class="form-control form-control-sm"
-                                           th:field="*{title}" required>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-6 mb-2">
-                                        <label class="form-label small">날짜</label>
-                                        <input type="date" class="form-control form-control-sm"
-                                               th:field="*{date}">
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <label class="form-label small">시간</label>
-                                        <input type="time" class="form-control form-control-sm"
-                                               th:field="*{startTime}">
-                                    </div>
-                                </div>
-
-                                <div class="mb-2">
-                                    <label class="form-label small">장소</label>
-                                    <input type="text" class="form-control form-control-sm"
-                                           th:field="*{place}"/>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label small">종류</label>
-                                    <select class="form-select form-select-sm"
-                                            th:field="*{type}">
-                                        <option th:value="${T(com.team10.matchup.event.EventType).ETC}">기타</option>
-                                        <option th:value="${T(com.team10.matchup.event.EventType).TRAINING}">훈련</option>
-                                        <option th:value="${T(com.team10.matchup.event.EventType).MATCH}">매치</option>
-                                    </select>
-                                </div>
-
-                                <button type="submit" class="btn btn-sm btn-primary w-100">
-                                    일정 추가
-                                </button>
-                            </form>
                         </div>
+
+                        <hr class="my-3"/>
+
+                        <h6>개인 일정 추가</h6>
+                        <form th:action="@{/team/schedule/new}" method="post"
+                              th:object="${eventForm}">
+                            <div class="mb-2">
+                                <label class="form-label small">제목</label>
+                                <input type="text" class="form-control form-control-sm"
+                                       th:field="*{title}" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label class="form-label small">날짜</label>
+                                    <input type="date" class="form-control form-control-sm"
+                                           th:field="*{date}">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label small">시간</label>
+                                    <input type="time" class="form-control form-control-sm"
+                                           th:field="*{startTime}">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small">장소</label>
+                                <input type="text" class="form-control form-control-sm"
+                                       th:field="*{place}"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small">종류</label>
+                                <select class="form-select form-select-sm"
+                                        th:field="*{type}">
+                                    <option th:value="${T(com.team10.matchup.event.EventType).ETC}">기타</option>
+                                    <option th:value="${T(com.team10.matchup.event.EventType).TRAINING}">훈련</option>
+                                    <option th:value="${T(com.team10.matchup.event.EventType).MATCH}">매치</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                일정 추가
+                            </button>
+                        </form>
                     </div>
                 </div>
-
-            </section>
+            </div>
         </div>
     </div>
-</main>
-
-<footer class="bg-dark text-white py-4 mt-4">
-    <div class="container small d-flex justify-content-between">
-        <div>© 2025 Match-Up</div>
-        <div class="text-white-50">문의: support@matchup.com</div>
-    </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+</div>
 </html>
